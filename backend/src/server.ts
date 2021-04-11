@@ -3,12 +3,18 @@ import express from "express";
 import { ApolloServer } from "apollo-server-express";
 import fs from "fs";
 import path from "path";
+import config from "config";
 
 import resolvers from "./resolvers";
 import { connectToDB } from "./database/src/connection";
 
 import cors from "cors";
 import compression from "compression";
+
+if (!config.get("jwtPrivateKey")) {
+  console.error("FATAL ERROR: jwtKey Not Defined!");
+  process.exit(1);
+}
 
 const app = express();
 app.use("*", cors());

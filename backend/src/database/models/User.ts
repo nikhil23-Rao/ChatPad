@@ -15,4 +15,13 @@ export const User = sequelize.define("User", {
     type: DataTypes.STRING,
     allowNull: false,
   },
+  profile_picture: {
+    type: DataTypes.TEXT,
+    allowNull: false,
+  },
+  id: {
+    primaryKey: true,
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
 });
