@@ -1,6 +1,7 @@
 import { tw } from 'twind';
 import FeatureSvg from '@/constants/svg/features.svg';
 import Wave from '../Wave';
+import { Fragment } from 'react';
 
 const listItems = [
   {
@@ -30,7 +31,7 @@ const ListSection = () => (
         <div className={tw(`w-full lg:w-1/2 px-8`)}>
           <ul className={tw(`space-y-12`)}>
             {listItems.map((item, index) => (
-              <>
+              <Fragment key={index}>
                 <li className={tw(`flex -mx-4`)} key={item.title}>
                   <div className={tw(`px-4`)}>
                     <span
@@ -46,7 +47,7 @@ const ListSection = () => (
                     <p className={tw(`text-gray-500 leading-loose`)}>{item.description}</p>
                   </div>
                 </li>
-              </>
+              </Fragment>
             ))}
           </ul>
         </div>

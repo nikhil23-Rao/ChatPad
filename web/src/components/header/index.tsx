@@ -1,9 +1,4 @@
 import { tw, css } from 'twind/css';
-import Button from '@/components/button';
-import Netlify from '@/constants/svg/netlify.svg';
-import Nike from '@/constants/svg/nike.svg';
-import Figma from '@/constants/svg/figma.svg';
-import Aws from '@/constants/svg/aws.svg';
 import Wave from '../Wave';
 
 const headerStyle = css`

@@ -1,6 +1,7 @@
 import { tw } from 'twind';
 import { useState } from 'react';
 import Button from '@/components/button';
+import { useRouter } from 'next/dist/client/router';
 
 interface IMenuButton {
   toggleMenu: React.MouseEventHandler<HTMLButtonElement>;
@@ -83,6 +84,7 @@ const MobileMenu = () => (
 const Navigation = () => {
   const [showMenu, setShowMenu] = useState(false);
   const toggleMenu = () => setShowMenu(!showMenu);
+  const router = useRouter();
 
   return (
     <nav className={tw(`bg-white`)}>
@@ -96,8 +98,12 @@ const Navigation = () => {
           </div>
           <div className={tw(`hidden md:block`)}>
             <div className={tw(`ml-4 flex items-center md:ml-6`)}>
-              <Button modifier="border-0 mr-2">Log in</Button>
-              <Button primary>Register</Button>
+              <Button modifier="border-0 mr-2" onClick={() => router.push('/login')}>
+                Log in
+              </Button>
+              <Button primary onClick={() => router.push('/register')}>
+                Register
+              </Button>
             </div>
           </div>
           <div className={tw(`-mr-2 flex md:hidden`)}>
