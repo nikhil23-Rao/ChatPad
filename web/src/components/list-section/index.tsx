@@ -3,22 +3,16 @@ import FeatureSvg from '@/constants/svg/features.svg';
 
 const listItems = [
   {
-    title: `Designers`,
-    description: `Officia et fugiat mollit qui. Dolor elit aliqua voluptate ipsum
-    excepteur cillum consequat consectetur duis magna qui eu consequat occaecat.
-    Deserunt nisi sit.`,
+    title: `Speed`,
+    description: `Speed is very important, thats why ChatPad is blazing fast as we use techniques such as code splitting to optimize the amount of javascript rendered on each page to have a better expierience for you!`,
   },
   {
-    title: `Developers`,
-    description: `Pariatur consectetur laboris exercitation duis laboris.
-    Commodo duis fugiat magna fugiat et ut anim elit. Tempor aute ex qui
-    tempor tempor.`,
+    title: `Performence`,
+    description: `When using ChatPad performance is always high. This is because we pre-render each page before you get on, that means that features such as routing to a new page are blazingly fast.`,
   },
   {
-    title: `Product owners`,
-    description: `Ullamco consectetur ipsum eiusmod nisi adipisicing sint anim
-    dolore aute excepteur. Voluptate ea ullamco sunt eu elit qui aliquip.
-    Adipisicing.`,
+    title: `The Best Features`,
+    description: `When using ChatPad you will see the very best features. A few examples are dark theme, real-time chat, and many many more. To see more features scroll down.`,
   },
 ];
 
@@ -35,21 +29,23 @@ const ListSection = () => (
         <div className={tw(`w-full lg:w-1/2 px-8`)}>
           <ul className={tw(`space-y-12`)}>
             {listItems.map((item, index) => (
-              <li className={tw(`flex -mx-4`)} key={item.title}>
-                <div className={tw(`px-4`)}>
-                  <span
-                    className={tw(`flex w-16 h-16 mx-auto items-center
+              <>
+                <li className={tw(`flex -mx-4`)} key={item.title}>
+                  <div className={tw(`px-4`)}>
+                    <span
+                      className={tw(`flex w-16 h-16 mx-auto items-center
                       justify-center text-2xl font-bold rounded-full
                       bg-blue-50 text-blue-500`)}
-                  >
-                    {index + 1}
-                  </span>
-                </div>
-                <div className={tw(`px-4`)}>
-                  <h3 className={tw(`my-4 text-xl font-semibold`)}>{item.title}</h3>
-                  <p className={tw(`text-gray-500 leading-loose`)}>{item.description}</p>
-                </div>
-              </li>
+                    >
+                      {index + 1}
+                    </span>
+                  </div>
+                  <div className={tw(`px-4`)}>
+                    <h3 className={tw(`my-4 text-xl font-semibold`)}>{item.title}</h3>
+                    <p className={tw(`text-gray-500 leading-loose`)}>{item.description}</p>
+                  </div>
+                </li>
+              </>
             ))}
           </ul>
         </div>
