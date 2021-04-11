@@ -97,15 +97,6 @@ const CasesSection = () => (
                 </div>
               </div>
             ))}
-            <span
-              className={tw(
-                `-mt-8 pb-12 lg:mt-4 flex items-center text-xl
-                text-indigo-400 cursor-pointer z-30 hover:text-indigo-600`,
-              )}
-            >
-              See all case studies
-              <Arrow className={tw(`h-6 w-6 fill-current ml-2`)} />
-            </span>
           </div>
         </div>
       </div>

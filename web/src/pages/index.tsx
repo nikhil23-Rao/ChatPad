@@ -9,7 +9,7 @@ import SocialProof from '@/components/social-proof';
 import PricingTable from '@/components/pricing-table';
 import Footer from '@/components/footer';
 
-export default function Home() {
+export default function LandingPage() {
   return (
     <Page>
       <NextSeo title="ChatPad" description="An Advanced Chat App." />
