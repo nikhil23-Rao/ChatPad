@@ -1,5 +1,6 @@
 import { tw } from 'twind';
 import FeatureSvg from '@/constants/svg/features.svg';
+import Wave from '../Wave';
 
 const listItems = [
   {

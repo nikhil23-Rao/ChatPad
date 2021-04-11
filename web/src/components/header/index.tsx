@@ -4,6 +4,7 @@ import Netlify from '@/constants/svg/netlify.svg';
 import Nike from '@/constants/svg/nike.svg';
 import Figma from '@/constants/svg/figma.svg';
 import Aws from '@/constants/svg/aws.svg';
+import Wave from '../Wave';
 
 const headerStyle = css`
   background-color: #ffffff;
@@ -27,6 +28,7 @@ const Header = () => (
         <div className={tw(`mt-4 w-full`)}></div>
       </div>
     </header>
+    <Wave />
   </>
 );
 
