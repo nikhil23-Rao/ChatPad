@@ -10,11 +10,7 @@ const Register: React.FC<RegisterProps> = ({}) => {
         <nav className="navbar navbar-expand-lg navbar-light py-3">
           <div className="container">
             <a href="#" className="navbar-brand">
-              <img
-                src="https://res.cloudinary.com/mhmd/image/upload/v1571398888/Group_1514_tjekh3_zkts1c.svg"
-                alt="logo"
-                width="150"
-              />
+              <img src="/images/chatpadlogo.png" alt="logo" width="90" />
             </a>
           </div>
         </nav>
