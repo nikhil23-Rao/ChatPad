@@ -18,6 +18,8 @@ export const User = sequelize.define("User", {
   profile_picture: {
     type: DataTypes.TEXT,
     allowNull: false,
+    defaultValue:
+      "https://www.watsonmartin.com/wp-content/uploads/2016/03/default-profile-picture.jpg",
   },
   id: {
     primaryKey: true,
