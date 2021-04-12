@@ -22,8 +22,8 @@ const Header = () => (
       <div className={tw(`flex justify-center w-full`)}>
         <div className={tw(`mt-4 w-full`)}></div>
       </div>
+      <Wave />
     </header>
-    <Wave />
   </>
 );
 

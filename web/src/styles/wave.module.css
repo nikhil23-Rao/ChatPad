@@ -11,11 +11,11 @@
 }
 
 .waveWrapperInner {
-  position: absolute;
+  position: fixed;
   width: 100%;
   overflow: hidden;
   height: 20%;
-  bottom: 5px;
+  bottom: 0px;
 }
 .bgTop {
   z-index: 15;

@@ -1,7 +1,20 @@
+import { Stack, InputGroup, InputLeftElement, Input, InputRightElement } from '@chakra-ui/react';
+import { EmailIcon, CheckCircleIcon, LockIcon } from '@chakra-ui/icons';
+import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 import React from 'react';
+import client from '../../apollo-client';
 import registerStyles from '../styles/register.module.css';
+import { Formik } from 'formik';
+import * as Yup from 'yup';
+import { REGISTER } from '../apollo/Mutations';
 
 interface RegisterProps {}
+
+const registerValidationSchema = Yup.object({}).shape({
+  email: Yup.string().email().required().label('Email'),
+  username: Yup.string().required().max(20).label('Username'),
+  password: Yup.string().required().min(5).max(18).label('Password'),
+});
 
 const Register: React.FC<RegisterProps> = ({}) => {
   return (
@@ -25,143 +38,123 @@ const Register: React.FC<RegisterProps> = ({}) => {
               className="img-fluid mb-3 d-none d-md-block"
             />
             <h1>Create an Account</h1>
-            <p className="font-italic text-muted mb-0">
-              Create a minimal registeration page using Bootstrap 4 HTML form elements.
-            </p>
+            <p className="font-italic text-muted mb-0">Don't Want To Use The Website? Or, Want To Chat On The Go?</p>
             <p className="font-italic text-muted">
-              Snippet By{' '}
-              <a href="https://bootstrapious.com" className="text-muted">
-                <u>Bootstrapious</u>
-              </a>
+              <a href="https://google.com">Download The Mobile App Here.</a>
             </p>
           </div>
 
           <div className="col-md-7 col-lg-6 ml-auto">
-            <form action="#">
-              <div className="row">
-                <div className="input-group col-lg-6 mb-4">
-                  <div className="input-group-prepend">
-                    <span className="input-group-text bg-white px-4 border-md border-right-0">
-                      <i className="fa fa-user text-muted"></i>
-                    </span>
-                  </div>
-                  <input
-                    id="firstName"
-                    type="text"
-                    name="firstname"
-                    placeholder="First Name"
-                    className="form-control bg-white border-left-0 border-md"
-                  />
-                </div>
+            <Formik
+              initialValues={{ username: '', email: '', password: '' }}
+              onSubmit={(values, { resetForm }) => {
+                try {
+                  function makeid(length: number) {
+                    var result = [];
+                    var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+                    var charactersLength = characters.length;
+                    for (var i = 0; i < length; i++) {
+                      result.push(characters.charAt(Math.floor(Math.random() * charactersLength)));
+                    }
+                    return result.join('');
+                  }
 
-                <div className="input-group col-lg-6 mb-4">
-                  <div className="input-group-prepend">
-                    <span className="input-group-text bg-white px-4 border-md border-right-0">
-                      <i className="fa fa-user text-muted"></i>
-                    </span>
-                  </div>
-                  <input
-                    id="lastName"
-                    type="text"
-                    name="lastname"
-                    placeholder="Last Name"
-                    className="form-control bg-white border-left-0 border-md"
-                  />
-                </div>
+                  console.log(makeid(5));
+                  console.log(values);
+                  client.mutate({
+                    mutation: REGISTER,
+                    variables: {
+                      username: values.username,
+                      email: values.email,
+                      password: values.password,
+                      profile_picture:
+                        'https://www.watsonmartin.com/wp-content/uploads/2016/03/default-profile-picture.jpg',
+                      id: makeid(24),
+                    },
+                  });
+                  resetForm();
+                  alert('YAY');
+                } catch (err) {
+                  console.log(err.message);
+                }
+              }}
+              validationSchema={registerValidationSchema}
+            >
+              {({ handleSubmit, handleChange, touched, errors }) => {
+                const isInvalidEmail = errors.email && touched.email ? true : false;
+                const isInvalidPassword = errors.password && touched.password ? true : false;
+                const isInvalidUsername = errors.username && touched.username ? true : false;
 
-                <div className="input-group col-lg-12 mb-4">
-                  <div className="input-group-prepend">
-                    <span className="input-group-text bg-white px-4 border-md border-right-0">
-                      <i className="fa fa-envelope text-muted"></i>
-                    </span>
-                  </div>
-                  <input
-                    id="email"
-                    type="email"
-                    name="email"
-                    placeholder="Email Address"
-                    className="form-control bg-white border-left-0 border-md"
-                  />
-                </div>
+                return (
+                  <form onSubmit={handleSubmit}>
+                    <div className="row">
+                      <div>
+                        <Stack spacing={4}>
+                          <InputGroup>
+                            <InputLeftElement pointerEvents="none" children={<EmailIcon />} />
+                            <Input
+                              isInvalid={isInvalidEmail}
+                              errorBorderColor="crimson"
+                              name="email"
+                              onChange={handleChange}
+                              placeholder="Email Address..."
+                            />
+                          </InputGroup>
+                          <p className={registerStyles.errTxt}>{isInvalidEmail && errors.email}</p>
 
-                <div className="input-group col-lg-12 mb-4">
-                  <div className="input-group-prepend">
-                    <span className="input-group-text bg-white px-4 border-md border-right-0">
-                      <i className="fa fa-phone-square text-muted"></i>
-                    </span>
-                  </div>
-                  <input
-                    id="phoneNumber"
-                    type="tel"
-                    name="phone"
-                    placeholder="Phone Number"
-                    className="form-control bg-white border-md border-left-0 pl-3"
-                  />
-                </div>
+                          <InputGroup>
+                            <InputLeftElement pointerEvents="none" fontSize="1.2em" children={<AccountCircleIcon />} />
+                            <Input
+                              isInvalid={isInvalidUsername}
+                              errorBorderColor="crimson"
+                              name="username"
+                              onChange={handleChange}
+                              placeholder="Username..."
+                            />
+                          </InputGroup>
+                          <p className={registerStyles.errTxt}>{isInvalidUsername && errors.username}</p>
 
-                <div className="input-group col-lg-6 mb-4">
-                  <div className="input-group-prepend">
-                    <span className="input-group-text bg-white px-4 border-md border-right-0">
-                      <i className="fa fa-lock text-muted"></i>
-                    </span>
-                  </div>
-                  <input
-                    id="password"
-                    type="password"
-                    name="password"
-                    placeholder="Password"
-                    className="form-control bg-white border-left-0 border-md"
-                  />
-                </div>
+                          <InputGroup>
+                            <InputLeftElement pointerEvents="none" fontSize="1.2em" children={<LockIcon />} />
+                            <Input
+                              isInvalid={isInvalidPassword}
+                              style={{ paddingTop: 8, paddingLeft: 45 }}
+                              type="password"
+                              errorBorderColor="crimson"
+                              name="password"
+                              onChange={handleChange}
+                              placeholder="Password..."
+                            />
+                          </InputGroup>
+                          <p className={registerStyles.errTxt}>{isInvalidPassword && errors.password}</p>
+                        </Stack>
+                      </div>
 
-                <div className="input-group col-lg-6 mb-4">
-                  <div className="input-group-prepend">
-                    <span className="input-group-text bg-white px-4 border-md border-right-0">
-                      <i className="fa fa-lock text-muted"></i>
-                    </span>
-                  </div>
-                  <input
-                    id="passwordConfirmation"
-                    type="text"
-                    name="passwordConfirmation"
-                    placeholder="Confirm Password"
-                    className="form-control bg-white border-left-0 border-md"
-                  />
-                </div>
+                      <div className="form-group col-lg-12 mx-auto mb-0 mt-4 text-center">
+                        <button className="btn btn-primary btn-block py-2" onClick={() => handleSubmit()}>
+                          <span className="font-weight-bold">Create your account</span>
+                        </button>
+                      </div>
 
-                <div className="form-group col-lg-12 mx-auto mb-0">
-                  <a href="#" className="btn btn-primary btn-block py-2">
-                    <span className="font-weight-bold">Create your account</span>
-                  </a>
-                </div>
+                      <div className="form-group col-lg-12 mx-auto d-flex align-items-center my-4">
+                        <div className="border-bottom w-100 ml-5"></div>
+                        <span className="px-2 small text-muted font-weight-bold text-muted">OR</span>
+                        <div className="border-bottom w-100 mr-5"></div>
+                      </div>
 
-                <div className="form-group col-lg-12 mx-auto d-flex align-items-center my-4">
-                  <div className="border-bottom w-100 ml-5"></div>
-                  <span className="px-2 small text-muted font-weight-bold text-muted">OR</span>
-                  <div className="border-bottom w-100 mr-5"></div>
-                </div>
-
-                <div className="form-group col-lg-12 mx-auto">
-                  <a href="#" className="btn btn-primary btn-block py-2 btn-facebook">
-                    <i className="fa fa-facebook-f mr-2"></i>
-                    <span className="font-weight-bold">Continue with Facebook</span>
-                  </a>
-                  <a href="#" className="btn btn-primary btn-block py-2 btn-twitter">
-                    <i className="fa fa-twitter mr-2"></i>
-                    <span className="font-weight-bold">Continue with Twitter</span>
-                  </a>
-                </div>
-
-                <div className="text-center w-100">
-                  <p className="text-muted font-weight-bold">
-                    Already Registered?{' '}
-                    <a href="#" className="text-primary ml-2">
-                      Login
-                    </a>
-                  </p>
-                </div>
-              </div>
-            </form>
+                      <div className="text-center w-100">
+                        <p className="text-muted font-weight-bold">
+                          Already Registered?{' '}
+                          <a href="#" className="text-primary ml-2">
+                            Login
+                          </a>
+                        </p>
+                      </div>
+                    </div>
+                  </form>
+                );
+              }}
+            </Formik>
           </div>
         </div>
       </div>

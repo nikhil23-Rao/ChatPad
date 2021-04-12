@@ -1,29 +1,32 @@
-.border-md {
+.borderMd {
   border-width: 2px;
 }
 
-.btn-facebook {
+.btnFacebook {
   background: #405d9d;
   border: none;
 }
 
-.btn-facebook:hover,
-.btn-facebook:focus {
+.btnFacebook:hover,
+.btnFacebook:focus {
   background: #314879;
 }
 
-.btn-twitter {
+.btnTwitter {
   background: #42aeec;
   border: none;
 }
 
-.btn-twitter:hover,
-.btn-twitter:focus {
+.btnTwitter:hover,
+.btnTwitter:focus {
   background: #1799e4;
 }
 
-body {
-  min-height: 100vh;
+.errTxt {
+  color: red;
+  position: relative;
+  bottom: 10px;
+  left: 5px;
 }
 
 .form-control:not(select) {
