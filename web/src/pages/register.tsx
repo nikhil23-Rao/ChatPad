@@ -12,7 +12,9 @@ import { GetServerSideProps, GetServerSidePropsContext } from 'next';
 import { signIn, signOut, useSession, providers } from 'next-auth/client';
 import Github from '../components/auth/Github';
 
-interface RegisterProps {}
+interface RegisterProps {
+  myproviders: { myproviders: { name: string; id: string | undefined } };
+}
 
 const registerValidationSchema = Yup.object({}).shape({
   email: Yup.string().email().required().label('Email'),
@@ -20,14 +22,14 @@ const registerValidationSchema = Yup.object({}).shape({
   password: Yup.string().required().min(5).max(18).label('Password'),
 });
 
-export async function getServerSideProps(context: any) {
+export const getServerSideProps: GetServerSideProps = async (_) => {
   const myproviders = await providers();
   return {
     props: { myproviders },
   };
-}
+};
 
-const Register: React.FC<RegisterProps> = ({ myproviders }: any) => {
+const Register: React.FC<RegisterProps> = ({ myproviders }: RegisterProps) => {
   const [session] = useSession();
   console.log(session);
   return (
@@ -155,7 +157,7 @@ const Register: React.FC<RegisterProps> = ({ myproviders }: any) => {
                     </div>
 
                     {myproviders &&
-                      Object.values(myproviders).map((provider: any) => (
+                      Object.values(myproviders).map((provider) => (
                         <div key={provider.name} className="text-center mb-4">
                           <button onClick={() => signIn(provider.id)}>Sign in with {provider.name}</button>
                         </div>
