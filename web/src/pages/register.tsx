@@ -1,17 +1,14 @@
-import { Stack, InputGroup, InputLeftElement, Input, InputRightElement } from '@chakra-ui/react';
-import { EmailIcon, CheckCircleIcon, LockIcon } from '@chakra-ui/icons';
+import { Stack, InputGroup, InputLeftElement, Input } from '@chakra-ui/react';
+import { EmailIcon, LockIcon } from '@chakra-ui/icons';
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 import React from 'react';
 import client from '../../apollo-client';
 import registerStyles from '../styles/register.module.css';
-import { Form, Formik } from 'formik';
+import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { REGISTER } from '../apollo/Mutations';
-import { Button } from '@chakra-ui/react';
-import { GetServerSideProps, GetServerSidePropsContext } from 'next';
-import { signIn, signOut, useSession, providers } from 'next-auth/client';
-import Github from '../components/auth/Github';
-
+import { GetServerSideProps } from 'next';
+import { signIn, useSession, providers } from 'next-auth/client';
 interface RegisterProps {
   myproviders: { myproviders: { name: string; id: string | undefined } };
 }
