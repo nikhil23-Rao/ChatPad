@@ -7,6 +7,7 @@ import { ChakraProvider } from '@chakra-ui/react';
 
 import { setup } from 'twind';
 import twindConfig from '../twind.config';
+import { Provider } from 'next-auth/client';
 
 if (typeof window !== `undefined`) {
   setup(twindConfig);
@@ -15,7 +16,9 @@ if (typeof window !== `undefined`) {
 export default function MyApp({ Component, pageProps }: AppProps) {
   return (
     <ChakraProvider>
-      <Component {...pageProps} />
+      <Provider session={pageProps.session}>
+        <Component {...pageProps} />
+      </Provider>
     </ChakraProvider>
   );
 }

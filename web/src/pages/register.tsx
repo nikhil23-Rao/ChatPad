@@ -4,9 +4,13 @@ import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 import React from 'react';
 import client from '../../apollo-client';
 import registerStyles from '../styles/register.module.css';
-import { Formik } from 'formik';
+import { Form, Formik } from 'formik';
 import * as Yup from 'yup';
 import { REGISTER } from '../apollo/Mutations';
+import { Button } from '@chakra-ui/react';
+import { GetServerSideProps, GetServerSidePropsContext } from 'next';
+import { signIn, signOut, useSession, providers } from 'next-auth/client';
+import Github from '../components/auth/Github';
 
 interface RegisterProps {}
 
@@ -16,7 +20,16 @@ const registerValidationSchema = Yup.object({}).shape({
   password: Yup.string().required().min(5).max(18).label('Password'),
 });
 
-const Register: React.FC<RegisterProps> = ({}) => {
+export async function getServerSideProps(context: any) {
+  const myproviders = await providers();
+  return {
+    props: { myproviders },
+  };
+}
+
+const Register: React.FC<RegisterProps> = ({ myproviders }: any) => {
+  const [session] = useSession();
+  console.log(session);
   return (
     <>
       <header className="header">
@@ -86,72 +99,77 @@ const Register: React.FC<RegisterProps> = ({}) => {
                 const isInvalidUsername = errors.username && touched.username ? true : false;
 
                 return (
-                  <form onSubmit={handleSubmit}>
-                    <div className="row">
-                      <div>
-                        <Stack spacing={4}>
-                          <InputGroup>
-                            <InputLeftElement pointerEvents="none" children={<EmailIcon />} />
-                            <Input
-                              isInvalid={isInvalidEmail}
-                              errorBorderColor="crimson"
-                              name="email"
-                              onChange={handleChange}
-                              placeholder="Email Address..."
-                            />
-                          </InputGroup>
-                          <p className={registerStyles.errTxt}>{isInvalidEmail && errors.email}</p>
+                  <div className="row">
+                    <div>
+                      <Stack spacing={4}>
+                        <InputGroup>
+                          <InputLeftElement pointerEvents="none" children={<EmailIcon />} />
+                          <Input
+                            isInvalid={isInvalidEmail}
+                            errorBorderColor="crimson"
+                            name="email"
+                            onChange={handleChange}
+                            placeholder="Email Address..."
+                          />
+                        </InputGroup>
+                        <p className={registerStyles.errTxt}>{isInvalidEmail && errors.email}</p>
 
-                          <InputGroup>
-                            <InputLeftElement pointerEvents="none" fontSize="1.2em" children={<AccountCircleIcon />} />
-                            <Input
-                              isInvalid={isInvalidUsername}
-                              errorBorderColor="crimson"
-                              name="username"
-                              onChange={handleChange}
-                              placeholder="Username..."
-                            />
-                          </InputGroup>
-                          <p className={registerStyles.errTxt}>{isInvalidUsername && errors.username}</p>
+                        <InputGroup>
+                          <InputLeftElement pointerEvents="none" fontSize="1.2em" children={<AccountCircleIcon />} />
+                          <Input
+                            isInvalid={isInvalidUsername}
+                            errorBorderColor="crimson"
+                            name="username"
+                            onChange={handleChange}
+                            placeholder="Username..."
+                          />
+                        </InputGroup>
+                        <p className={registerStyles.errTxt}>{isInvalidUsername && errors.username}</p>
 
-                          <InputGroup>
-                            <InputLeftElement pointerEvents="none" fontSize="1.2em" children={<LockIcon />} />
-                            <Input
-                              isInvalid={isInvalidPassword}
-                              style={{ paddingTop: 8, paddingLeft: 45 }}
-                              type="password"
-                              errorBorderColor="crimson"
-                              name="password"
-                              onChange={handleChange}
-                              placeholder="Password..."
-                            />
-                          </InputGroup>
-                          <p className={registerStyles.errTxt}>{isInvalidPassword && errors.password}</p>
-                        </Stack>
-                      </div>
-
-                      <div className="form-group col-lg-12 mx-auto mb-0 mt-4 text-center">
-                        <button className="btn btn-primary btn-block py-2" onClick={() => handleSubmit()}>
-                          <span className="font-weight-bold">Create your account</span>
-                        </button>
-                      </div>
-
-                      <div className="form-group col-lg-12 mx-auto d-flex align-items-center my-4">
-                        <div className="border-bottom w-100 ml-5"></div>
-                        <span className="px-2 small text-muted font-weight-bold text-muted">OR</span>
-                        <div className="border-bottom w-100 mr-5"></div>
-                      </div>
-
-                      <div className="text-center w-100">
-                        <p className="text-muted font-weight-bold">
-                          Already Registered?{' '}
-                          <a href="#" className="text-primary ml-2">
-                            Login
-                          </a>
-                        </p>
-                      </div>
+                        <InputGroup>
+                          <InputLeftElement pointerEvents="none" fontSize="1.2em" children={<LockIcon />} />
+                          <Input
+                            isInvalid={isInvalidPassword}
+                            style={{ paddingTop: 8, paddingLeft: 45 }}
+                            type="password"
+                            errorBorderColor="crimson"
+                            name="password"
+                            onChange={handleChange}
+                            placeholder="Password..."
+                          />
+                        </InputGroup>
+                        <p className={registerStyles.errTxt}>{isInvalidPassword && errors.password}</p>
+                      </Stack>
                     </div>
-                  </form>
+
+                    <div className="form-group col-lg-12 mx-auto mb-0 mt-4 text-center">
+                      <button className="btn btn-primary btn-block py-2" onClick={() => handleSubmit()}>
+                        <span className="font-weight-bold">Create your account</span>
+                      </button>
+                    </div>
+
+                    <div className="form-group col-lg-12 mx-auto d-flex align-items-center my-4">
+                      <div className="border-bottom w-100 ml-5"></div>
+                      <span className="px-2 small text-muted font-weight-bold text-muted">OR</span>
+                      <div className="border-bottom w-100 mr-5"></div>
+                    </div>
+
+                    {myproviders &&
+                      Object.values(myproviders).map((provider: any) => (
+                        <div key={provider.name} className="text-center mb-4">
+                          <button onClick={() => signIn(provider.id)}>Sign in with {provider.name}</button>
+                        </div>
+                      ))}
+
+                    <div className="text-center w-100">
+                      <p className="text-muted font-weight-bold">
+                        Already Registered?{' '}
+                        <a href="#" className="text-primary ml-2">
+                          Login
+                        </a>
+                      </p>
+                    </div>
+                  </div>
                 );
               }}
             </Formik>
