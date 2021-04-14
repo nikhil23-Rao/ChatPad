@@ -22,7 +22,11 @@ export default NextAuth({
   },
   callbacks: {
     signIn: async (profile, account): Promise<any> => {
-      await Register(profile, account);
+      try {
+        await Register(profile, account);
+      } catch (err) {
+        console.log('ERR', err);
+      }
     },
   },
 });
