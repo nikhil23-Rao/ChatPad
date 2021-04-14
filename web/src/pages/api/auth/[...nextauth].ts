@@ -1,3 +1,4 @@
+import { Register } from '@/auth/Register';
 import NextAuth from 'next-auth';
 import Providers from 'next-auth/providers';
 
@@ -8,8 +9,8 @@ export default NextAuth({
       clientSecret: process.env.GITHUB_CLIENT_SECRET!,
     }),
     Providers.Google({
-      clientId: '145764687586-1p6qccanju66cv5a0309uhrdd7j1umid.apps.googleusercontent.com',
-      clientSecret: 'D1mSIBnTgP_KUUfnnDJm9nWa',
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
   ],
   pages: {
@@ -20,20 +21,8 @@ export default NextAuth({
     newUser: null,
   },
   callbacks: {
-    signIn: async (profile, account, metaData): Promise<any> => {
-      if (profile.image?.includes('https://avatars.githubusercontent')) {
-        const res = await fetch('https://api.github.com/user/emails', {
-          headers: {
-            Authorization: `token ${account.accessToken}`,
-          },
-        });
-        const emails = await res.json();
-        if (!emails || emails.length === 0) {
-          return;
-        }
-        const sortedEmails = emails.sort((a: any, b: any) => b.primary - a.primary);
-        profile.email = sortedEmails[0].email;
-      }
+    signIn: async (profile, account): Promise<any> => {
+      await Register(profile, account);
     },
   },
 });
