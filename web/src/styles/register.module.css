@@ -2,24 +2,26 @@
   border-width: 2px;
 }
 
-.btnFacebook {
-  background: #405d9d;
+.btnGithub {
+  background: #000;
   border: none;
+  width: 100%;
 }
 
-.btnFacebook:hover,
-.btnFacebook:focus {
-  background: #314879;
+.btnGithub:hover,
+.btnGithub:focus {
+  background: #000;
 }
 
-.btnTwitter {
-  background: #42aeec;
+.btnGoogle {
+  background: #de5246;
   border: none;
+  width: 100%;
 }
 
-.btnTwitter:hover,
-.btnTwitter:focus {
-  background: #1799e4;
+.btnGoogle:hover,
+.btnGoogle:focus {
+  background: #de5246;
 }
 
 .errTxt {
@@ -29,20 +31,20 @@
   left: 5px;
 }
 
-.form-control:not(select) {
+.formControl:not(select) {
   padding: 1.5rem 0.5rem;
 }
 
-select.form-control {
+select.formControl {
   height: 52px;
   padding-left: 0.5rem;
 }
 
-.form-control::placeholder {
+.formControl::placeholder {
   color: #ccc;
   font-weight: bold;
   font-size: 0.9rem;
 }
-.form-control:focus {
+.formControl:focus {
   box-shadow: none;
 }

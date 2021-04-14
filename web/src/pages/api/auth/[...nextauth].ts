@@ -7,6 +7,10 @@ export default NextAuth({
       clientId: process.env.GITHUB_CLIENT_ID!,
       clientSecret: process.env.GITHUB_CLIENT_SECRET!,
     }),
+    Providers.Google({
+      clientId: '145764687586-1p6qccanju66cv5a0309uhrdd7j1umid.apps.googleusercontent.com',
+      clientSecret: 'D1mSIBnTgP_KUUfnnDJm9nWa',
+    }),
   ],
   pages: {
     signIn: '/auth/signin',
@@ -17,17 +21,19 @@ export default NextAuth({
   },
   callbacks: {
     signIn: async (profile, account, metaData): Promise<any> => {
-      const res = await fetch('https://api.github.com/user/emails', {
-        headers: {
-          Authorization: `token ${account.accessToken}`,
-        },
-      });
-      const emails = await res.json();
-      if (!emails || emails.length === 0) {
-        return;
+      if (profile.image?.includes('https://avatars.githubusercontent')) {
+        const res = await fetch('https://api.github.com/user/emails', {
+          headers: {
+            Authorization: `token ${account.accessToken}`,
+          },
+        });
+        const emails = await res.json();
+        if (!emails || emails.length === 0) {
+          return;
+        }
+        const sortedEmails = emails.sort((a: any, b: any) => b.primary - a.primary);
+        profile.email = sortedEmails[0].email;
       }
-      const sortedEmails = emails.sort((a: any, b: any) => b.primary - a.primary);
-      profile.email = sortedEmails[0].email;
     },
   },
 });

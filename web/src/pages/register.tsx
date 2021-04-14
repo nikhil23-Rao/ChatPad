@@ -142,8 +142,14 @@ const Register: React.FC<RegisterProps> = ({ myproviders }: RegisterProps) => {
                     </div>
 
                     <div className="form-group col-lg-12 mx-auto mb-0 mt-4 text-center">
-                      <button className="btn btn-primary btn-block py-2" onClick={() => handleSubmit()}>
-                        <span className="font-weight-bold">Create your account</span>
+                      <button
+                        className="btn btn-primary btn-block py-2"
+                        style={{ width: '100%' }}
+                        onClick={() => handleSubmit()}
+                      >
+                        <span className="font-weight-bold" style={{ fontWeight: 'bold' }}>
+                          Create your account
+                        </span>
                       </button>
                     </div>
 
@@ -154,16 +160,48 @@ const Register: React.FC<RegisterProps> = ({ myproviders }: RegisterProps) => {
                     </div>
 
                     {myproviders &&
-                      Object.values(myproviders).map((provider) => (
-                        <div key={provider.name} className="text-center mb-4">
-                          <button onClick={() => signIn(provider.id)}>Sign in with {provider.name}</button>
-                        </div>
-                      ))}
+                      Object.values(myproviders).map((provider) => {
+                        if (provider.name.includes('Google')) {
+                          return (
+                            <div className="form-group col-lg-12 mx-auto" key={provider.id}>
+                              <a
+                                onClick={() => signIn(provider.id)}
+                                className={`btn btn-primary btn-block py-2 mb-3 ${registerStyles.btnGoogle}`}
+                              >
+                                <i className="fa fa-google fa-2x mr-1"></i>
+                                <span
+                                  className="font-weight-bold"
+                                  style={{ bottom: 5, fontWeight: 'bold', marginLeft: 10, position: 'relative' }}
+                                >
+                                  Register with Google
+                                </span>
+                              </a>
+                            </div>
+                          );
+                        } else {
+                          return (
+                            <div className="form-group col-lg-12 mx-auto" key={provider.id}>
+                              <a
+                                onClick={() => signIn(provider.id)}
+                                className={`btn btn-primary btn-block py-2 mb-3 ${registerStyles.btnGithub}`}
+                              >
+                                <i className="fa fa-github fa-2x mr-1"></i>
+                                <span
+                                  className="font-weight-bold"
+                                  style={{ bottom: 5, fontWeight: 'bold', marginLeft: 10, position: 'relative' }}
+                                >
+                                  Register with Github
+                                </span>
+                              </a>
+                            </div>
+                          );
+                        }
+                      })}
 
                     <div className="text-center w-100">
                       <p className="text-muted font-weight-bold">
                         Already Registered?{' '}
-                        <a href="#" className="text-primary ml-2">
+                        <a href="" className="text-primary ml-2">
                           Login
                         </a>
                       </p>
