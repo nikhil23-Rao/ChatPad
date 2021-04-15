@@ -1,8 +1,4 @@
-import { REGISTER } from '@/apollo/Mutations';
-import client from '../../apollo-client';
-import { useRouter } from 'next/dist/client/router';
-
-export const Register = async (
+export const GetGithubEmail = async (
   profile: { image?: string | null | undefined; name?: string | null | undefined; email?: string | null | undefined },
   account: Record<string, unknown>,
 ) => {

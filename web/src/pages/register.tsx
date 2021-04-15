@@ -7,10 +7,7 @@ import registerStyles from '../styles/register.module.css';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { REGISTER } from '../apollo/Mutations';
-import { GetServerSideProps } from 'next';
 import { signIn, useSession, providers } from 'next-auth/client';
-import { AppProvider } from 'next-auth/providers';
-import { Session } from 'next-auth';
 import { useRouter } from 'next/dist/client/router';
 interface RegisterProps {
   myproviders: { myproviders: { name: string; id: string | undefined } };
@@ -30,49 +27,6 @@ export const getServerSideProps = async () => {
 };
 
 const Register: React.FC<RegisterProps> = ({ myproviders }: RegisterProps) => {
-  const [session] = useSession();
-  const router = useRouter();
-  const register = async () => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      router.push('/feed');
-    }
-    if (session) {
-      console.log(session);
-      function makeid(length: number) {
-        var result = [];
-        var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        var charactersLength = characters.length;
-        for (var i = 0; i < length; i++) {
-          result.push(characters.charAt(Math.floor(Math.random() * charactersLength)));
-        }
-        return result.join('');
-      }
-
-      try {
-        const apolloResult = await client.mutate({
-          mutation: REGISTER,
-          variables: {
-            username: session.user.name,
-            email: session.user.email,
-            password: makeid(15),
-            profile_picture: session.user.image,
-            id: makeid(24),
-          },
-        });
-        if (!token) {
-          localStorage.setItem('token', apolloResult.data.Register);
-          router.push('/feed');
-        }
-      } catch (err) {
-        console.clear();
-      }
-    }
-  };
-  useEffect(() => {
-    register();
-  });
-
   return (
     <>
       <header className="header">
@@ -209,7 +163,7 @@ const Register: React.FC<RegisterProps> = ({ myproviders }: RegisterProps) => {
                           return (
                             <div className="form-group col-lg-12 mx-auto" key={provider.id}>
                               <a
-                                onClick={() => signIn(provider.id)}
+                                onClick={() => signIn(provider.id, { callbackUrl: 'http://localhost:3000/feed' })}
                                 className={`btn btn-primary btn-block py-2 mb-3 ${registerStyles.btnGoogle}`}
                               >
                                 <i className="fa fa-google fa-2x mr-1"></i>
@@ -226,7 +180,7 @@ const Register: React.FC<RegisterProps> = ({ myproviders }: RegisterProps) => {
                           return (
                             <div className="form-group col-lg-12 mx-auto" key={provider.id}>
                               <a
-                                onClick={() => signIn(provider.id)}
+                                onClick={() => signIn(provider.id, { callbackUrl: 'http://localhost:3000/feed' })}
                                 className={`btn btn-primary btn-block py-2 mb-3 ${registerStyles.btnGithub}`}
                               >
                                 <i className="fa fa-github fa-2x mr-1"></i>
