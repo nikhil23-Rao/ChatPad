@@ -1,5 +1,5 @@
 type Query {
-  hello: String
+  GetCurrentUser(email: String!): String
 }
 
 type Mutation {

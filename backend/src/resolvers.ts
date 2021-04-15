@@ -6,7 +6,19 @@ import { generateJwt } from "./auth/generateJwt";
 
 const resolvers = {
   Query: {
-    hello: () => "Hello World",
+    GetCurrentUser: async (_: void, args: UserType) => {
+      const user: UserType | null = await User.findOne({
+        where: { email: args.email },
+      });
+      if (!user) return "Invalid User Email.";
+      const token = generateJwt({
+        username: user.username,
+        email: user.email,
+        id: user.id,
+        profile_picture: user.profile_picture,
+      });
+      return token;
+    },
   },
   Mutation: {
     Register: async (_: void, args: UserType) => {
