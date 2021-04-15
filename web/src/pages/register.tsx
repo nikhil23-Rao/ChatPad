@@ -1,14 +1,14 @@
-import { Stack, InputGroup, InputLeftElement, Input } from '@chakra-ui/react';
+import { Stack, InputGroup, InputLeftElement, Input, Button, Spinner } from '@chakra-ui/react';
 import { EmailIcon, LockIcon } from '@chakra-ui/icons';
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
-import React, { useEffect } from 'react';
+import React, { useState } from 'react';
 import client from '../../apollo-client';
 import registerStyles from '../styles/register.module.css';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { REGISTER } from '../apollo/Mutations';
 import { signIn, useSession, providers } from 'next-auth/client';
-import { useRouter } from 'next/dist/client/router';
+import { generateId } from '@/utils/GenerateId';
 interface RegisterProps {
   myproviders: { myproviders: { name: string; id: string | undefined } };
 }
@@ -27,6 +27,7 @@ export const getServerSideProps = async () => {
 };
 
 const Register: React.FC<RegisterProps> = ({ myproviders }: RegisterProps) => {
+  const [apolloError, setApolloError] = useState(false);
   return (
     <>
       <header className="header">
@@ -57,21 +58,11 @@ const Register: React.FC<RegisterProps> = ({ myproviders }: RegisterProps) => {
           <div className="col-md-7 col-lg-6 ml-auto">
             <Formik
               initialValues={{ username: '', email: '', password: '' }}
-              onSubmit={(values, { resetForm }) => {
+              onSubmit={async (values, { setSubmitting }) => {
                 try {
-                  function makeid(length: number) {
-                    var result = [];
-                    var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-                    var charactersLength = characters.length;
-                    for (var i = 0; i < length; i++) {
-                      result.push(characters.charAt(Math.floor(Math.random() * charactersLength)));
-                    }
-                    return result.join('');
-                  }
-
-                  console.log(makeid(5));
+                  setSubmitting(true);
                   console.log(values);
-                  client.mutate({
+                  await client.mutate({
                     mutation: REGISTER,
                     variables: {
                       username: values.username,
@@ -79,18 +70,16 @@ const Register: React.FC<RegisterProps> = ({ myproviders }: RegisterProps) => {
                       password: values.password,
                       profile_picture:
                         'https://www.watsonmartin.com/wp-content/uploads/2016/03/default-profile-picture.jpg',
-                      id: makeid(24),
+                      id: generateId(24),
                     },
                   });
-                  resetForm();
-                  alert('YAY');
                 } catch (err) {
-                  console.log(err.message);
+                  return setApolloError(true);
                 }
               }}
               validationSchema={registerValidationSchema}
             >
-              {({ handleSubmit, handleChange, touched, errors }) => {
+              {({ handleSubmit, handleChange, touched, errors, isSubmitting }) => {
                 const isInvalidEmail = errors.email && touched.email ? true : false;
                 const isInvalidPassword = errors.password && touched.password ? true : false;
                 const isInvalidUsername = errors.username && touched.username ? true : false;
@@ -102,15 +91,17 @@ const Register: React.FC<RegisterProps> = ({ myproviders }: RegisterProps) => {
                         <InputGroup>
                           <InputLeftElement pointerEvents="none" children={<EmailIcon />} />
                           <Input
-                            isInvalid={isInvalidEmail}
+                            isInvalid={isInvalidEmail || apolloError}
                             errorBorderColor="crimson"
                             name="email"
                             onChange={handleChange}
                             placeholder="Email Address..."
                           />
                         </InputGroup>
-                        <p className={registerStyles.errTxt}>{isInvalidEmail && errors.email}</p>
-
+                        <p className={registerStyles.errTxt}>
+                          {isInvalidEmail && errors.email}{' '}
+                          {apolloError && 'The Account With The Given Email Already Exists.'}
+                        </p>
                         <InputGroup>
                           <InputLeftElement pointerEvents="none" fontSize="1.2em" children={<AccountCircleIcon />} />
                           <Input
@@ -122,7 +113,6 @@ const Register: React.FC<RegisterProps> = ({ myproviders }: RegisterProps) => {
                           />
                         </InputGroup>
                         <p className={registerStyles.errTxt}>{isInvalidUsername && errors.username}</p>
-
                         <InputGroup>
                           <InputLeftElement pointerEvents="none" fontSize="1.2em" children={<LockIcon />} />
                           <Input
@@ -140,15 +130,16 @@ const Register: React.FC<RegisterProps> = ({ myproviders }: RegisterProps) => {
                     </div>
 
                     <div className="form-group col-lg-12 mx-auto mb-0 mt-4 text-center">
-                      <button
+                      <Button
                         className="btn btn-primary btn-block py-2"
-                        style={{ width: '100%' }}
+                        style={{ width: '100%', backgroundColor: '#0C6DFD' }}
+                        isLoading={isSubmitting}
                         onClick={() => handleSubmit()}
                       >
                         <span className="font-weight-bold" style={{ fontWeight: 'bold' }}>
                           Create your account
                         </span>
-                      </button>
+                      </Button>
                     </div>
 
                     <div className="form-group col-lg-12 mx-auto d-flex align-items-center my-4">

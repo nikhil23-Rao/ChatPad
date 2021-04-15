@@ -1,6 +1,7 @@
 import client from '@/../apollo-client';
 import { REGISTER } from '@/apollo/Mutations';
 import { GetGithubEmail } from '@/auth/GetGithubEmail';
+import { generateId } from '@/utils/GenerateId';
 import NextAuth from 'next-auth';
 import Providers from 'next-auth/providers';
 
@@ -26,27 +27,18 @@ export default NextAuth({
     signIn: async (profile, account): Promise<any> => {
       try {
         await GetGithubEmail(profile, account);
-        console.log(profile);
-        function makeid(length: number) {
-          var result = [];
-          var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-          var charactersLength = characters.length;
-          for (var i = 0; i < length; i++) {
-            result.push(characters.charAt(Math.floor(Math.random() * charactersLength)));
-          }
-          return result.join('');
-        }
 
         await client.mutate({
           mutation: REGISTER,
           variables: {
             username: profile.name,
             email: profile.email,
-            password: makeid(15),
+            password: generateId(15),
             profile_picture: profile.image,
-            id: makeid(24),
+            id: generateId(24),
           },
         });
+        
       } catch (err) {
         console.log(err);
       }
