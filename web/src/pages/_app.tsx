@@ -3,7 +3,10 @@ import '@/styles/global.css';
 import '@fontsource/inter';
 import 'bootstrap/dist/css/bootstrap.css';
 import 'font-awesome/css/font-awesome.min.css';
+import 'react-toastify/dist/ReactToastify.css';
+
 import { ChakraProvider } from '@chakra-ui/react';
+import { ToastContainer } from 'react-toastify';
 
 import { setup } from 'twind';
 import twindConfig from '../twind.config';
@@ -15,10 +18,13 @@ if (typeof window !== `undefined`) {
 
 export default function MyApp({ Component, pageProps }: AppProps) {
   return (
-    <ChakraProvider>
-      <Provider session={pageProps.session}>
-        <Component {...pageProps} />
-      </Provider>
-    </ChakraProvider>
+    <>
+      <ToastContainer />
+      <ChakraProvider>
+        <Provider session={pageProps.session}>
+          <Component {...pageProps} />
+        </Provider>
+      </ChakraProvider>
+    </>
   );
 }

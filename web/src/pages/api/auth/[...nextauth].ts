@@ -2,8 +2,11 @@ import client from '@/../apollo-client';
 import { REGISTER } from '@/apollo/Mutations';
 import { GetGithubEmail } from '@/auth/GetGithubEmail';
 import { generateId } from '@/utils/GenerateId';
+import { useToast } from '@chakra-ui/toast';
 import NextAuth from 'next-auth';
 import Providers from 'next-auth/providers';
+import { useRouter } from 'next/dist/client/router';
+import { toast } from 'react-toastify';
 
 export default NextAuth({
   providers: [
@@ -19,15 +22,15 @@ export default NextAuth({
   pages: {
     signIn: '/auth/signin',
     signOut: '/auth/signout',
-    error: '/auth/error',
+    error: '/register-error',
     verifyRequest: '/auth/verify-request',
     newUser: null,
   },
   callbacks: {
     signIn: async (profile, account): Promise<any> => {
-      try {
-        await GetGithubEmail(profile, account);
+      await GetGithubEmail(profile, account);
 
+      try {
         await client.mutate({
           mutation: REGISTER,
           variables: {
@@ -38,9 +41,8 @@ export default NextAuth({
             id: generateId(24),
           },
         });
-        
       } catch (err) {
-        console.log(err);
+        window.location.href = '/register';
       }
     },
   },

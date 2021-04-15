@@ -9,6 +9,7 @@ import * as Yup from 'yup';
 import { REGISTER } from '../apollo/Mutations';
 import { signIn, useSession, providers } from 'next-auth/client';
 import { generateId } from '@/utils/GenerateId';
+import { useRouter } from 'next/dist/client/router';
 interface RegisterProps {
   myproviders: { myproviders: { name: string; id: string | undefined } };
 }
@@ -27,6 +28,7 @@ export const getServerSideProps = async () => {
 };
 
 const Register: React.FC<RegisterProps> = ({ myproviders }: RegisterProps) => {
+  const router = useRouter();
   const [apolloError, setApolloError] = useState(false);
   return (
     <>
@@ -50,8 +52,10 @@ const Register: React.FC<RegisterProps> = ({ myproviders }: RegisterProps) => {
             />
             <h1>Create an Account</h1>
             <p className="font-italic text-muted mb-0">Don't Want To Use The Website? Or, Want To Chat On The Go?</p>
-            <p className="font-italic text-muted">
-              <a href="https://google.com">Download The Mobile App Here.</a>
+            <p className="font-italic text-muted" style={{ color: 'blue', textDecoration: 'underline' }}>
+              <a href="https://google.com" style={{ color: 'blue' }}>
+                Download The Mobile App Here.
+              </a>
             </p>
           </div>
 
@@ -73,6 +77,7 @@ const Register: React.FC<RegisterProps> = ({ myproviders }: RegisterProps) => {
                       id: generateId(24),
                     },
                   });
+                  router.push('/feed');
                 } catch (err) {
                   return setApolloError(true);
                 }
@@ -117,7 +122,7 @@ const Register: React.FC<RegisterProps> = ({ myproviders }: RegisterProps) => {
                           <InputLeftElement pointerEvents="none" fontSize="1.2em" children={<LockIcon />} />
                           <Input
                             isInvalid={isInvalidPassword}
-                            style={{ paddingTop: 8, paddingLeft: 45 }}
+                            style={{  paddingLeft: 45 }}
                             type="password"
                             errorBorderColor="crimson"
                             name="password"
