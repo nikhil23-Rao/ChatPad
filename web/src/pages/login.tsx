@@ -1,16 +1,15 @@
 import { Stack, InputGroup, InputLeftElement, Input, Button } from '@chakra-ui/react';
 import { EmailIcon, LockIcon } from '@chakra-ui/icons';
-import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 import React, { useState } from 'react';
 import client from '../../apollo-client';
 import registerStyles from '../styles/register.module.css';
 import { Formik } from 'formik';
-import { REGISTER } from '../apollo/Mutations';
+import { LOGIN } from '../apollo/Mutations';
 import { signIn, providers } from 'next-auth/client';
 import Link from 'next/link';
-import { generateId } from '@/utils/GenerateId';
 import { useRouter } from 'next/dist/client/router';
 import { registerValidationSchema } from '@/components/validation/RegisterValidationSchema';
+import { loginValidationSchema } from '@/components/validation/LoginValidationSchema';
 
 interface LoginProps {
   myproviders: { myproviders: { name: string; id: string | undefined } };
@@ -50,30 +49,28 @@ const Login: React.FC<LoginProps> = ({ myproviders }: LoginProps) => {
 
           <div className="col-md-7 col-lg-6 ml-auto">
             <Formik
-              initialValues={{ username: '', email: '', password: '' }}
+              initialValues={{ email: '', password: '' }}
               onSubmit={async (values, { setSubmitting }) => {
                 try {
                   setSubmitting(true);
-                  await client.mutate({
-                    mutation: REGISTER,
+                  const result = await client.mutate({
+                    mutation: LOGIN,
                     variables: {
-                      username: values.username,
                       email: values.email,
                       password: values.password,
-                      id: generateId(24),
                     },
                   });
+                  localStorage.setItem('token', result.data.Login!);
                   router.push('/feed');
                 } catch (err) {
                   return setApolloError(true);
                 }
               }}
-              validationSchema={registerValidationSchema}
+              validationSchema={loginValidationSchema}
             >
               {({ handleSubmit, handleChange, touched, errors, isSubmitting }) => {
                 const isInvalidEmail = errors.email && touched.email ? true : false;
                 const isInvalidPassword = errors.password && touched.password ? true : false;
-                const isInvalidUsername = errors.username && touched.username ? true : false;
                 return (
                   <div className="row">
                     <div>
@@ -89,20 +86,8 @@ const Login: React.FC<LoginProps> = ({ myproviders }: LoginProps) => {
                           />
                         </InputGroup>
                         <p className={registerStyles.errTxt}>
-                          {isInvalidEmail && errors.email}{' '}
-                          {apolloError && 'The Account With The Given Email Already Exists.'}
+                          {isInvalidEmail && errors.email} {apolloError && 'Invalid Email or Password.'}
                         </p>
-                        <InputGroup>
-                          <InputLeftElement pointerEvents="none" fontSize="1.2em" children={<AccountCircleIcon />} />
-                          <Input
-                            isInvalid={isInvalidUsername}
-                            errorBorderColor="crimson"
-                            name="username"
-                            onChange={handleChange}
-                            placeholder="Username..."
-                          />
-                        </InputGroup>
-                        <p className={registerStyles.errTxt}>{isInvalidUsername && errors.username}</p>
                         <InputGroup>
                           <InputLeftElement pointerEvents="none" fontSize="1.2em" children={<LockIcon />} />
                           <Input
@@ -127,7 +112,7 @@ const Login: React.FC<LoginProps> = ({ myproviders }: LoginProps) => {
                         onClick={() => handleSubmit()}
                       >
                         <span className="font-weight-bold" style={{ fontWeight: 'bold' }}>
-                          Create your account
+                          Sign In
                         </span>
                       </Button>
                     </div>
@@ -152,7 +137,7 @@ const Login: React.FC<LoginProps> = ({ myproviders }: LoginProps) => {
                                   className="font-weight-bold"
                                   style={{ bottom: 5, fontWeight: 'bold', marginLeft: 10, position: 'relative' }}
                                 >
-                                  Login with Google
+                                  Sign in with Google
                                 </span>
                               </a>
                             </div>
@@ -169,7 +154,7 @@ const Login: React.FC<LoginProps> = ({ myproviders }: LoginProps) => {
                                   className="font-weight-bold"
                                   style={{ bottom: 5, fontWeight: 'bold', marginLeft: 10, position: 'relative' }}
                                 >
-                                  Login with Github
+                                  Sign in with Github
                                 </span>
                               </a>
                             </div>

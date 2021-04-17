@@ -60,15 +60,17 @@ const Register: React.FC<RegisterProps> = ({ myproviders }: RegisterProps) => {
               onSubmit={async (values, { setSubmitting }) => {
                 try {
                   setSubmitting(true);
-                  await client.mutate({
+                  const result = await client.mutate({
                     mutation: REGISTER,
                     variables: {
                       username: values.username,
                       email: values.email,
                       password: values.password,
                       id: generateId(24),
+                      oauth: false,
                     },
                   });
+                  localStorage.setItem('token', result.data.Register!);
                   router.push('/feed');
                 } catch (err) {
                   return setApolloError(true);
@@ -150,7 +152,11 @@ const Register: React.FC<RegisterProps> = ({ myproviders }: RegisterProps) => {
                           return (
                             <div className="form-group col-lg-12 mx-auto" key={provider.id}>
                               <a
-                                onClick={() => signIn(provider.id, { callbackUrl: 'http://localhost:3000/feed' })}
+                                onClick={() =>
+                                  signIn(provider.id, {
+                                    callbackUrl: 'http://localhost:3000/feed',
+                                  })
+                                }
                                 className={`btn btn-primary btn-block py-2 mb-3 ${registerStyles.btnGoogle}`}
                               >
                                 <i className="fa fa-google fa-2x mr-1"></i>
@@ -167,7 +173,11 @@ const Register: React.FC<RegisterProps> = ({ myproviders }: RegisterProps) => {
                           return (
                             <div className="form-group col-lg-12 mx-auto" key={provider.id}>
                               <a
-                                onClick={() => signIn(provider.id, { callbackUrl: 'http://localhost:3000/feed' })}
+                                onClick={() =>
+                                  signIn(provider.id, {
+                                    callbackUrl: 'http://localhost:3000/feed',
+                                  })
+                                }
                                 className={`btn btn-primary btn-block py-2 mb-3 ${registerStyles.btnGithub}`}
                               >
                                 <i className="fa fa-github fa-2x mr-1"></i>

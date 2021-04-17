@@ -1,12 +1,14 @@
 import client from '@/../apollo-client';
-import { REGISTER } from '@/apollo/Mutations';
+import { LOGIN, REGISTER } from '@/apollo/Mutations';
 import { GetGithubEmail } from '@/auth/GetGithubEmail';
 import { generateId } from '@/utils/GenerateId';
 import { useToast } from '@chakra-ui/toast';
 import NextAuth from 'next-auth';
 import Providers from 'next-auth/providers';
 import { useRouter } from 'next/dist/client/router';
+import { useState } from 'react';
 import { toast } from 'react-toastify';
+import { GET_USER_PASSWORD } from '../../../apollo/Queries';
 
 export default NextAuth({
   providers: [
@@ -22,14 +24,14 @@ export default NextAuth({
   pages: {
     signIn: '/auth/signin',
     signOut: '/auth/signout',
-    error: '/register-error',
+    error: '/register',
     verifyRequest: '/auth/verify-request',
     newUser: null,
   },
+
   callbacks: {
     signIn: async (profile, account): Promise<any> => {
       await GetGithubEmail(profile, account);
-
       try {
         await client.mutate({
           mutation: REGISTER,
@@ -39,10 +41,19 @@ export default NextAuth({
             password: generateId(15),
             profile_picture: profile.image,
             id: generateId(24),
+            oauth: true,
           },
         });
       } catch (err) {
-        window.location.href = '/register';
+        console.log(err);
+        if (!err.message.includes('Account')) {
+          await client.mutate({
+            mutation: LOGIN,
+            variables: {
+              email: profile.email,
+            },
+          });
+        }
       }
     },
   },
