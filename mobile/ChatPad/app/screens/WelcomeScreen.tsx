@@ -1,3 +1,5 @@
+import { NavigationProp } from "@react-navigation/core";
+import { ParamListBase } from "@react-navigation/native";
 import React from "react";
 import {
   StyleSheet,
@@ -9,26 +11,31 @@ import {
 } from "react-native";
 import { Text } from "react-native-elements";
 
-interface IProps {}
+interface IProps {
+  navigation: NavigationProp<ParamListBase, string>;
+}
 
-const WelcomeScreen = ({}: IProps) => {
+const WelcomeScreen = ({ navigation }: IProps) => {
   return (
     <React.Fragment>
       <View style={WelcomeScreenStyles.container}>
         <SafeAreaView>
-          <Text style={WelcomeScreenStyles.text}>ChatPad</Text>
+          <Text style={WelcomeScreenStyles.text}>Welcome To ChatPad</Text>
         </SafeAreaView>
         <Image
+          source={require("../assets/chatpadphonelogo.png")}
           style={WelcomeScreenStyles.image}
-          source={require("../assets/guy.png")}
         />
         <TouchableOpacity
           style={WelcomeScreenStyles.loginButton}
-          onPress={() => console.log("HELLO")}
+          onPress={() => navigation.navigate("Login")}
         >
           <Text style={WelcomeScreenStyles.buttonText}>Login</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[WelcomeScreenStyles.registerButton]}>
+        <TouchableOpacity
+          style={[WelcomeScreenStyles.registerButton]}
+          onPress={() => navigation.navigate("Register")}
+        >
           <Text style={WelcomeScreenStyles.buttonText}>Register</Text>
         </TouchableOpacity>
       </View>
@@ -39,16 +46,17 @@ const WelcomeScreen = ({}: IProps) => {
 const WelcomeScreenStyles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#80CBC4",
+    backgroundColor: "#fff",
   },
   image: {
     alignSelf: "center",
-    top: 100,
+    top: 200,
   },
   text: {
     alignSelf: "center",
-    fontSize: 60,
+    fontSize: 40,
     color: "#37454F",
+    top: 100,
     fontFamily: "Helvetica-Bold",
     fontWeight: "bold",
   },
@@ -58,8 +66,8 @@ const WelcomeScreenStyles = StyleSheet.create({
     height: 50,
     borderRadius: 25,
     padding: 12,
-    backgroundColor: "#87CEFA",
-    top: 230,
+    backgroundColor: "#89D5D2",
+    top: 390,
   },
   registerButton: {
     width: "80%",
@@ -67,15 +75,16 @@ const WelcomeScreenStyles = StyleSheet.create({
     height: 50,
     borderRadius: 25,
     padding: 12,
-    backgroundColor: "#FFCCCB",
-    top: 250,
+    backgroundColor: "#FBA095",
+    top: 410,
   },
   buttonText: {
     alignSelf: "center",
     textTransform: "uppercase",
     fontSize: 20,
     fontWeight: "bold",
-    color: "#37454F",
+    color: "#000",
+    fontFamily: "Helvetica-Bold",
   },
 });
 
