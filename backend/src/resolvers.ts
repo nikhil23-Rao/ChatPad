@@ -22,7 +22,7 @@ const resolvers = {
   },
   Mutation: {
     Register: async (_: void, args: UserType) => {
-      // await User.sync({ force: true });
+      await User.sync({ force: true });
 
       const salt = await bcrypt.genSalt(10);
       const password = await bcrypt.hash(args.password, salt);

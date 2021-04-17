@@ -11,7 +11,8 @@ import Link from 'next/link';
 import { generateId } from '@/utils/GenerateId';
 import { useRouter } from 'next/dist/client/router';
 import { registerValidationSchema } from '@/components/validation/RegisterValidationSchema';
-interface RegisterProps {
+
+interface LoginProps {
   myproviders: { myproviders: { name: string; id: string | undefined } };
 }
 
@@ -22,7 +23,7 @@ export const getServerSideProps = async () => {
   };
 };
 
-const Register: React.FC<RegisterProps> = ({ myproviders }: RegisterProps) => {
+const Login: React.FC<LoginProps> = ({ myproviders }: LoginProps) => {
   const router = useRouter();
   const [apolloError, setApolloError] = useState(false);
   return (
@@ -40,17 +41,10 @@ const Register: React.FC<RegisterProps> = ({ myproviders }: RegisterProps) => {
       <div className="container">
         <div className="row py-5 mt-4 align-items-center">
           <div className="col-md-5 pr-lg-5 mb-5 mb-md-0">
-            <img
-              src="https://res.cloudinary.com/mhmd/image/upload/v1569543678/form_d9sh6m.svg"
-              alt=""
-              className="img-fluid mb-3 d-none d-md-block"
-            />
-            <h1>Create an Account</h1>
-            <p className="font-italic text-muted mb-0">Don't Want To Use The Website? Or, Want To Chat On The Go?</p>
-            <p className="font-italic text-muted" style={{ color: 'blue', textDecoration: 'underline' }}>
-              <a href="https://google.com" style={{ color: 'blue' }}>
-                Download The Mobile App Here.
-              </a>
+            <img src="https://i.imgur.com/uNGdWHi.png" alt="" className="img-fluid mb-3 d-none d-md-block" />
+            <h1>Login To Your Account</h1>
+            <p className="font-italic text-muted mb-0">
+              Welcome Back To ChatPad. To Continue Chatting, Login To Your Account Here
             </p>
           </div>
 
@@ -158,7 +152,7 @@ const Register: React.FC<RegisterProps> = ({ myproviders }: RegisterProps) => {
                                   className="font-weight-bold"
                                   style={{ bottom: 5, fontWeight: 'bold', marginLeft: 10, position: 'relative' }}
                                 >
-                                  Register with Google
+                                  Login with Google
                                 </span>
                               </a>
                             </div>
@@ -175,7 +169,7 @@ const Register: React.FC<RegisterProps> = ({ myproviders }: RegisterProps) => {
                                   className="font-weight-bold"
                                   style={{ bottom: 5, fontWeight: 'bold', marginLeft: 10, position: 'relative' }}
                                 >
-                                  Register with Github
+                                  Login with Github
                                 </span>
                               </a>
                             </div>
@@ -185,9 +179,9 @@ const Register: React.FC<RegisterProps> = ({ myproviders }: RegisterProps) => {
 
                     <div className="text-center w-100">
                       <p className="text-muted font-weight-bold">
-                        Already Have An Account?{' '}
-                        <Link href="/login">
-                          <a className="text-primary ml-2">Login Here</a>
+                        Don't Have An Account?{' '}
+                        <Link href="/register">
+                          <a className="text-primary ml-2">Register Here</a>
                         </Link>
                       </p>
                     </div>
@@ -202,4 +196,4 @@ const Register: React.FC<RegisterProps> = ({ myproviders }: RegisterProps) => {
   );
 };
 
-export default Register;
+export default Login;
