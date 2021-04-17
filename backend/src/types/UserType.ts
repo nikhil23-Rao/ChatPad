@@ -6,4 +6,5 @@ export interface UserType extends Model {
   email?: string;
   profile_picture?: string;
   id?: string;
+  oauth?: boolean;
 }

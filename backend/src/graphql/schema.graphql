@@ -1,15 +1,16 @@
 type Query {
-  GetCurrentUser(email: String!): String
+  GetUserPassword(email: String!): String
 }
 
 type Mutation {
   Register(
     email: String!
     username: String!
-    password: String!
+    password: String
     profile_picture: String
+    oauth: Boolean
     id: String
   ): String!
 
-  Login(email: String!, password: String!): String!
+  Login(email: String!, password: String): String!
 }

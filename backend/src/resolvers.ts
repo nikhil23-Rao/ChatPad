@@ -6,26 +6,22 @@ import { generateJwt } from "./auth/generateJwt";
 
 const resolvers = {
   Query: {
-    GetCurrentUser: async (_: void, args: UserType) => {
+    GetUserPassword: async (_: void, args: UserType) => {
       const user: UserType | null = await User.findOne({
         where: { email: args.email },
       });
-      if (!user) return "Invalid User Email.";
-      const token = generateJwt({
-        username: user.username,
-        email: user.email,
-        id: user.id,
-        profile_picture: user.profile_picture,
-      });
-      return token;
+      return user?.password;
     },
   },
   Mutation: {
     Register: async (_: void, args: UserType) => {
-      await User.sync({ force: true });
+      // await User.sync({ force: true });
 
       const salt = await bcrypt.genSalt(10);
-      const password = await bcrypt.hash(args.password, salt);
+      let password = await bcrypt.hash(process.env.OAUTH_PASSWORD!, salt);
+      if (!args.oauth) {
+        password = await bcrypt.hash(args.password, salt);
+      }
 
       if (await User.findOne({ where: { email: args.email } })) {
         throw new ApolloError("Account with the given email already exists.");
@@ -36,6 +32,7 @@ const resolvers = {
         email: args.email,
         password,
         profile_picture: args.profile_picture,
+        oauth: args.oauth,
         id: args.id,
       });
 
@@ -45,6 +42,32 @@ const resolvers = {
         username: user.username,
         email: user.email,
         id: user.id,
+        oauth: user.oauth,
+        profile_picture: user.profile_picture,
+      });
+
+      return token;
+    },
+
+    Login: async (_: void, args: UserType) => {
+      let user: UserType | null = await User.findOne({
+        where: { email: args.email },
+      });
+      if (!user) return new ApolloError("Invalid email or password.");
+
+      if (!args.oauth) {
+        const validPassword = await bcrypt.compare(
+          args.password,
+          user.password!
+        );
+        if (!validPassword)
+          return new ApolloError("Invalid email or password.");
+      }
+
+      const token = generateJwt({
+        email: user.email,
+        id: user.id,
+        username: user.username,
         profile_picture: user.profile_picture,
       });
 
