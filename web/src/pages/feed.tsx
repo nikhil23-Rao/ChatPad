@@ -40,6 +40,9 @@ const Feed: React.FC<feedProps> = ({}) => {
         oauth: boolean;
       } = jwtDecode(token!);
       setUser(currentUser);
+      window.onbeforeunload = () => {
+        localStorage.removeItem('token');
+      };
     }
   }, [session]);
 

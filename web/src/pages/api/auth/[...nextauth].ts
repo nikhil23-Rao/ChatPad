@@ -24,7 +24,7 @@ export default NextAuth({
   pages: {
     signIn: '/auth/signin',
     signOut: '/auth/signout',
-    error: '/register',
+    error: '/register-error',
     verifyRequest: '/auth/verify-request',
     newUser: null,
   },

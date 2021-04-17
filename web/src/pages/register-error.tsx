@@ -16,13 +16,18 @@ const RegisterError: React.FC<registerErrorProps> = ({}) => {
         <div className={`${registerErrorStyles.cloud} ${registerErrorStyles.x5}`}></div>
       </div>
       <div className={registerErrorStyles.c}>
-        <div className={registerErrorStyles._404}>Error</div>
+        <div className={registerErrorStyles._404}>Oops!</div>
         <br />
         <br />
-        <div className={registerErrorStyles._1}>Account With The Given Email Already Exists.</div>
+        <div className={registerErrorStyles._1}>Something Went Wrong When Logging/Registering You In.</div>
         <Link href="/register">
           <a className={registerErrorStyles.btn} style={{ marginTop: 80 }}>
             BACK TO REGISTER
+          </a>
+        </Link>
+        <Link href="/login">
+          <a className={registerErrorStyles.btn} style={{ marginTop: 80 }}>
+            BACK TO LOGIN
           </a>
         </Link>
       </div>
