@@ -20,7 +20,7 @@ const WelcomeScreen = ({ navigation }: IProps) => {
     <React.Fragment>
       <View style={WelcomeScreenStyles.container}>
         <SafeAreaView>
-          <Text style={WelcomeScreenStyles.text}>Welcome To ChatPad</Text>
+          <Text style={WelcomeScreenStyles.text}>ChatPad</Text>
         </SafeAreaView>
         <Image
           source={require("../assets/chatpadphonelogo.png")}

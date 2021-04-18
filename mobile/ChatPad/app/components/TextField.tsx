@@ -5,7 +5,6 @@ import {
   TextInput,
   TextInputFocusEventData,
   NativeSyntheticEvent,
-  TextInputChangeEventData,
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 

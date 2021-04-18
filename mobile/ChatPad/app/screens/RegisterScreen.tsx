@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import {
   SafeAreaView,
   StyleSheet,
@@ -10,10 +10,18 @@ import {
 import TextField from "../components/TextField";
 import { Formik } from "formik";
 import { registerValidationSchema } from "../components/validation/RegisterValidationSchema";
+import { client } from "../../App";
+import { REGISTER } from "../apollo/Mutations";
+import { generateId } from "../utils/generateId";
+import { AuthContext } from "../../context/AuthContext";
+import storage from "../../auth/storage";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 interface IProps {}
 
 const RegisterScreen = ({}: IProps) => {
+  const authContext = useContext(AuthContext);
+  const [apolloError, setApolloError] = useState(false);
   return (
     <React.Fragment>
       <View style={RegisterScreenStyles.container}>
@@ -23,10 +31,27 @@ const RegisterScreen = ({}: IProps) => {
         />
         <Formik
           initialValues={{ email: "", password: "", username: "" }}
-          onSubmit={(values) => console.log(values)}
+          onSubmit={async (values, { setSubmitting }) => {
+            try {
+              setSubmitting(true);
+              const result = await client.mutate({
+                mutation: REGISTER,
+                variables: {
+                  username: values.username,
+                  email: values.email,
+                  password: values.password,
+                  id: generateId(24),
+                  oauth: false,
+                },
+              });
+              authContext.setUser(result.data.Register);
+            } catch (err) {
+              return setApolloError(true);
+            }
+          }}
           validationSchema={registerValidationSchema}
         >
-          {({ handleChange, handleSubmit, errors, touched }) => {
+          {({ handleChange, handleSubmit, errors, touched, isSubmitting }) => {
             const isInvalidEmail = errors.email && touched.email ? true : false;
             const isInvalidPassword =
               errors.password && touched.password ? true : false;
@@ -36,13 +61,15 @@ const RegisterScreen = ({}: IProps) => {
               <React.Fragment>
                 <SafeAreaView style={RegisterScreenStyles.textFieldContainer}>
                   <TextField
-                    isInvalid={isInvalidEmail}
+                    isInvalid={isInvalidEmail || apolloError}
                     onChangeText={handleChange("email")}
                     icon="email"
                     placeholder="Email Address..."
                   />
                   <Text style={RegisterScreenStyles.errTxtEmail}>
-                    {isInvalidEmail && errors.email}
+                    {(isInvalidEmail && errors.email) ||
+                      (apolloError &&
+                        "Account With The Given Email Already Exists.")}
                   </Text>
                 </SafeAreaView>
                 <SafeAreaView style={RegisterScreenStyles.textFieldContainer}>
@@ -69,10 +96,22 @@ const RegisterScreen = ({}: IProps) => {
                   </Text>
                 </SafeAreaView>
                 <TouchableOpacity
+                  disabled={isSubmitting}
                   style={RegisterScreenStyles.RegisterButton}
                   onPress={() => handleSubmit()}
                 >
-                  <Text style={RegisterScreenStyles.buttonText}>Register</Text>
+                  {!isSubmitting && (
+                    <Text style={RegisterScreenStyles.buttonText}>
+                      Register
+                    </Text>
+                  )}
+                  {isSubmitting && (
+                    <MaterialCommunityIcons
+                      style={RegisterScreenStyles.buttonText}
+                      name="loading"
+                      size={20}
+                    />
+                  )}
                 </TouchableOpacity>
               </React.Fragment>
             );

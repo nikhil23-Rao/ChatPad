@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext, useState } from "react";
 import {
   SafeAreaView,
   StyleSheet,
@@ -10,10 +10,16 @@ import {
 import TextField from "../components/TextField";
 import { Formik } from "formik";
 import { loginValidationSchema } from "../components/validation/LoginValidationSchema";
+import { client } from "../../App";
+import { LOGIN } from "../apollo/Mutations";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { AuthContext } from "../../context/AuthContext";
 
 interface IProps {}
 
 const LoginScreen = ({}: IProps) => {
+  const authContext = useContext(AuthContext);
+  const [apolloError, setApolloError] = useState(false);
   return (
     <React.Fragment>
       <View style={LoginScreenStyles.container}>
@@ -23,10 +29,25 @@ const LoginScreen = ({}: IProps) => {
         />
         <Formik
           initialValues={{ email: "", password: "" }}
-          onSubmit={(values) => console.log(values)}
+          onSubmit={async (values, { setSubmitting }) => {
+            try {
+              setSubmitting(true);
+              const result = await client.mutate({
+                mutation: LOGIN,
+                variables: {
+                  email: values.email,
+                  password: values.password,
+                },
+              });
+              authContext.setUser(result.data.Login);
+            } catch (err) {
+              console.log(err);
+              setApolloError(true);
+            }
+          }}
           validationSchema={loginValidationSchema}
         >
-          {({ handleChange, handleSubmit, errors, touched }) => {
+          {({ handleChange, handleSubmit, errors, touched, isSubmitting }) => {
             const isInvalidEmail = errors.email && touched.email ? true : false;
             const isInvalidPassword =
               errors.password && touched.password ? true : false;
@@ -34,13 +55,14 @@ const LoginScreen = ({}: IProps) => {
               <React.Fragment>
                 <SafeAreaView style={LoginScreenStyles.textFieldContainer}>
                   <TextField
-                    isInvalid={isInvalidEmail}
+                    isInvalid={isInvalidEmail || apolloError}
                     onChangeText={handleChange("email")}
                     icon="email"
                     placeholder="Email Address..."
                   />
                   <Text style={LoginScreenStyles.errTxtEmail}>
-                    {isInvalidEmail && errors.email}
+                    {(isInvalidEmail && errors.email) ||
+                      (apolloError && "Invalid Email Or Password.")}
                   </Text>
                 </SafeAreaView>
                 <SafeAreaView style={LoginScreenStyles.textFieldContainer}>
@@ -55,10 +77,20 @@ const LoginScreen = ({}: IProps) => {
                   </Text>
                 </SafeAreaView>
                 <TouchableOpacity
+                  disabled={isSubmitting}
                   style={LoginScreenStyles.loginButton}
                   onPress={() => handleSubmit()}
                 >
-                  <Text style={LoginScreenStyles.buttonText}>Login</Text>
+                  {!isSubmitting && (
+                    <Text style={LoginScreenStyles.buttonText}>Login</Text>
+                  )}
+                  {isSubmitting && (
+                    <MaterialCommunityIcons
+                      style={LoginScreenStyles.buttonText}
+                      name="loading"
+                      size={20}
+                    />
+                  )}
                 </TouchableOpacity>
               </React.Fragment>
             );
