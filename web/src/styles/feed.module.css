@@ -1,0 +1,125 @@
+@media screen and (min-width: 1400px) {
+  .leftsidebar {
+    height: 1900px;
+  }
+}
+@media screen and (min-width: 1600px) {
+  .leftsidebar {
+    height: 1970px;
+  }
+}
+@media screen and (min-width: 1900px) {
+  .leftsidebar {
+    height: 1870px;
+  }
+}
+
+.leftsidebar {
+  position: absolute;
+  width: 350px;
+  height: 730px;
+  left: 0px;
+  top: 110px;
+  background: #e3f6fc;
+  border-radius: 14px 14px 0px 0px;
+}
+
+.bottomtab {
+  position: absolute;
+  width: 350px;
+  height: 85px;
+  left: 0px;
+  top: 800px;
+  background: #add8e6;
+}
+
+.profile {
+  position: absolute;
+  width: 350px;
+  height: 100px;
+  left: 0px;
+  top: 0px;
+  background: #e3f6fc;
+  border-radius: 0px 0px 14px 14px;
+}
+
+.inputfield {
+  position: absolute;
+  width: 1200px;
+  outline-width: 0;
+  height: 40px;
+  margin-left: 4%;
+  left: 410px;
+  top: 770px;
+  background: #fdfdfd;
+  border: 1px solid rgba(150, 169, 186, 0.7);
+  box-sizing: border-box;
+  border-radius: 14px;
+}
+
+.chatprofile {
+  position: absolute;
+  width: 44px;
+  height: 44px;
+  left: 410px;
+  top: 687px;
+  background-blend-mode: normal;
+  border: 2px solid #f3ba4a;
+}
+
+.sidebarcontentselected {
+  position: absolute;
+  width: 310px;
+  height: 74px;
+  left: 10px;
+  top: 28px;
+  background: #6588de;
+  box-shadow: 0px 8px 40px rgba(0, 72, 251, 0.3);
+  border-radius: 14px;
+}
+
+.sidebarcontent {
+  position: absolute;
+  width: 310px;
+  height: 74px;
+  left: 14px;
+  top: 140px;
+  background: rgba(101, 136, 222, 0.1);
+  border-radius: 14px;
+}
+
+.message {
+  position: absolute;
+  width: 506px;
+  height: 84px;
+  left: 464px;
+  top: 500px;
+  background: #e3f6fc;
+  border-radius: 0px 14px 14px 14px;
+}
+
+.yourmessage {
+  position: absolute;
+  width: 154px;
+  height: 76px;
+  left: 1400px;
+  top: 600px;
+  background: #f3ba4a;
+  border-radius: 14px 0px 14px 14px;
+}
+
+.sendbutton {
+  position: absolute;
+  width: 108px;
+  height: 40px;
+  left: 1592px;
+  top: 770px;
+  color: #fff;
+  background: #6588de;
+  border-radius: 14px;
+}
+
+.cotainer {
+  background-color: #e5e5e5;
+  flex: 1;
+}
