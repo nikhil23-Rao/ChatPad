@@ -18,7 +18,7 @@ export const User = sequelize.define("User", {
     type: DataTypes.TEXT,
     allowNull: false,
     defaultValue:
-      "https://www.watsonmartin.com/wp-content/uploads/2016/03/default-profile-picture.jpg",
+      "https://twirpz.files.wordpress.com/2015/06/twitter-avi-gender-balanced-figure.png?w=640",
   },
   oauth: {
     type: DataTypes.BOOLEAN,

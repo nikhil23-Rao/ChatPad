@@ -1,5 +1,5 @@
 type Query {
-  GetUserPassword(email: String!): String
+  GetUserId(email: String!): String
 }
 
 type Mutation {

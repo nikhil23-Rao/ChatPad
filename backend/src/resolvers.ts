@@ -6,19 +6,25 @@ import { generateJwt } from "./auth/generateJwt";
 
 const resolvers = {
   Query: {
-    GetUserPassword: async (_: void, args: UserType) => {
+    GetUserId: async (_: void, args: UserType) => {
       const user: UserType | null = await User.findOne({
         where: { email: args.email },
       });
-      return user?.password;
+      return user?.id;
     },
   },
   Mutation: {
     Register: async (_: void, args: UserType) => {
-      // await User.sync({ force: true });
+      await User.sync({ force: true });
 
       const salt = await bcrypt.genSalt(10);
-      let password = await bcrypt.hash(process.env.OAUTH_PASSWORD!, salt);
+      console.log(process.env.OAUTH_PASSWORD);
+      let password;
+      await bcrypt.hash(process.env.OAUTH_PASSWORD!, salt, (err, hash) => {
+        console.log("ERROR", err);
+        password = hash;
+      });
+
       if (!args.oauth) {
         password = await bcrypt.hash(args.password, salt);
       }
