@@ -35,11 +35,13 @@
     "cors": "^2.8.5",
     "express": "^4.17.1",
     "graphql": "^15.5.0",
+    "graphql-subscriptions": "^1.2.1",
     "http": "0.0.1-security",
     "jsonwebtoken": "^8.5.1",
     "ncp": "^2.0.0",
     "pg": "^8.5.1",
     "pg-hstore": "^2.3.3",
-    "sequelize": "^6.6.2"
+    "sequelize": "^6.6.2",
+    "subscriptions-transport-ws": "^0.9.18"
   }
 }

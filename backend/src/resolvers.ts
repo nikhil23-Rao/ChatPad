@@ -3,8 +3,18 @@ import { User } from "../src/database/models/User";
 import bcrypt from "bcrypt";
 import { ApolloError } from "apollo-server-express";
 import { generateJwt } from "./auth/generateJwt";
+import { GroupType } from "./types/GroupType";
+import { Group } from "./database/models/Group";
+import { pubsub } from "./server";
+
+const NEW_MESSAGE = "NEW_MESSAGE";
 
 const resolvers = {
+  Subscription: {
+    GetAllMessages: {
+      subscribe: () => pubsub.asyncIterator(NEW_MESSAGE),
+    },
+  },
   Query: {
     GetUserId: async (_: void, args: UserType) => {
       const user: UserType | null = await User.findOne({
@@ -78,6 +88,42 @@ const resolvers = {
       });
 
       return token;
+    },
+    CreateGroup: async (_: void, args: GroupType) => {
+      await Group.sync({ force: true });
+      const group = Group.build({
+        messages: [],
+        id: args.id,
+        members: args.members,
+      });
+      await group.save();
+
+      return true;
+    },
+    SendMessage: async (_: void, args: GroupType) => {
+      const group: GroupType | null = await Group.findOne({
+        where: { id: args.groupid },
+      });
+      if (!group) return "Invalid ID";
+      let messages = [];
+      const newMessage = {
+        body: args.body,
+        authorid: args.authorid,
+        messageid: args.messageid,
+      };
+      const payload = {
+        GetAllMessages: {
+          body: args.body,
+          messageid: args.messageid,
+          members: args.members,
+          authorid: args.authorid,
+        },
+      };
+      pubsub.publish(NEW_MESSAGE, payload);
+      messages.push({ ...group.messages, newMessage });
+      group.messages = messages as any;
+      await group.save();
+      return true;
     },
   },
 };

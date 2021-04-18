@@ -12,5 +12,25 @@ type Mutation {
     id: String
   ): String!
 
+  CreateGroup(id: String, members: [String]): Boolean
+
+  SendMessage(
+    groupid: String
+    body: String
+    authorid: String
+    messageid: String
+  ): Boolean
+
   Login(email: String!, password: String): String!
+}
+
+type Subscription {
+  GetAllMessages(groupid: String): Message
+}
+
+type Message {
+  body: String
+  messageid: String
+  members: [String]
+  authorid: String
 }
