@@ -56,6 +56,7 @@ const Feed: React.FC<feedProps> = ({}) => {
 
   useEffect(() => {
     GetUser();
+    document.body.style.zoom = '80%';
   }, [session]);
 
   if (typeof window === 'undefined') return <h1>Loading</h1>;
@@ -80,9 +81,9 @@ const Feed: React.FC<feedProps> = ({}) => {
               <Link href="/feed">
                 <a style={{ cursor: 'pointer' }}>
                   {window.location.href.includes('feed') ? (
-                    <i className="fa fa-home fa-2x" style={{ color: '#6588DE' }}></i>
+                    <i className="fa fa-comments fa-2x" style={{ color: '#6588DE' }}></i>
                   ) : (
-                    <i className="fa fa-home fa-2x"></i>
+                    <i className="fa fa-comments fa-2x"></i>
                   )}
                 </a>
               </Link>
@@ -104,10 +105,14 @@ const Feed: React.FC<feedProps> = ({}) => {
       <div className={feedStyles.container}>
         <div className={feedStyles.bottomtab}></div>
         <div className={feedStyles.message}>
-          <p style={{ marginLeft: 5, marginTop: 10 }}>HAHAHAHAHAHA O MY GOD HAHAHAHAHAHH</p>
+          <p style={{ marginLeft: 5, marginTop: 10 }} className={feedStyles.chattext}>
+            HAHAHAHAHAHA O MY GOD HAHAHAHAHAHH
+          </p>
         </div>
         <div className={feedStyles.yourmessage}>
-          <p style={{ marginLeft: 5, marginTop: 10 }}>Whats So Funny?</p>
+          <p style={{ marginLeft: 5, marginTop: 10 }} className={feedStyles.chattext}>
+            Whats So Funny?
+          </p>
         </div>
         <div className={feedStyles.leftsidebar}>
           <div className={feedStyles.sidebarcontentselected}>
@@ -143,7 +148,7 @@ const Feed: React.FC<feedProps> = ({}) => {
           </p>
         </div>
         <div style={{ textAlign: 'center' }}>
-          <input className={feedStyles.inputfield} />
+          <input className={feedStyles.inputfield} placeholder="Send a message..." />
         </div>
         <button className={feedStyles.sendbutton}>
           Send <SendIcon fontSize="small" />
