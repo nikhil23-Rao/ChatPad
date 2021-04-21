@@ -194,7 +194,7 @@ const Feed: React.FC<feedProps> = ({}) => {
         </div>
         <div className={feedStyles.profile}>
           <img
-            src={user && user.profile_picture}
+            src={user && (user.profile_picture as any)}
             alt=""
             style={{ width: 70, height: 70, borderRadius: 35, marginTop: '3%', marginLeft: '3%' }}
           />
