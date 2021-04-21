@@ -6,7 +6,6 @@ import {
   View,
   Image,
   SafeAreaView,
-  TouchableHighlight,
   TouchableOpacity,
 } from "react-native";
 import { Text } from "react-native-elements";
@@ -19,24 +18,29 @@ const WelcomeScreen = ({ navigation }: IProps) => {
   return (
     <React.Fragment>
       <View style={WelcomeScreenStyles.container}>
+        <Image
+          source={require("../assets/people.png")}
+          style={WelcomeScreenStyles.image}
+        />
         <SafeAreaView>
           <Text style={WelcomeScreenStyles.text}>ChatPad</Text>
         </SafeAreaView>
-        <Image
-          source={require("../assets/chatpadphonelogo.png")}
-          style={WelcomeScreenStyles.image}
-        />
-        <TouchableOpacity
-          style={WelcomeScreenStyles.loginButton}
-          onPress={() => navigation.navigate("Login")}
-        >
-          <Text style={WelcomeScreenStyles.buttonText}>Login</Text>
-        </TouchableOpacity>
+        <SafeAreaView>
+          <Text style={WelcomeScreenStyles.subText}>
+            Chat with friends & family. Anytime, anywhere.
+          </Text>
+        </SafeAreaView>
         <TouchableOpacity
           style={[WelcomeScreenStyles.registerButton]}
           onPress={() => navigation.navigate("Register")}
         >
-          <Text style={WelcomeScreenStyles.buttonText}>Register</Text>
+          <Text style={WelcomeScreenStyles.registerButtonText}>Register</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={WelcomeScreenStyles.loginButton}
+          onPress={() => navigation.navigate("Login")}
+        >
+          <Text style={WelcomeScreenStyles.loginButtonText}>Login</Text>
         </TouchableOpacity>
       </View>
     </React.Fragment>
@@ -46,18 +50,26 @@ const WelcomeScreen = ({ navigation }: IProps) => {
 const WelcomeScreenStyles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "#FCFCFC",
   },
   image: {
     alignSelf: "center",
-    top: 200,
+    top: 50,
   },
   text: {
     alignSelf: "center",
-    fontSize: 40,
+    fontSize: 30,
     color: "#37454F",
-    top: 100,
+    top: 40,
     fontFamily: "Helvetica-Bold",
+    fontWeight: "bold",
+  },
+  subText: {
+    color: "#B3B3B7",
+    alignSelf: "center",
+    fontSize: 17,
+    top: 60,
+    fontFamily: "Helvetica",
     fontWeight: "bold",
   },
   loginButton: {
@@ -66,8 +78,7 @@ const WelcomeScreenStyles = StyleSheet.create({
     height: 50,
     borderRadius: 25,
     padding: 12,
-    backgroundColor: "#89D5D2",
-    top: 390,
+    top: 260,
   },
   registerButton: {
     width: "80%",
@@ -75,15 +86,24 @@ const WelcomeScreenStyles = StyleSheet.create({
     height: 50,
     borderRadius: 25,
     padding: 12,
-    backgroundColor: "#FBA095",
-    top: 410,
+    backgroundColor: "#076AFF",
+    top: 250,
+    shadowOpacity: 0.2,
   },
-  buttonText: {
+  registerButtonText: {
     alignSelf: "center",
     textTransform: "uppercase",
     fontSize: 20,
     fontWeight: "bold",
-    color: "#000",
+    color: "#fff",
+    fontFamily: "Helvetica-Bold",
+  },
+  loginButtonText: {
+    alignSelf: "center",
+    textTransform: "uppercase",
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#076AFF",
     fontFamily: "Helvetica-Bold",
   },
 });

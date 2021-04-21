@@ -7,10 +7,25 @@ import Link from 'next/link';
 import client from '@/../apollo-client';
 import { GET_USER_ID } from '../apollo/Queries';
 import { Picker } from 'emoji-mart';
+import { GET_ALL_MESSAGES } from '@/apollo/Subscriptions';
+import { useSubscription } from '@apollo/client';
+import {
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton,
+  Button,
+  useDisclosure,
+} from '@chakra-ui/react';
+import { Dropdown } from 'react-bootstrap';
 
 interface feedProps {}
 
 const Feed: React.FC<feedProps> = ({}) => {
+  const { isOpen, onOpen, onClose } = useDisclosure();
   const [session] = useSession();
   const [user, setUser] = useState<{
     username: string | null | undefined;
@@ -56,17 +71,20 @@ const Feed: React.FC<feedProps> = ({}) => {
 
   useEffect(() => {
     GetUser();
-    document.body.style.zoom = '80%';
+    console.log(window.screen.availHeight, window.screen.availWidth);
+    if (window.screen.availHeight < 863 || window.screen.availWidth < 1800) {
+      document.body.style.zoom = '80%';
+    }
   }, [session]);
 
   if (typeof window === 'undefined') return <h1>Loading</h1>;
 
   return (
     <>
-      <header style={{ width: 580 }} className="mx-auto">
+      <header style={{ width: 780 }} className="mx-auto">
         <nav>
           <ul>
-            <li style={{ cursor: 'pointer', marginLeft: '10%' }}>
+            <li style={{ cursor: 'pointer', marginLeft: '10%', marginTop: 5 }}>
               <Link href="/search">
                 <a style={{ cursor: 'pointer' }}>
                   {window.location.href.includes('search') ? (
@@ -77,7 +95,7 @@ const Feed: React.FC<feedProps> = ({}) => {
                 </a>
               </Link>
             </li>
-            <li style={{ cursor: 'pointer', marginLeft: '10%' }}>
+            <li style={{ cursor: 'pointer', marginLeft: '10%', marginTop: 5 }}>
               <Link href="/feed">
                 <a style={{ cursor: 'pointer' }}>
                   {window.location.href.includes('feed') ? (
@@ -88,7 +106,7 @@ const Feed: React.FC<feedProps> = ({}) => {
                 </a>
               </Link>
             </li>
-            <li style={{ cursor: 'pointer', marginLeft: '10%' }}>
+            <li style={{ cursor: 'pointer', marginLeft: '10%', marginTop: 5 }}>
               <Link href="/account">
                 <a style={{ cursor: 'pointer' }}>
                   {window.location.href.includes('account') ? (
@@ -99,9 +117,39 @@ const Feed: React.FC<feedProps> = ({}) => {
                 </a>
               </Link>
             </li>
+            <li style={{ cursor: 'pointer', marginLeft: '8%' }}>
+              <Dropdown>
+                <Dropdown.Toggle style={{ backgroundColor: '#fff', borderWidth: 0 }} id="dropdown-basic">
+                  <a style={{ cursor: 'pointer', color: '#9F9F9F' }}>
+                    <i className="fa fa-bell fa-2x" style={{ color: '#9F9F9F', fontSize: '2.5rem' }}></i>
+                  </a>
+                </Dropdown.Toggle>
+
+                <Dropdown.Menu>
+                  <Dropdown.Item href="#/action-1">Action</Dropdown.Item>
+                  <Dropdown.Item href="#/action-2">Another action</Dropdown.Item>
+                  <Dropdown.Item href="#/action-3">Something else</Dropdown.Item>
+                </Dropdown.Menu>
+              </Dropdown>
+            </li>
           </ul>
         </nav>
       </header>
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Modal Title</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>HELLO</ModalBody>
+
+          <ModalFooter>
+            <Button colorScheme="blue" mr={3} onClick={onClose}>
+              Close
+            </Button>
+            <Button variant="ghost">Secondary Action</Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
       <div className={feedStyles.container}>
         <div className={feedStyles.bottomtab}></div>
         <div className={feedStyles.message}>
@@ -115,6 +163,16 @@ const Feed: React.FC<feedProps> = ({}) => {
           </p>
         </div>
         <div className={feedStyles.leftsidebar}>
+          <div className="text-center">
+            <button
+              type="button"
+              style={{ borderRadius: 50, marginTop: 15 }}
+              className="btn btn-light btn-circle btn-xl"
+              onClick={onOpen}
+            >
+              <i className="fa fa-plus"></i>
+            </button>
+          </div>
           <div className={feedStyles.sidebarcontentselected}>
             <img
               src={user && (user.profile_picture! as string | any)}

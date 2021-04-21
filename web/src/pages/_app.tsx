@@ -12,6 +12,8 @@ import { ToastContainer } from 'react-toastify';
 import { setup } from 'twind';
 import twindConfig from '../twind.config';
 import { Provider } from 'next-auth/client';
+import { ApolloProvider } from '@apollo/client';
+import client from '../../apollo-client';
 
 if (typeof window !== `undefined`) {
   setup(twindConfig);
@@ -23,7 +25,9 @@ export default function MyApp({ Component, pageProps }: AppProps) {
       <ToastContainer />
       <ChakraProvider>
         <Provider session={pageProps.session}>
-          <Component {...pageProps} />
+          <ApolloProvider client={client}>
+            <Component {...pageProps} />
+          </ApolloProvider>
         </Provider>
       </ChakraProvider>
     </>

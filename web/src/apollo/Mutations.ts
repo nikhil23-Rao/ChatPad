@@ -25,3 +25,15 @@ export const LOGIN = gql`
     Login(email: $email, password: $password)
   }
 `;
+
+export const CREATE_GROUP = gql`
+  mutation CreateGroup($id: String, $members: [String]) {
+    CreateGroup(id: $id, members: $members)
+  }
+`;
+
+export const SEND_MESSAGE = gql`
+  mutation SendMessage($groupid: String, $body: String, $authorid: String, $messageid: String) {
+    SendMessage(groupid: $groupid, body: $body, authorid: $authorid, messageid: $messageid)
+  }
+`;

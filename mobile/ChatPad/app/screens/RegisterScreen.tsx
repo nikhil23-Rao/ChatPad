@@ -146,7 +146,7 @@ const RegisterScreenStyles = StyleSheet.create({
     textTransform: "uppercase",
     fontSize: 20,
     fontWeight: "bold",
-    color: "#000",
+    color: "#fff",
     fontFamily: "Helvetica-Bold",
   },
   image: {

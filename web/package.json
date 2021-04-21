@@ -18,8 +18,8 @@
     "start": "next start",
     "type-check": "tsc",
     "lint": "eslint --ignore-path .gitignore \"src/**/*.+(ts|js|tsx)\"",
-    "format": "prettier --ignore-path .gitignore \"src/**/*.+(ts|js|tsx)\" --write",
-    "postinstall": "husky install"
+    "format": "prettier --ignore-path .gitignore \"src/**/*.+(ts|js|tsx)\" --write"
+    
   },
   "lint-staged": {
     "./src/**/*.{ts,js,jsx,tsx}": [
@@ -52,9 +52,11 @@
     "next-auth": "3.14.6",
     "next-seo": "4.20.0",
     "react": "17.0.1",
+    "react-bootstrap": "1.5.2",
     "react-dom": "17.0.1",
     "react-particles-js": "3.4.1",
     "react-toastify": "7.0.3",
+    "subscriptions-transport-ws": "0.9.18",
     "twind": "0.15.4",
     "yup": "0.32.9"
   },

@@ -1,5 +1,5 @@
-import { UserType } from "./types/UserType";
 import { User } from "../src/database/models/User";
+import { UserType } from "./types/UserType";
 import bcrypt from "bcrypt";
 import { ApolloError } from "apollo-server-express";
 import { generateJwt } from "./auth/generateJwt";
@@ -31,7 +31,7 @@ const resolvers = {
       console.log(process.env.OAUTH_PASSWORD);
       let password;
       await bcrypt.hash(process.env.OAUTH_PASSWORD!, salt, (err, hash) => {
-        console.log("ERROR", err);
+        console.log("", err);
         password = hash;
       });
 
