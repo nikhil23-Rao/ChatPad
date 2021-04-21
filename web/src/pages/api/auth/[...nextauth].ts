@@ -8,7 +8,6 @@ import Providers from 'next-auth/providers';
 import { useRouter } from 'next/dist/client/router';
 import { useState } from 'react';
 import { toast } from 'react-toastify';
-import { GET_USER_PASSWORD } from '../../../apollo/Queries';
 
 export default NextAuth({
   providers: [
