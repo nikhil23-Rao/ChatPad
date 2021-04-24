@@ -8,7 +8,6 @@ import { Avatar, Chip } from '@material-ui/core';
 
 export const Search = () => {
   const [inputValue, setInputValue] = useState<any>('');
-
   const {
     getSelectedItemProps,
     getDropdownProps,
@@ -19,8 +18,7 @@ export const Search = () => {
   const getFilteredItems = (items) =>
     items.filter(
       (item) =>
-        (selectedItems.indexOf(item as never) < 0 && item.email.toLowerCase().startsWith(inputValue.toLowerCase())) ||
-        item.username.toLowerCase().startsWith(inputValue.toLowerCase()),
+        selectedItems.indexOf(item as never) < 0 && item.email.toLowerCase().startsWith(inputValue.toLowerCase()),
     );
   const {
     isOpen,
@@ -78,7 +76,7 @@ export const Search = () => {
         <div style={comboboxStyles} {...getComboboxProps()}>
           <Input
             {...getInputProps(getDropdownProps({ preventKeyAction: isOpen }))}
-            placeholder="Add Members..."
+            placeholder="Add Members By Email..."
             size="lg"
             color="gray.900"
           />
