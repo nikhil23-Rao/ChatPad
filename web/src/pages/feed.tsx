@@ -3,29 +3,14 @@ import jwtDecode from 'jwt-decode';
 import { useSession } from 'next-auth/client';
 import feedStyles from '../styles/feed.module.css';
 import SendIcon from '@material-ui/icons/Send';
-import Link from 'next/link';
 import client from '@/../apollo-client';
 import { GET_USER_ID } from '../apollo/Queries';
-import { Picker } from 'emoji-mart';
-import { GET_ALL_MESSAGES } from '@/apollo/Subscriptions';
-import { useSubscription } from '@apollo/client';
-import {
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
-  ModalBody,
-  ModalCloseButton,
-  Button,
-  useDisclosure,
-} from '@chakra-ui/react';
-import { Dropdown } from 'react-bootstrap';
+import { Search } from '../components/Search';
+import { Button, Input } from '@chakra-ui/react';
 
-interface feedProps {}
+interface FeedProps {}
 
-const Feed: React.FC<feedProps> = ({}) => {
-  const { isOpen, onOpen, onClose } = useDisclosure();
+const Feed: React.FC<FeedProps> = ({}) => {
   const [session] = useSession();
   const [user, setUser] = useState<{
     username: string | null | undefined;
@@ -81,75 +66,6 @@ const Feed: React.FC<feedProps> = ({}) => {
 
   return (
     <>
-      <header style={{ width: 780 }} className="mx-auto">
-        <nav>
-          <ul>
-            <li style={{ cursor: 'pointer', marginLeft: '10%', marginTop: 5 }}>
-              <Link href="/search">
-                <a style={{ cursor: 'pointer' }}>
-                  {window.location.href.includes('search') ? (
-                    <i className="fa fa-search fa-2x" style={{ color: '#6588DE' }}></i>
-                  ) : (
-                    <i className="fa fa-search fa-2x"></i>
-                  )}
-                </a>
-              </Link>
-            </li>
-            <li style={{ cursor: 'pointer', marginLeft: '10%', marginTop: 5 }}>
-              <Link href="/feed">
-                <a style={{ cursor: 'pointer' }}>
-                  {window.location.href.includes('feed') ? (
-                    <i className="fa fa-comments fa-2x" style={{ color: '#6588DE' }}></i>
-                  ) : (
-                    <i className="fa fa-comments fa-2x"></i>
-                  )}
-                </a>
-              </Link>
-            </li>
-            <li style={{ cursor: 'pointer', marginLeft: '10%', marginTop: 5 }}>
-              <Link href="/account">
-                <a style={{ cursor: 'pointer' }}>
-                  {window.location.href.includes('account') ? (
-                    <i className="fa fa-user fa-2x" style={{ color: '#6588DE' }}></i>
-                  ) : (
-                    <i className="fa fa-user fa-2x"></i>
-                  )}
-                </a>
-              </Link>
-            </li>
-            <li style={{ cursor: 'pointer', marginLeft: '8%' }}>
-              <Dropdown>
-                <Dropdown.Toggle style={{ backgroundColor: '#fff', borderWidth: 0 }} id="dropdown-basic">
-                  <a style={{ cursor: 'pointer', color: '#9F9F9F' }}>
-                    <i className="fa fa-bell fa-2x" style={{ color: '#9F9F9F', fontSize: '2.5rem' }}></i>
-                  </a>
-                </Dropdown.Toggle>
-
-                <Dropdown.Menu>
-                  <Dropdown.Item href="#/action-1">Action</Dropdown.Item>
-                  <Dropdown.Item href="#/action-2">Another action</Dropdown.Item>
-                  <Dropdown.Item href="#/action-3">Something else</Dropdown.Item>
-                </Dropdown.Menu>
-              </Dropdown>
-            </li>
-          </ul>
-        </nav>
-      </header>
-      <Modal isOpen={isOpen} onClose={onClose}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Modal Title</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>HELLO</ModalBody>
-
-          <ModalFooter>
-            <Button colorScheme="blue" mr={3} onClick={onClose}>
-              Close
-            </Button>
-            <Button variant="ghost">Secondary Action</Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
       <div className={feedStyles.container}>
         <div className={feedStyles.bottomtab}></div>
         <div className={feedStyles.message}>
@@ -162,17 +78,32 @@ const Feed: React.FC<feedProps> = ({}) => {
             Whats So Funny?
           </p>
         </div>
-        <div className={feedStyles.leftsidebar}>
-          <div className="text-center">
-            <button
-              type="button"
-              style={{ borderRadius: 50, marginTop: 15 }}
-              className="btn btn-light btn-circle btn-xl"
-              onClick={onOpen}
-            >
-              <i className="fa fa-plus"></i>
-            </button>
+        <div style={{ top: -10, right: 80, position: 'absolute' }}>
+          <div className="outer-menu">
+            <input className="checkbox-toggle" type="checkbox" />
+            <div className="hamburger rainbow-box" style={{ borderRadius: 50 }}>
+              <div>
+                <i className="fa fa-plus  fa-2x"></i>
+              </div>
+            </div>
+            <div className="menu">
+              <div style={{ marginRight: '22%' }}>
+                <div>
+                  <div className="mb-3 ml-5">
+                    <Input placeholder="Group Name..." size="lg" style={{ width: '300%' }} color="gray.800" />
+                  </div>
+                  <div className="mt-1" style={{ width: '300%' }}>
+                    <Search />
+                  </div>
+                  <div className="mt-4" style={{ marginLeft: '110%' }}>
+                    <Button colorScheme="green">Create Group</Button>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
+        </div>
+        <div className={feedStyles.leftsidebar}>
           <div className={feedStyles.sidebarcontentselected}>
             <img
               src={user && (user.profile_picture! as string | any)}
@@ -194,7 +125,7 @@ const Feed: React.FC<feedProps> = ({}) => {
         </div>
         <div className={feedStyles.profile}>
           <img
-            src={user && (user.profile_picture as any)}
+            src={user! && (user.profile_picture as string | undefined)}
             alt=""
             style={{ width: 70, height: 70, borderRadius: 35, marginTop: '3%', marginLeft: '3%' }}
           />
