@@ -6,6 +6,7 @@ import { generateJwt } from "./auth/generateJwt";
 import { GroupType } from "./types/GroupType";
 import { Group } from "./database/models/Group";
 import { pubsub } from "./server";
+import { Model } from "sequelize/types";
 
 const NEW_MESSAGE = "NEW_MESSAGE";
 
@@ -21,6 +22,10 @@ const resolvers = {
         where: { email: args.email },
       });
       return user?.id;
+    },
+    GetAllUsers: async () => {
+      const users: UserType | Model<any, any>[] = await User.findAll();
+      return users;
     },
   },
   Mutation: {

@@ -1,5 +1,6 @@
 type Query {
   GetUserId(email: String!): String
+  GetAllUsers: [User]
 }
 
 type Mutation {
@@ -33,4 +34,11 @@ type Message {
   messageid: String
   members: [String]
   authorid: String
+}
+
+type User {
+  username: String
+  email: String
+  profile_picture: String
+  id: String
 }
