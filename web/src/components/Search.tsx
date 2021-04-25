@@ -4,13 +4,14 @@ import { items, comboboxStyles, comboboxWrapperStyles } from './shared';
 import { Button, Input } from '@chakra-ui/react';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 import { Avatar, Chip } from '@material-ui/core';
-import { MemberContext } from '@/../context/members';
 import { CREATE_GROUP } from '@/apollo/Mutations';
 import { generateId } from '@/utils/GenerateId';
 import client from '@/../apollo-client';
 
 export const Search = () => {
   const [inputValue, setInputValue] = useState<any>('');
+  const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(false);
   const {
     getSelectedItemProps,
     getDropdownProps,
@@ -138,12 +139,15 @@ export const Search = () => {
       <div className="mt-4" style={{ marginLeft: '36%' }}>
         <Button
           colorScheme="green"
+          isLoading={loading}
           onClick={async () => {
             try {
+              setLoading(true);
               await client.mutate({
                 mutation: CREATE_GROUP,
                 variables: { id: generateId(24), members: memberIds },
               });
+              setLoading(false);
             } catch (err) {
               console.log(err);
             }
