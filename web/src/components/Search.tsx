@@ -7,6 +7,7 @@ import { Avatar, Chip } from '@material-ui/core';
 import { CREATE_GROUP } from '@/apollo/Mutations';
 import { generateId } from '@/utils/GenerateId';
 import client from '@/../apollo-client';
+import { useRouter } from 'next/dist/client/router';
 
 export const Search = () => {
   const [inputValue, setInputValue] = useState<any>('');
@@ -14,6 +15,7 @@ export const Search = () => {
   const [nameError, setNameError] = useState(false);
   const [nameVal, setNameVal] = useState('');
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
   const {
     getSelectedItemProps,
     getDropdownProps,
@@ -174,6 +176,7 @@ export const Search = () => {
                 variables: { id: generateId(24), members: memberIds },
               });
               setLoading(false);
+              router.reload();
             } catch (err) {
               console.log(err);
             }
