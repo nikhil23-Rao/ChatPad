@@ -30,7 +30,7 @@ const resolvers = {
   },
   Mutation: {
     Register: async (_: void, args: UserType) => {
-      await User.sync({ force: true });
+      // await User.sync({ force: true });
 
       const salt = await bcrypt.genSalt(10);
       console.log(process.env.OAUTH_PASSWORD);

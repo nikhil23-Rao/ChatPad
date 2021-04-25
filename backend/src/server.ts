@@ -33,8 +33,6 @@ const server: ApolloServer = new ApolloServer({
     path: "/subscriptions",
     onConnect: async (connectionParams, webSocket) => {
       console.log("Connected To Subscriptions URL");
-      console.log(connectionParams);
-      console.log(webSocket);
     },
   },
 });
