@@ -11,6 +11,8 @@ import client from '@/../apollo-client';
 export const Search = () => {
   const [inputValue, setInputValue] = useState<any>('');
   const [error, setError] = useState(false);
+  const [nameError, setNameError] = useState(false);
+  const [nameVal, setNameVal] = useState('');
   const [loading, setLoading] = useState(false);
   const {
     getSelectedItemProps,
@@ -65,16 +67,32 @@ export const Search = () => {
   };
 
   useEffect(() => {
-    console.log(selectedItems);
+    console.log('SELECTED ITEMS', selectedItems);
+    if (selectedItems.length > 0) {
+      setError(false);
+    }
+    if (nameVal.length > 0) {
+      setNameError(false);
+    }
     GetMemberIds();
-  }, [selectedItems]);
+  }, [selectedItems, error, nameError]);
 
   return (
     <div>
       <div style={comboboxWrapperStyles as any}>
         <div style={comboboxStyles} {...getComboboxProps()}>
           <div className="mb-3 ml-5">
-            <Input placeholder="Group Name..." size="lg" color="gray.800" required={true} />
+            <Input
+              isInvalid={nameError}
+              placeholder="Group Name..."
+              value={nameVal}
+              onChange={(e) => setNameVal(e.currentTarget.value)}
+              size="lg"
+              color="gray.800"
+              required={true}
+            />
+
+            {nameError ? <p style={{ color: '#E53E3E' }}>Please Provide A Group Name</p> : null}
           </div>
           {selectedItems.map((selectedItem, index) => (
             <React.Fragment key={(selectedItem as any).id}>
@@ -97,10 +115,12 @@ export const Search = () => {
           <Input
             {...getInputProps(getDropdownProps({ preventKeyAction: isOpen }))}
             placeholder="Add Members By Email..."
+            isInvalid={error}
             size="lg"
             required={true}
             color="gray.900"
           />
+          {error ? <p style={{ color: '#E53E3E' }}>To Create A Group Please Add Members</p> : null}
         </div>
       </div>
       <ul {...getMenuProps()}>
@@ -142,6 +162,12 @@ export const Search = () => {
           isLoading={loading}
           onClick={async () => {
             try {
+              if (nameVal.length == 0) {
+                return setNameError(true);
+              }
+              if (selectedItems.length === 0) {
+                return setError(true);
+              }
               setLoading(true);
               await client.mutate({
                 mutation: CREATE_GROUP,
