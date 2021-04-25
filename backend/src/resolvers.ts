@@ -27,6 +27,19 @@ const resolvers = {
       const users: UserType | Model<any, any>[] = await User.findAll();
       return users;
     },
+    GetGroups: async (_: void, args: GroupType) => {
+      const allGroups:
+        | GroupType
+        | Model<any, any>[]
+        | any = await Group.findAll();
+      let groups = [];
+      for (const group in allGroups) {
+        if (allGroups[group].members.includes(args.authorid)) {
+          groups.push(allGroups[group]);
+        }
+      }
+      return groups;
+    },
   },
   Mutation: {
     Register: async (_: void, args: UserType) => {
@@ -95,7 +108,7 @@ const resolvers = {
       return token;
     },
     CreateGroup: async (_: void, args: GroupType) => {
-      await Group.sync({ force: true });
+      // await Group.sync({ force: true });
       const group = Group.build({
         messages: [],
         id: args.id,
