@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useCombobox, useMultipleSelection } from 'downshift';
 import { items, comboboxStyles, comboboxWrapperStyles } from './shared';
-import { Input } from '@chakra-ui/react';
-import FaceIcon from '@material-ui/icons/Face';
+import { Button, Input } from '@chakra-ui/react';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 import { Avatar, Chip } from '@material-ui/core';
+import { MemberContext } from '@/../context/members';
+import { CREATE_GROUP } from '@/apollo/Mutations';
+import { generateId } from '@/utils/GenerateId';
+import client from '@/../apollo-client';
 
 export const Search = () => {
   const [inputValue, setInputValue] = useState<any>('');
@@ -52,28 +55,44 @@ export const Search = () => {
     },
   });
 
+  const memberIds = [];
+
+  const GetMemberIds = () => {
+    for (const item in selectedItems) {
+      memberIds.push(selectedItems[item].id as never);
+    }
+  };
+
+  useEffect(() => {
+    console.log(selectedItems);
+    GetMemberIds();
+  }, [selectedItems]);
+
   return (
     <div>
       <div style={comboboxWrapperStyles as any}>
-        {selectedItems.map((selectedItem, index) => (
-          <>
-            <div style={{ position: 'relative' }} key={index}>
-              <Chip
-                avatar={<Avatar src={(selectedItem as any).profile_picture} />}
-                label={(selectedItem as any).email}
-                style={{ position: 'relative' }}
-                clickable
-                color="default"
-                key={`selected-item-${index}`}
-                {...getSelectedItemProps({ selectedItem, index })}
-                onDelete={() => removeSelectedItem(selectedItem)}
-                deleteIcon={<HighlightOffIcon />}
-                variant="outlined"
-              />
-            </div>
-          </>
-        ))}
         <div style={comboboxStyles} {...getComboboxProps()}>
+          <div className="mb-3 ml-5">
+            <Input placeholder="Group Name..." size="lg" color="gray.800" />
+          </div>
+          {selectedItems.map((selectedItem, index) => (
+            <React.Fragment key={(selectedItem as any).id}>
+              <div style={{ position: 'relative' }}>
+                <Chip
+                  avatar={<Avatar src={(selectedItem as any).profile_picture} />}
+                  label={(selectedItem as any).email}
+                  style={{ position: 'relative' }}
+                  clickable
+                  color="default"
+                  key={`selected-item-`}
+                  {...getSelectedItemProps({ selectedItem, index })}
+                  onDelete={() => removeSelectedItem(selectedItem)}
+                  deleteIcon={<HighlightOffIcon />}
+                  variant="outlined"
+                />
+              </div>
+            </React.Fragment>
+          ))}
           <Input
             {...getInputProps(getDropdownProps({ preventKeyAction: isOpen }))}
             placeholder="Add Members By Email..."
@@ -88,7 +107,7 @@ export const Search = () => {
             .slice(0, 5)
             .map((item, index) => (
               <li
-                key={`${item.id}${index}`}
+                key={`${index}`}
                 className="mx-auto"
                 style={{
                   fontFamily: 'Arial',
@@ -108,6 +127,23 @@ export const Search = () => {
               </li>
             ))}
       </ul>
+      <div className="mt-4" style={{ marginLeft: '36%' }}>
+        <Button
+          colorScheme="green"
+          onClick={async () => {
+            try {
+              await client.mutate({
+                mutation: CREATE_GROUP,
+                variables: { id: generateId(24), members: memberIds },
+              });
+            } catch (err) {
+              console.log(err);
+            }
+          }}
+        >
+          Create Group
+        </Button>
+      </div>
     </div>
   );
 };

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import jwtDecode from 'jwt-decode';
 import { useSession } from 'next-auth/client';
 import feedStyles from '../styles/feed.module.css';
@@ -7,10 +7,14 @@ import client from '@/../apollo-client';
 import { GET_USER_ID } from '../apollo/Queries';
 import { Search } from '../components/Search';
 import { Button, Input } from '@chakra-ui/react';
+import { CREATE_GROUP } from '@/apollo/Mutations';
+import { generateId } from '@/utils/GenerateId';
+import { MemberContext } from '@/../context/members';
 
 interface FeedProps {}
 
 const Feed: React.FC<FeedProps> = ({}) => {
+  const memberContext = useContext(MemberContext);
   const [session] = useSession();
   const [user, setUser] = useState<{
     username: string | null | undefined;
@@ -22,7 +26,6 @@ const Feed: React.FC<FeedProps> = ({}) => {
 
   const GetUser = async () => {
     const token = localStorage.getItem('token');
-    console.log(user);
     if (session && !token) {
       const result = await client.query({ query: GET_USER_ID, variables: { email: session.user.email } });
       const currentUser: {
@@ -56,13 +59,11 @@ const Feed: React.FC<FeedProps> = ({}) => {
 
   useEffect(() => {
     GetUser();
-    console.log(window.screen.availHeight, window.screen.availWidth);
     if (window.screen.availHeight < 863 || window.screen.availWidth < 1800) {
       document.body.style.zoom = '80%';
     }
+    console.log('CONTEXT', memberContext);
   }, [session]);
-
-  if (typeof window === 'undefined') return <h1>Loading</h1>;
 
   return (
     <>
@@ -89,14 +90,8 @@ const Feed: React.FC<FeedProps> = ({}) => {
             <div className="menu">
               <div style={{ marginRight: '22%' }}>
                 <div>
-                  <div className="mb-3 ml-5">
-                    <Input placeholder="Group Name..." size="lg" style={{ width: '300%' }} color="gray.800" />
-                  </div>
                   <div className="mt-1" style={{ width: '300%' }}>
                     <Search />
-                  </div>
-                  <div className="mt-4" style={{ marginLeft: '110%' }}>
-                    <Button colorScheme="green">Create Group</Button>
                   </div>
                 </div>
               </div>
