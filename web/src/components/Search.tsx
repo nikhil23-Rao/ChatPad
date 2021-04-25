@@ -73,7 +73,7 @@ export const Search = () => {
       <div style={comboboxWrapperStyles as any}>
         <div style={comboboxStyles} {...getComboboxProps()}>
           <div className="mb-3 ml-5">
-            <Input placeholder="Group Name..." size="lg" color="gray.800" />
+            <Input placeholder="Group Name..." size="lg" color="gray.800" required={true} />
           </div>
           {selectedItems.map((selectedItem, index) => (
             <React.Fragment key={(selectedItem as any).id}>
@@ -97,6 +97,7 @@ export const Search = () => {
             {...getInputProps(getDropdownProps({ preventKeyAction: isOpen }))}
             placeholder="Add Members By Email..."
             size="lg"
+            required={true}
             color="gray.900"
           />
         </div>
@@ -123,7 +124,14 @@ export const Search = () => {
                 }}
                 {...getItemProps({ item, index })}
               >
-                {item.email}
+                <div>
+                  <img
+                    src={item.profile_picture}
+                    style={{ width: 40, height: 40, borderRadius: 20, float: 'left', marginRight: 10 }}
+                    alt=""
+                  />
+                </div>
+                <div style={{ marginTop: 8, fontWeight: 'bold' }}>{item.email}</div>
               </li>
             ))}
       </ul>
