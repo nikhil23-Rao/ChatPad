@@ -34,7 +34,11 @@ const resolvers = {
         | any = await Group.findAll();
       let groups = [];
       for (const group in allGroups) {
-        if (allGroups[group].members.includes(args.authorid)) {
+        if (
+          allGroups[group].members.some(
+            (m: GroupType) => m.id === args.authorid
+          )
+        ) {
           groups.push(allGroups[group]);
         }
       }
@@ -108,11 +112,12 @@ const resolvers = {
       return token;
     },
     CreateGroup: async (_: void, args: GroupType) => {
-      // await Group.sync({ force: true });
+      await Group.sync({ force: true });
       const group = Group.build({
         messages: [],
         id: args.id,
         members: args.members,
+        name: args.name,
       });
       await group.save();
 
@@ -133,7 +138,6 @@ const resolvers = {
         GetAllMessages: {
           body: args.body,
           messageid: args.messageid,
-          members: args.members,
           authorid: args.authorid,
         },
       };

@@ -1,6 +1,6 @@
 type Query {
   GetUserId(email: String!): String
-  GetAllUsers: [User]
+  GetAllUsers: [GroupUser]
   GetGroups(authorid: String): [Group]
 }
 
@@ -14,7 +14,7 @@ type Mutation {
     id: String
   ): String!
 
-  CreateGroup(id: String, members: [String]): Boolean
+  CreateGroup(id: String, members: [User], name: String): Boolean
 
   SendMessage(
     groupid: String
@@ -33,11 +33,17 @@ type Subscription {
 type Message {
   body: String
   messageid: String
-  members: [String]
   authorid: String
 }
 
-type User {
+input User {
+  username: String
+  email: String
+  profile_picture: String
+  id: String
+}
+
+type GroupUser {
   username: String
   email: String
   profile_picture: String
@@ -45,7 +51,8 @@ type User {
 }
 
 type Group {
-  members: [String]
+  members: [GroupUser]
   messages: [Message]
   id: String
+  name: String
 }

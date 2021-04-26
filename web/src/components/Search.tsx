@@ -64,7 +64,12 @@ export const Search = () => {
 
   const GetMemberIds = () => {
     for (const item in selectedItems) {
-      memberIds.push(selectedItems[item].id as never);
+      memberIds.push({
+        username: (selectedItems[item] as any).username,
+        id: (selectedItems[item] as any).id,
+        email: (selectedItems[item] as any).email,
+        profile_picture: (selectedItems[item] as any).profile_picture,
+      });
     }
   };
 
@@ -173,7 +178,7 @@ export const Search = () => {
               setLoading(true);
               await client.mutate({
                 mutation: CREATE_GROUP,
-                variables: { id: generateId(24), members: memberIds },
+                variables: { id: generateId(24), members: memberIds, name: nameVal },
               });
               setLoading(false);
               router.reload();

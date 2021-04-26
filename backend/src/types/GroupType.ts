@@ -6,8 +6,9 @@ export interface GroupType extends Model {
   body?: string;
   messageid?: string;
   authorid?: string;
-  members?: Array<number>;
+  members?: Array<any>;
   id?: string;
   groupid?: string;
   pubsub?: any;
+  name?: string;
 }

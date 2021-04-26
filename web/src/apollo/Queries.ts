@@ -16,3 +16,22 @@ export const GET_ALL_USERS = gql`
     }
   }
 `;
+
+export const GET_GROUPS = gql`
+  query GetGroups($authorid: String) {
+    GetGroups(authorid: $authorid) {
+      members {
+        username
+        email
+        profile_picture
+        id
+      }
+      messages {
+        body
+        messageid
+        authorid
+      }
+      id
+    }
+  }
+`;

@@ -4,12 +4,13 @@ import { useSession } from 'next-auth/client';
 import feedStyles from '../styles/feed.module.css';
 import SendIcon from '@material-ui/icons/Send';
 import client from '@/../apollo-client';
-import { GET_USER_ID } from '../apollo/Queries';
+import { GET_GROUPS, GET_USER_ID } from '../apollo/Queries';
 import { Search } from '../components/Search';
 import { Button, Input } from '@chakra-ui/react';
 import { CREATE_GROUP } from '@/apollo/Mutations';
 import { generateId } from '@/utils/GenerateId';
 import { MemberContext } from '@/../context/members';
+import { useQuery } from '@apollo/client';
 
 interface FeedProps {}
 
@@ -57,6 +58,8 @@ const Feed: React.FC<FeedProps> = ({}) => {
     }
   };
 
+  const { data, loading } = useQuery(GET_GROUPS, { variables: { authorid: user?.id } });
+
   useEffect(() => {
     GetUser();
     if (window.screen.availHeight < 863 || window.screen.availWidth < 1800) {
@@ -65,6 +68,8 @@ const Feed: React.FC<FeedProps> = ({}) => {
     console.log('CONTEXT', memberContext);
   }, [session]);
 
+  if (loading) return <h1>Loading...</h1>;
+  if (data) console.log(data);
   return (
     <>
       <div className={feedStyles.container}>
