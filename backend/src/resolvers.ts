@@ -112,7 +112,7 @@ const resolvers = {
       return token;
     },
     CreateGroup: async (_: void, args: GroupType) => {
-      await Group.sync({ force: true });
+      // await Group.sync({ force: true });
       const group = Group.build({
         messages: [],
         id: args.id,

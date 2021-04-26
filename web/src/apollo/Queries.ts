@@ -32,6 +32,7 @@ export const GET_GROUPS = gql`
         authorid
       }
       id
+      name
     }
   }
 `;

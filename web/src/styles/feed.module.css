@@ -90,12 +90,22 @@
   cursor: pointer;
 }
 
+.dot {
+  height: 28px;
+  width: 28px;
+  background-color: #bbb;
+  border-radius: 50%;
+  position: relative;
+  margin-left: 35px;
+  top: -27px;
+}
+
 .sidebarcontent {
-  position: absolute;
+  position: relative;
   width: 310px;
   height: 74px;
   left: 14px;
-  top: 190px;
+  top: 155px;
   background: rgba(101, 136, 222, 0.1);
   border-radius: 14px;
   cursor: pointer;

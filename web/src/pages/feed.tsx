@@ -114,14 +114,74 @@ const Feed: React.FC<FeedProps> = ({}) => {
               {user && user.username}
             </p>
           </div>
-          <div className={feedStyles.sidebarcontent}>
-            <img
-              src={'https://lh3.googleusercontent.com/a-/AOh14Gg_hGyTjOBnqy-_fKKk5yjlUNDgjw6z2bOylHI0=s48-c-k-no'}
-              alt=""
-              style={{ width: 50, height: 50, borderRadius: 25, marginTop: '3%', marginLeft: '3%' }}
-            />
-            <p style={{ fontWeight: 'bold', color: '#000', position: 'relative', bottom: 45, left: 65 }}>Vinay Rao</p>
-          </div>
+          {data.GetGroups.map((group) => {
+            if (group.members.length === 2) {
+              return (
+                <div className={feedStyles.sidebarcontent} key={group.id}>
+                  <div style={{ marginTop: '5%', marginLeft: '3%', paddingTop: '3%' }}>
+                    <img
+                      src={group.members[0].profile_picture}
+                      alt=""
+                      style={{ width: 30, height: 30, borderRadius: 25 }}
+                    />
+                  </div>
+
+                  <div style={{ marginLeft: 3 }}>
+                    <img
+                      src={group.members[1].profile_picture}
+                      alt=""
+                      style={{ width: 30, height: 30, borderRadius: 25 }}
+                    />
+                  </div>
+
+                  <p style={{ fontWeight: 'bold', color: '#000', position: 'relative', bottom: 60, left: 65 }}>
+                    {group.name}
+                  </p>
+                </div>
+              );
+            } else if (group.members.length === 1) {
+              return (
+                <div className={feedStyles.sidebarcontent}>
+                  <div style={{ marginTop: '5%', marginLeft: '3%', paddingTop: '3%' }}>
+                    <img
+                      src={group.members[0].profile_picture}
+                      alt=""
+                      style={{ width: 50, height: 50, borderRadius: 25 }}
+                    />
+                  </div>
+                  <p style={{ fontWeight: 'bold', color: '#000', position: 'relative', bottom: 50, left: 75 }}>
+                    {group.name}
+                  </p>
+                </div>
+              );
+            } else if (group.members.length > 2) {
+              const restOfPeople = group.members.length - 2;
+              return (
+                <div className={feedStyles.sidebarcontent} key={group.id}>
+                  <div style={{ marginTop: '5%', marginLeft: '5%', paddingTop: '3%' }}>
+                    <img
+                      src={group.members[0].profile_picture}
+                      alt=""
+                      style={{ width: 30, height: 30, borderRadius: 25 }}
+                    />
+                  </div>
+
+                  <div style={{ marginLeft: 3 }}>
+                    <img
+                      src={group.members[1].profile_picture}
+                      alt=""
+                      style={{ width: 30, height: 30, borderRadius: 25 }}
+                    />
+                  </div>
+                  <div className={`${feedStyles.dot} text-center`}>+{restOfPeople}</div>
+
+                  <p style={{ fontWeight: 'bold', color: '#000', position: 'relative', bottom: 85, left: 65 }}>
+                    {group.name}
+                  </p>
+                </div>
+              );
+            }
+          })}
         </div>
         <div className={feedStyles.profile}>
           <img
