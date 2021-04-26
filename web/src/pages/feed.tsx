@@ -11,11 +11,13 @@ import { CREATE_GROUP } from '@/apollo/Mutations';
 import { generateId } from '@/utils/GenerateId';
 import { MemberContext } from '@/../context/members';
 import { useQuery } from '@apollo/client';
+import { IconButton } from '@material-ui/core';
 
 interface FeedProps {}
 
 const Feed: React.FC<FeedProps> = ({}) => {
   const memberContext = useContext(MemberContext);
+  const [groupSelected, setGroupSelected] = useState('');
   const [session] = useSession();
   const [user, setUser] = useState<{
     username: string | null | undefined;
@@ -65,25 +67,44 @@ const Feed: React.FC<FeedProps> = ({}) => {
     if (window.screen.availHeight < 863 || window.screen.availWidth < 1800) {
       document.body.style.zoom = '80%';
     }
-    console.log('CONTEXT', memberContext);
-  }, [session]);
+    console.log(groupSelected);
+  }, [session, groupSelected]);
 
   if (loading) return <h1>Loading...</h1>;
-  if (data) console.log(data);
+
   return (
     <>
-      <div className={feedStyles.container}>
-        <div className={feedStyles.bottomtab}></div>
-        <div className={feedStyles.message}>
-          <p style={{ marginLeft: 5, marginTop: 10 }} className={feedStyles.chattext}>
-            HAHAHAHAHAHA O MY GOD HAHAHAHAHAHH
-          </p>
-        </div>
-        <div className={feedStyles.yourmessage}>
-          <p style={{ marginLeft: 5, marginTop: 10 }} className={feedStyles.chattext}>
-            Whats So Funny?
-          </p>
-        </div>
+      <div style={{ backgroundColor: '#FCFDFC' }}>
+        {groupSelected !== '' ? (
+          <>
+            <div className={feedStyles.message}>
+              <p style={{ marginLeft: 5, marginTop: 10 }} className={feedStyles.chattext}>
+                Flight
+              </p>
+            </div>
+            <div className={feedStyles.yourmessage}>
+              <p style={{ marginLeft: 5, marginTop: 10 }} className={feedStyles.chattext}>
+                Ok
+              </p>
+            </div>
+          </>
+        ) : (
+          <>
+            <div
+              style={{
+                position: 'fixed',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+              }}
+            >
+              <img src="/images/chatpadlogo.png" style={{ borderRadius: 100 }} alt="" />
+            </div>
+            <p style={{ top: '62%', position: 'fixed', left: '37%' }}>
+              To start chatting select a group on the left hand side, or create a new group.
+            </p>
+          </>
+        )}
         <div style={{ top: -10, right: 80, position: 'absolute' }}>
           <div className="outer-menu">
             <input className="checkbox-toggle" type="checkbox" />
@@ -104,20 +125,19 @@ const Feed: React.FC<FeedProps> = ({}) => {
           </div>
         </div>
         <div className={feedStyles.leftsidebar}>
-          <div className={feedStyles.sidebarcontentselected}>
-            <img
-              src={user && (user.profile_picture! as string | any)}
-              alt=""
-              style={{ width: 50, height: 50, borderRadius: 25, marginTop: '3%', marginLeft: '3%' }}
-            />
-            <p style={{ fontWeight: 'bold', color: '#fff', position: 'relative', bottom: 45, left: 65 }}>
-              {user && user.username}
-            </p>
-          </div>
+          {data.GetGroups.length === 0 && <h1>CREATE ONE FATTY</h1>}
           {data.GetGroups.map((group) => {
             if (group.members.length === 2) {
               return (
-                <div className={feedStyles.sidebarcontent} key={group.id}>
+                <div
+                  className={feedStyles.sidebarcontent}
+                  style={{
+                    backgroundColor: groupSelected === group.id ? '#6588de' : '#6588de1a',
+                    boxShadow: groupSelected === group.id ? '0px 8px 40px rgba(0, 72, 251, 0.3)' : '',
+                  }}
+                  key={group.id}
+                  onClick={() => setGroupSelected(group.id)}
+                >
                   <div style={{ marginTop: '5%', marginLeft: '3%', paddingTop: '3%' }}>
                     <img
                       src={group.members[0].profile_picture}
@@ -134,14 +154,30 @@ const Feed: React.FC<FeedProps> = ({}) => {
                     />
                   </div>
 
-                  <p style={{ fontWeight: 'bold', color: '#000', position: 'relative', bottom: 60, left: 65 }}>
+                  <p
+                    style={{
+                      fontWeight: 'bold',
+                      color: groupSelected === group.id ? '#fff' : '#000',
+                      position: 'relative',
+                      bottom: 60,
+                      left: 65,
+                    }}
+                  >
                     {group.name}
                   </p>
                 </div>
               );
             } else if (group.members.length === 1) {
               return (
-                <div className={feedStyles.sidebarcontent}>
+                <div
+                  className={feedStyles.sidebarcontent}
+                  style={{
+                    backgroundColor: groupSelected === group.id ? '#6588de' : '#6588de1a',
+                    boxShadow: groupSelected === group.id ? '0px 8px 40px rgba(0, 72, 251, 0.3)' : '',
+                  }}
+                  key={group.id}
+                  onClick={() => setGroupSelected(group.id)}
+                >
                   <div style={{ marginTop: '5%', marginLeft: '3%', paddingTop: '3%' }}>
                     <img
                       src={group.members[0].profile_picture}
@@ -149,7 +185,15 @@ const Feed: React.FC<FeedProps> = ({}) => {
                       style={{ width: 50, height: 50, borderRadius: 25 }}
                     />
                   </div>
-                  <p style={{ fontWeight: 'bold', color: '#000', position: 'relative', bottom: 50, left: 75 }}>
+                  <p
+                    style={{
+                      fontWeight: 'bold',
+                      color: groupSelected === group.id ? '#fff' : '#000',
+                      position: 'relative',
+                      bottom: 50,
+                      left: 75,
+                    }}
+                  >
                     {group.name}
                   </p>
                 </div>
@@ -157,7 +201,15 @@ const Feed: React.FC<FeedProps> = ({}) => {
             } else if (group.members.length > 2) {
               const restOfPeople = group.members.length - 2;
               return (
-                <div className={feedStyles.sidebarcontent} key={group.id}>
+                <div
+                  className={feedStyles.sidebarcontent}
+                  style={{
+                    backgroundColor: groupSelected === group.id ? '#6588de' : '#6588de1a',
+                    boxShadow: groupSelected === group.id ? '0px 8px 40px rgba(0, 72, 251, 0.3)' : '',
+                  }}
+                  key={group.id}
+                  onClick={() => setGroupSelected(group.id)}
+                >
                   <div style={{ marginTop: '5%', marginLeft: '5%', paddingTop: '3%' }}>
                     <img
                       src={group.members[0].profile_picture}
@@ -175,7 +227,15 @@ const Feed: React.FC<FeedProps> = ({}) => {
                   </div>
                   <div className={`${feedStyles.dot} text-center`}>+{restOfPeople}</div>
 
-                  <p style={{ fontWeight: 'bold', color: '#000', position: 'relative', bottom: 85, left: 65 }}>
+                  <p
+                    style={{
+                      fontWeight: 'bold',
+                      color: groupSelected === group.id ? '#fff' : '#000',
+                      position: 'relative',
+                      bottom: 85,
+                      left: 65,
+                    }}
+                  >
                     {group.name}
                   </p>
                 </div>
@@ -196,12 +256,12 @@ const Feed: React.FC<FeedProps> = ({}) => {
             {user && user.email}
           </p>
         </div>
-        <div style={{ textAlign: 'center' }}>
-          <input className={feedStyles.inputfield} placeholder="Send a message..." />
-        </div>
-        <button className={feedStyles.sendbutton}>
-          Send <SendIcon fontSize="small" />
-        </button>
+        {groupSelected !== '' ? (
+          <div style={{ textAlign: 'center' }}>
+            <input className={feedStyles.inputfield} placeholder="Send a message..." />
+            <IconButton color="primary" children={<SendIcon />} className={feedStyles.sendbutton} />
+          </div>
+        ) : null}
       </div>
     </>
   );

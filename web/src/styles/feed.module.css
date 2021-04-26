@@ -78,18 +78,6 @@
   border: 2px solid #f3ba4a;
 }
 
-.sidebarcontentselected {
-  position: absolute;
-  width: 310px;
-  height: 74px;
-  left: 10px;
-  top: 80px;
-  background: #6588de;
-  box-shadow: 0px 8px 40px rgba(0, 72, 251, 0.3);
-  border-radius: 14px;
-  cursor: pointer;
-}
-
 .dot {
   height: 28px;
   width: 28px;
@@ -105,8 +93,8 @@
   width: 310px;
   height: 74px;
   left: 14px;
-  top: 155px;
-  background: rgba(101, 136, 222, 0.1);
+  top: 10px;
+  background: #6588de1a;
   border-radius: 14px;
   cursor: pointer;
 }
@@ -133,16 +121,16 @@
 
 .sendbutton {
   position: absolute;
-  width: 108px;
-  height: 40px;
-  left: 1532px;
-  top: 770px;
+  /* width: 80px; */
+  /* height: 40px; */
+  left: 600px;
+  top: 765px;
   color: #fff;
-  background: #6588de;
   border-radius: 14px;
+  transform: rotate(-40deg);
 }
 
-.cotainer {
-  background-color: #e5e5e5;
+.container {
+  background-color: #fcfdfc;
   flex: 1;
 }
