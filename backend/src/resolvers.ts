@@ -7,6 +7,7 @@ import { GroupType } from "./types/GroupType";
 import { Group } from "./database/models/Group";
 import { pubsub } from "./server";
 import { Model } from "sequelize/types";
+import { MessageType } from "./types/MessageType";
 
 const NEW_MESSAGE = "NEW_MESSAGE";
 
@@ -43,6 +44,17 @@ const resolvers = {
         }
       }
       return groups;
+    },
+    GetInitialMessages: async (_: void, args: { groupid: string }) => {
+      const group: GroupType | null = await Group.findOne({
+        where: { id: args.groupid },
+      });
+      if (!group) return "Invalid ID";
+      const messages = [];
+      for (const message in group.messages) {
+        messages.push((group.messages[message as any] as any).newMessage);
+      }
+      return messages;
     },
   },
   Mutation: {

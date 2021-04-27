@@ -2,6 +2,7 @@ type Query {
   GetUserId(email: String!): String
   GetAllUsers: [GroupUser]
   GetGroups(authorid: String): [Group]
+  GetInitialMessages(groupid: String): [Message]
 }
 
 type Mutation {
