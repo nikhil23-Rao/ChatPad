@@ -20,8 +20,6 @@ const httplink = new HttpLink({
 
 const link = process.browser
   ? split(
-      //only create the split in the browser
-      // split based on operation type
       ({ query }) => {
         const { kind, operation }: any = getMainDefinition(query);
         return kind === 'OperationDefinition' && operation === 'subscription';

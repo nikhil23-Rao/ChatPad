@@ -4,7 +4,7 @@ import { useSession } from 'next-auth/client';
 import feedStyles from '../styles/feed.module.css';
 import SendIcon from '@material-ui/icons/Send';
 import client from '@/../apollo-client';
-import { GET_GROUPS, GET_USER_ID } from '../apollo/Queries';
+import { GET_GROUPS, GET_INITIAL_MESSAGES, GET_USER_ID } from '../apollo/Queries';
 import { Search } from '../components/Search';
 import { Button, Input } from '@chakra-ui/react';
 import { CREATE_GROUP } from '@/apollo/Mutations';
@@ -16,7 +16,6 @@ import { IconButton } from '@material-ui/core';
 interface FeedProps {}
 
 const Feed: React.FC<FeedProps> = ({}) => {
-  const memberContext = useContext(MemberContext);
   const [groupSelected, setGroupSelected] = useState('');
   const [session] = useSession();
   const [user, setUser] = useState<{
@@ -61,11 +60,17 @@ const Feed: React.FC<FeedProps> = ({}) => {
   };
 
   const { data, loading } = useQuery(GET_GROUPS, { variables: { authorid: user?.id } });
+  const { data: messageData, loading: messageLoading } = useQuery(GET_INITIAL_MESSAGES, {
+    variables: { groupid: groupSelected },
+  });
 
   useEffect(() => {
     GetUser();
     if (window.screen.availHeight < 863 || window.screen.availWidth < 1800) {
       document.body.style.zoom = '80%';
+    }
+    if (data) {
+      console.log(data);
     }
     console.log(groupSelected);
   }, [session, groupSelected]);
@@ -75,20 +80,33 @@ const Feed: React.FC<FeedProps> = ({}) => {
   return (
     <>
       <div style={{ backgroundColor: '#FCFDFC' }}>
-        {groupSelected !== '' ? (
-          <>
-            <div className={feedStyles.message}>
-              <p style={{ marginLeft: 5, marginTop: 10 }} className={feedStyles.chattext}>
-                Flight
-              </p>
-            </div>
-            <div className={feedStyles.yourmessage}>
-              <p style={{ marginLeft: 5, marginTop: 10 }} className={feedStyles.chattext}>
-                Ok
-              </p>
-            </div>
-          </>
-        ) : (
+        {groupSelected !== '' &&
+          messageData &&
+          !messageLoading &&
+          user &&
+          messageData.GetInitialMessages.map((message) => {
+            if (message.authorid === user.id) {
+              return (
+                <div className={feedStyles.yourmessage}>
+                  <p style={{ marginLeft: 5, marginTop: 10 }} className={feedStyles.chattext}>
+                    {message.body}
+                  </p>
+                </div>
+              );
+            } else if (message.authorid !== user.id) {
+              return (
+                <>
+                  <div className={feedStyles.message}>
+                    <p style={{ marginLeft: 5, marginTop: 10 }} className={feedStyles.chattext}>
+                      {message.body}
+                    </p>
+                  </div>
+                </>
+              );
+            }
+          })}
+
+        {groupSelected === '' && (
           <>
             <div
               style={{
@@ -105,6 +123,7 @@ const Feed: React.FC<FeedProps> = ({}) => {
             </p>
           </>
         )}
+
         <div style={{ top: -10, right: 80, position: 'absolute' }}>
           <div className="outer-menu">
             <input className="checkbox-toggle" type="checkbox" />
@@ -125,7 +144,7 @@ const Feed: React.FC<FeedProps> = ({}) => {
           </div>
         </div>
         <div className={feedStyles.leftsidebar}>
-          {data.GetGroups.length === 0 && <h1>CREATE ONE FATTY</h1>}
+          {/* {data.GetGroups.length === 0 && <h1>CREATE ONE FATTY</h1>} */}
           {data.GetGroups.map((group) => {
             if (group.members.length === 2) {
               return (
