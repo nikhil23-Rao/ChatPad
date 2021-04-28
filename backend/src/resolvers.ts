@@ -51,8 +51,10 @@ const resolvers = {
       });
       if (!group) return "Invalid ID";
       const messages = [];
+      console.log("MESSAGES", group.messages);
       for (const message in group.messages) {
-        messages.push((group.messages[message as any] as any).newMessage);
+        console.log("HYDEHHDYEW*", message);
+        messages.push(group.messages[message as any] as any);
       }
       return messages;
     },
@@ -140,23 +142,24 @@ const resolvers = {
         where: { id: args.groupid },
       });
       if (!group) return "Invalid ID";
-      let messages = [];
       const newMessage = {
         body: args.body,
         authorid: args.authorid,
         messageid: args.messageid,
       };
-      const payload = {
-        GetAllMessages: {
-          body: args.body,
-          messageid: args.messageid,
-          authorid: args.authorid,
-        },
-      };
-      pubsub.publish(NEW_MESSAGE, payload);
-      messages.push({ ...group.messages, newMessage });
+      // const payload = {
+      //   GetAllMessages: {
+      //     body: args.body,
+      //     messageid: args.messageid,
+      //     authorid: args.authorid,
+      //   },
+      // };
+      // pubsub.publish(NEW_MESSAGE, payload);
+      const messages = [...(group.messages as any)];
+      messages.push(newMessage);
       group.messages = messages as any;
       await group.save();
+      console.log("YO", group.messages);
       return true;
     },
   },
