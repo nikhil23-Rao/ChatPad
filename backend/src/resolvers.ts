@@ -147,14 +147,17 @@ const resolvers = {
         authorid: args.authorid,
         messageid: args.messageid,
       };
-      // const payload = {
-      //   GetAllMessages: {
-      //     body: args.body,
-      //     messageid: args.messageid,
-      //     authorid: args.authorid,
-      //   },
-      // };
-      // pubsub.publish(NEW_MESSAGE, payload);
+      const payload = {
+        GetAllMessages: [
+          ...(group.messages as any),
+          {
+            body: args.body,
+            messageid: args.messageid,
+            authorid: args.authorid,
+          },
+        ],
+      };
+      pubsub.publish(NEW_MESSAGE, payload);
       const messages = [...(group.messages as any)];
       messages.push(newMessage);
       group.messages = messages as any;

@@ -28,7 +28,7 @@ type Mutation {
 }
 
 type Subscription {
-  GetAllMessages: Message
+  GetAllMessages: [Message]
 }
 
 type Message {
