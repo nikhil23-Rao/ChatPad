@@ -22,7 +22,7 @@ type Mutation {
   SendMessage(
     groupid: String
     body: String
-    authorid: String
+    author: User
     messageid: String
   ): Boolean
 
@@ -36,7 +36,7 @@ type Subscription {
 type Message {
   body: String
   messageid: String
-  authorid: String
+  author: GroupUser
   groupid: String
 }
 

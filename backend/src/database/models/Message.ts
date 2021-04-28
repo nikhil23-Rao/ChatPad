@@ -1,16 +1,20 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../src/connection";
 
-export const Group = sequelize.define("Group", {
-  name: {
+export const Message = sequelize.define("Message", {
+  body: {
+    type: DataTypes.TEXT,
+    allowNull: false,
+  },
+  author: {
+    type: DataTypes.JSON,
+    allowNull: false,
+  },
+  groupid: {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  members: {
-    type: DataTypes.ARRAY(DataTypes.JSON),
-    allowNull: false,
-  },
-  id: {
+  messageid: {
     primaryKey: true,
     type: DataTypes.STRING,
     allowNull: false,

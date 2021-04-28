@@ -8,6 +8,7 @@ import { Group } from "./database/models/Group";
 import { pubsub } from "./server";
 import { Model } from "sequelize/types";
 import { MessageType } from "./types/MessageType";
+import { Message } from "./database/models/Message";
 
 const NEW_MESSAGE = "NEW_MESSAGE";
 
@@ -46,16 +47,9 @@ const resolvers = {
       return groups;
     },
     GetInitialMessages: async (_: void, args: { groupid: string }) => {
-      const group: GroupType | null = await Group.findOne({
-        where: { id: args.groupid },
+      const messages = await Message.findAll({
+        where: { groupid: args.groupid },
       });
-      if (!group) return "Invalid ID";
-      const messages = [];
-      console.log("MESSAGES", group.messages);
-      for (const message in group.messages) {
-        console.log("HYDEHHDYEW*", message);
-        messages.push(group.messages[message as any] as any);
-      }
       return messages;
     },
   },
@@ -128,7 +122,6 @@ const resolvers = {
     CreateGroup: async (_: void, args: GroupType) => {
       // await Group.sync({ force: true });
       const group = Group.build({
-        messages: [],
         id: args.id,
         members: args.members,
         name: args.name,
@@ -138,33 +131,29 @@ const resolvers = {
       return true;
     },
     SendMessage: async (_: void, args: GroupType) => {
-      const group: GroupType | null = await Group.findOne({
-        where: { id: args.groupid },
+      const previousMessages = await Message.findAll({
+        where: { groupid: args.groupid },
       });
-      if (!group) return "Invalid ID";
-
-      const newMessage = {
+      await Message.sync({ force: true });
+      const message = await Message.build({
         body: args.body,
-        authorid: args.authorid,
+        author: args.author,
         messageid: args.messageid,
         groupid: args.groupid,
-      };
+      });
+      await message.save();
       const payload = {
         GetAllMessages: [
-          ...(group.messages as any),
+          ...previousMessages,
           {
             body: args.body,
             messageid: args.messageid,
-            authorid: args.authorid,
+            author: args.author,
             groupid: args.groupid,
           },
         ],
       };
       pubsub.publish(NEW_MESSAGE, payload);
-      const messages = [...(group.messages as any)];
-      messages.push(newMessage);
-      group.messages = messages as any;
-      await group.save();
       return true;
     },
     StartSubscription: async (_: void, args: GroupType) => {
