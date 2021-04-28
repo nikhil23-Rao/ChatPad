@@ -6,6 +6,7 @@ export const GET_ALL_MESSAGES = gql`
       body
       messageid
       authorid
+      groupid
     }
   }
 `;

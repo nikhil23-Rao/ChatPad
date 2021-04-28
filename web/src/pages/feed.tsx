@@ -7,10 +7,11 @@ import { GET_GROUPS, GET_INITIAL_MESSAGES, GET_USER_ID } from '../apollo/Queries
 import { Search } from '../components/Search';
 import { useMutation, useQuery, useSubscription } from '@apollo/client';
 import { IconButton } from '@material-ui/core';
-import { SEND_MESSAGE } from '@/apollo/Mutations';
+import { SEND_MESSAGE, START_SUBSCRIPTION } from '@/apollo/Mutations';
 import { generateId } from '@/utils/GenerateId';
 import Head from 'next/head';
 import { GET_ALL_MESSAGES } from '@/apollo/Subscriptions';
+import { useRouter } from 'next/dist/client/router';
 
 interface FeedProps {}
 
@@ -25,6 +26,7 @@ const Feed: React.FC<FeedProps> = ({}) => {
     profile_picture: string | null | undefined;
     iat?: string | null | undefined;
   } | null>(null);
+  const router = useRouter();
 
   const GetUser = async () => {
     const token = localStorage.getItem('token');
@@ -57,11 +59,14 @@ const Feed: React.FC<FeedProps> = ({}) => {
   };
 
   const { data, loading } = useQuery(GET_GROUPS, { variables: { authorid: user?.id } });
-  const { data: messageData, loading: messageLoading, refetch } = useQuery(GET_INITIAL_MESSAGES, {
+  const { data: messageData, loading: messageLoading } = useQuery(GET_INITIAL_MESSAGES, {
     variables: { groupid: groupSelected },
   });
   const [SendMessage] = useMutation(SEND_MESSAGE);
+  const [StartSubscription] = useMutation(START_SUBSCRIPTION);
   const { data: realtimeData } = useSubscription(GET_ALL_MESSAGES);
+
+  const messagesForGroup = [];
 
   useEffect(() => {
     window.scrollTo(0, document.body.scrollHeight);
@@ -71,6 +76,10 @@ const Feed: React.FC<FeedProps> = ({}) => {
     }
     if (data) {
       console.log(data);
+    }
+    if (realtimeData) {
+      const res = realtimeData.GetAllMessages.filter((message) => message.groupid === groupSelected);
+      console.log('RES', res);
     }
     console.log(messageData);
     console.log(groupSelected);
@@ -171,7 +180,21 @@ const Feed: React.FC<FeedProps> = ({}) => {
                     boxShadow: groupSelected === group.id ? '0px 8px 40px rgba(0, 72, 251, 0.3)' : '',
                   }}
                   key={group.id}
-                  onClick={() => setGroupSelected(group.id)}
+                  onClick={async () => {
+                    const messageid = generateId(24);
+                    setGroupSelected(group.id);
+                    // await SendMessage({
+                    //   variables: { groupid: group.id, body: '', authorid: user?.id, messageid },
+                    // });
+                    // console.log('SENT');
+                    // await StartSubscription({
+                    //   variables: {
+                    //     groupid: group.id,
+                    //     messageid,
+                    //   },
+                    // });
+                    // console.log('DELETED');
+                  }}
                 >
                   <div style={{ marginTop: '5%', marginLeft: '3%', paddingTop: '3%' }}>
                     <img

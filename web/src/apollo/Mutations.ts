@@ -37,3 +37,9 @@ export const SEND_MESSAGE = gql`
     SendMessage(groupid: $groupid, body: $body, authorid: $authorid, messageid: $messageid)
   }
 `;
+
+export const START_SUBSCRIPTION = gql`
+  mutation StartSubscription($groupid: String, $messageid: String) {
+    StartSubscription(groupid: $groupid, messageid: $messageid)
+  }
+`;

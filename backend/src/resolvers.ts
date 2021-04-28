@@ -142,10 +142,12 @@ const resolvers = {
         where: { id: args.groupid },
       });
       if (!group) return "Invalid ID";
+
       const newMessage = {
         body: args.body,
         authorid: args.authorid,
         messageid: args.messageid,
+        groupid: args.groupid,
       };
       const payload = {
         GetAllMessages: [
@@ -154,6 +156,7 @@ const resolvers = {
             body: args.body,
             messageid: args.messageid,
             authorid: args.authorid,
+            groupid: args.groupid,
           },
         ],
       };
@@ -162,7 +165,15 @@ const resolvers = {
       messages.push(newMessage);
       group.messages = messages as any;
       await group.save();
-      console.log("YO", group.messages);
+      return true;
+    },
+    StartSubscription: async (_: void, args: GroupType) => {
+      const group: GroupType | null = await Group.findOne({
+        where: { id: args.groupid },
+      });
+      if (!group) return "INVALID ID";
+      group.messages?.pop();
+      await group.save();
       return true;
     },
   },
