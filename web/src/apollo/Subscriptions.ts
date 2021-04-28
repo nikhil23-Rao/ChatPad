@@ -4,6 +4,8 @@ export const GET_ALL_MESSAGES = gql`
   subscription GetAllMessages {
     GetAllMessages {
       body
+      messageid
+      authorid
     }
   }
 `;

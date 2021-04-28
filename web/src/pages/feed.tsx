@@ -5,11 +5,12 @@ import feedStyles from '../styles/feed.module.css';
 import client from '@/../apollo-client';
 import { GET_GROUPS, GET_INITIAL_MESSAGES, GET_USER_ID } from '../apollo/Queries';
 import { Search } from '../components/Search';
-import { useMutation, useQuery } from '@apollo/client';
+import { useMutation, useQuery, useSubscription } from '@apollo/client';
 import { IconButton } from '@material-ui/core';
 import { SEND_MESSAGE } from '@/apollo/Mutations';
 import { generateId } from '@/utils/GenerateId';
 import Head from 'next/head';
+import { GET_ALL_MESSAGES } from '@/apollo/Subscriptions';
 
 interface FeedProps {}
 
@@ -60,6 +61,7 @@ const Feed: React.FC<FeedProps> = ({}) => {
     variables: { groupid: groupSelected },
   });
   const [SendMessage] = useMutation(SEND_MESSAGE);
+  const { data: realtimeData } = useSubscription(GET_ALL_MESSAGES);
 
   useEffect(() => {
     window.scrollTo(0, document.body.scrollHeight);
@@ -72,7 +74,8 @@ const Feed: React.FC<FeedProps> = ({}) => {
     }
     console.log(messageData);
     console.log(groupSelected);
-  }, [session, groupSelected, messageData]);
+    console.log('REALTIME', realtimeData);
+  }, [session, groupSelected, messageData, realtimeData]);
 
   if (loading) return <h1>Loading...</h1>;
 
@@ -88,19 +91,38 @@ const Feed: React.FC<FeedProps> = ({}) => {
           !messageLoading &&
           user &&
           messageData.GetInitialMessages.map((message) => {
+            if (!realtimeData) {
+              return (
+                <>
+                  <div>
+                    <div className={message.authorid === user.id ? feedStyles.yourmessage : feedStyles.message}>
+                      <p style={{ marginLeft: 5, marginTop: 10 }} className={feedStyles.text}>
+                        {message.body}
+                      </p>
+                    </div>
+                  </div>
+                </>
+              );
+            } else {
+              return;
+            }
+          })}
+        {groupSelected !== '' &&
+          realtimeData &&
+          realtimeData.GetAllMessages &&
+          user &&
+          realtimeData.GetAllMessages.map((message) => {
             return (
               <>
-                <div>
-                  <div className={message.authorid === user.id ? feedStyles.yourmessage : feedStyles.message}>
-                    <p style={{ marginLeft: 5, marginTop: 10 }} className={feedStyles.text}>
-                      {message.body}
-                    </p>
-                  </div>
+                <div className={message.authorid === user.id ? feedStyles.yourmessage : feedStyles.message}>
+                  <p style={{ marginLeft: 5, marginTop: 10 }} className={feedStyles.text}>
+                    {message.body}
+                  </p>
                 </div>
               </>
             );
           })}
-
+        )
         {groupSelected === '' && (
           <>
             <div
@@ -118,7 +140,6 @@ const Feed: React.FC<FeedProps> = ({}) => {
             </p>
           </>
         )}
-
         <div style={{ top: -10, right: 80, position: 'absolute' }}>
           <div className="outer-menu">
             <input className="checkbox-toggle" type="checkbox" />
@@ -290,7 +311,6 @@ const Feed: React.FC<FeedProps> = ({}) => {
                       messageid: generateId(24),
                     },
                   });
-                  await refetch({ groupid: groupSelected });
                   setMessageVal('');
                 }
               }}
