@@ -60,16 +60,18 @@ export const Search = () => {
     },
   });
 
-  const memberIds = [];
+  const members = [];
 
-  const GetMemberIds = () => {
+  const GetMembers = () => {
     for (const item in selectedItems) {
-      memberIds.push({
+      console.log(selectedItems[item]);
+      members.push({
         username: (selectedItems[item] as any).username,
         id: (selectedItems[item] as any).id,
         email: (selectedItems[item] as any).email,
         profile_picture: (selectedItems[item] as any).profile_picture,
       });
+      console.log(members);
     }
   };
 
@@ -81,7 +83,7 @@ export const Search = () => {
     if (nameVal.length > 0) {
       setNameError(false);
     }
-    GetMemberIds();
+    GetMembers();
   }, [selectedItems, error, nameError]);
 
   return (
@@ -178,7 +180,7 @@ export const Search = () => {
               setLoading(true);
               await client.mutate({
                 mutation: CREATE_GROUP,
-                variables: { id: generateId(24), members: memberIds, name: nameVal },
+                variables: { id: generateId(24), members, name: nameVal },
               });
               setLoading(false);
               router.reload();

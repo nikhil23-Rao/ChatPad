@@ -1,22 +1,21 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import jwtDecode from 'jwt-decode';
 import { useSession } from 'next-auth/client';
 import feedStyles from '../styles/feed.module.css';
-import SendIcon from '@material-ui/icons/Send';
 import client from '@/../apollo-client';
 import { GET_GROUPS, GET_INITIAL_MESSAGES, GET_USER_ID } from '../apollo/Queries';
 import { Search } from '../components/Search';
-import { Button, Input } from '@chakra-ui/react';
-import { CREATE_GROUP } from '@/apollo/Mutations';
-import { generateId } from '@/utils/GenerateId';
-import { MemberContext } from '@/../context/members';
-import { useQuery } from '@apollo/client';
+import { useMutation, useQuery } from '@apollo/client';
 import { IconButton } from '@material-ui/core';
+import { SEND_MESSAGE } from '@/apollo/Mutations';
+import { generateId } from '@/utils/GenerateId';
+import Head from 'next/head';
 
 interface FeedProps {}
 
 const Feed: React.FC<FeedProps> = ({}) => {
   const [groupSelected, setGroupSelected] = useState('');
+  const [messageVal, setMessageVal] = useState('');
   const [session] = useSession();
   const [user, setUser] = useState<{
     username: string | null | undefined;
@@ -53,18 +52,17 @@ const Feed: React.FC<FeedProps> = ({}) => {
         oauth: boolean;
       } = jwtDecode(token!);
       setUser(currentUser);
-      window.onbeforeunload = () => {
-        localStorage.removeItem('token');
-      };
     }
   };
 
   const { data, loading } = useQuery(GET_GROUPS, { variables: { authorid: user?.id } });
-  const { data: messageData, loading: messageLoading } = useQuery(GET_INITIAL_MESSAGES, {
+  const { data: messageData, loading: messageLoading, refetch } = useQuery(GET_INITIAL_MESSAGES, {
     variables: { groupid: groupSelected },
   });
+  const [SendMessage] = useMutation(SEND_MESSAGE);
 
   useEffect(() => {
+    window.scrollTo(0, document.body.scrollHeight);
     GetUser();
     if (window.screen.availHeight < 863 || window.screen.availWidth < 1800) {
       document.body.style.zoom = '80%';
@@ -72,38 +70,35 @@ const Feed: React.FC<FeedProps> = ({}) => {
     if (data) {
       console.log(data);
     }
+    console.log(messageData);
     console.log(groupSelected);
-  }, [session, groupSelected]);
+  }, [session, groupSelected, messageData]);
 
   if (loading) return <h1>Loading...</h1>;
 
   return (
     <>
+      <Head>
+        <title>ChatPad</title>
+        <link rel="icon" href="/images/chatpadlogo.png" />
+      </Head>
       <div style={{ backgroundColor: '#FCFDFC' }}>
         {groupSelected !== '' &&
           messageData &&
           !messageLoading &&
           user &&
           messageData.GetInitialMessages.map((message) => {
-            if (message.authorid === user.id) {
-              return (
-                <div className={feedStyles.yourmessage}>
-                  <p style={{ marginLeft: 5, marginTop: 10 }} className={feedStyles.chattext}>
-                    {message.body}
-                  </p>
-                </div>
-              );
-            } else if (message.authorid !== user.id) {
-              return (
-                <>
-                  <div className={feedStyles.message}>
-                    <p style={{ marginLeft: 5, marginTop: 10 }} className={feedStyles.chattext}>
+            return (
+              <>
+                <div>
+                  <div className={message.authorid === user.id ? feedStyles.yourmessage : feedStyles.message}>
+                    <p style={{ marginLeft: 5, marginTop: 10 }} className={feedStyles.text}>
                       {message.body}
                     </p>
                   </div>
-                </>
-              );
-            }
+                </div>
+              </>
+            );
           })}
 
         {groupSelected === '' && (
@@ -144,7 +139,7 @@ const Feed: React.FC<FeedProps> = ({}) => {
           </div>
         </div>
         <div className={feedStyles.leftsidebar}>
-          {/* {data.GetGroups.length === 0 && <h1>CREATE ONE FATTY</h1>} */}
+          {data.GetGroups.length === 0 && <h1>CREATE ONE FATTY</h1>}
           {data.GetGroups.map((group) => {
             if (group.members.length === 2) {
               return (
@@ -275,10 +270,32 @@ const Feed: React.FC<FeedProps> = ({}) => {
             {user && user.email}
           </p>
         </div>
-        {groupSelected !== '' ? (
+        {groupSelected !== '' && user ? (
           <div style={{ textAlign: 'center' }}>
-            <input className={feedStyles.inputfield} placeholder="Send a message..." />
-            <IconButton color="primary" children={<SendIcon />} className={feedStyles.sendbutton} />
+            <input
+              className={feedStyles.inputfield}
+              placeholder="Send a message..."
+              value={messageVal}
+              onKeyPress={async (e) => {
+                if (e.key === 'Enter') {
+                  // Check If Text Is Empty Before Submitting
+                  if (!messageVal.trim()) {
+                    return;
+                  }
+                  await SendMessage({
+                    variables: {
+                      groupid: groupSelected,
+                      body: messageVal,
+                      authorid: user?.id,
+                      messageid: generateId(24),
+                    },
+                  });
+                  await refetch({ groupid: groupSelected });
+                  setMessageVal('');
+                }
+              }}
+              onChange={(e) => setMessageVal(e.currentTarget.value)}
+            />
           </div>
         ) : null}
       </div>

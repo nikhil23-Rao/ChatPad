@@ -15,7 +15,7 @@
 }
 
 .leftsidebar {
-  position: absolute;
+  position: fixed;
   width: 350px;
   height: 730px;
   left: 0px;
@@ -34,7 +34,7 @@
 }
 
 .profile {
-  position: absolute;
+  position: fixed;
   width: 350px;
   height: 100px;
   left: 0px;
@@ -44,13 +44,14 @@
 }
 
 .inputfield {
-  position: absolute;
+  position: fixed;
   width: 1200px;
+  margin-bottom: 100px;
+  top: 800px;
   outline-width: 0;
   height: 40px;
   margin-left: 4%;
   left: 300px;
-  top: 770px;
   background: #fdfdfd;
   border: 1px solid rgba(150, 169, 186, 0.7);
   box-sizing: border-box;
@@ -100,31 +101,37 @@
 }
 
 .message {
-  position: absolute;
+  position: relative;
   width: 506px;
   height: 84px;
   left: 464px;
-  top: 500px;
+  overflow: hidden;
+  top: 100px;
+  height: 1%;
   background: #e3f6fc;
+  margin-bottom: 20px;
   border-radius: 0px 14px 14px 14px;
 }
 
 .yourmessage {
-  position: absolute;
-  width: 154px;
-  height: 76px;
-  left: 1400px;
-  top: 600px;
+  position: relative;
+  width: 506px;
+  top: 100px;
+  left: 1200px;
+  margin-bottom: 20px;
+  overflow: hidden;
   background: #f3ba4a;
   border-radius: 14px 0px 14px 14px;
 }
 
+.text {
+  padding: 10px 20px;
+}
+
 .sendbutton {
-  position: absolute;
-  /* width: 80px; */
-  /* height: 40px; */
-  left: 600px;
-  top: 765px;
+  position: relative;
+  width: 80px;
+  height: 40px;
   color: #fff;
   border-radius: 14px;
   transform: rotate(-40deg);
