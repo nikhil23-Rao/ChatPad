@@ -26,11 +26,6 @@ export const GET_GROUPS = gql`
         profile_picture
         id
       }
-      messages {
-        body
-        messageid
-        authorid
-      }
       id
       name
     }
@@ -42,7 +37,12 @@ export const GET_INITIAL_MESSAGES = gql`
     GetInitialMessages(groupid: $groupid) {
       body
       messageid
-      authorid
+      author {
+        username
+        email
+        profile_picture
+        id
+      }
     }
   }
 `;

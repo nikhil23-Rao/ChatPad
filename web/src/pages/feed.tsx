@@ -104,7 +104,7 @@ const Feed: React.FC<FeedProps> = ({}) => {
               return (
                 <>
                   <div>
-                    <div className={message.authorid === user.id ? feedStyles.yourmessage : feedStyles.message}>
+                    <div className={message.author.id === user.id ? feedStyles.yourmessage : feedStyles.message}>
                       <p style={{ marginLeft: 5, marginTop: 10 }} className={feedStyles.text}>
                         {message.body}
                       </p>
@@ -116,7 +116,7 @@ const Feed: React.FC<FeedProps> = ({}) => {
               return;
             }
           })}
-        {groupSelected !== '' &&
+        {/* {groupSelected !== '' &&
           realtimeData &&
           realtimeData.GetAllMessages &&
           user &&
@@ -130,7 +130,7 @@ const Feed: React.FC<FeedProps> = ({}) => {
                 </div>
               </>
             );
-          })}
+          })} */}
         )
         {groupSelected === '' && (
           <>
@@ -181,19 +181,7 @@ const Feed: React.FC<FeedProps> = ({}) => {
                   }}
                   key={group.id}
                   onClick={async () => {
-                    const messageid = generateId(24);
                     setGroupSelected(group.id);
-                    // await SendMessage({
-                    //   variables: { groupid: group.id, body: '', authorid: user?.id, messageid },
-                    // });
-                    // console.log('SENT');
-                    // await StartSubscription({
-                    //   variables: {
-                    //     groupid: group.id,
-                    //     messageid,
-                    //   },
-                    // });
-                    // console.log('DELETED');
                   }}
                 >
                   <div style={{ marginTop: '5%', marginLeft: '3%', paddingTop: '3%' }}>
@@ -330,7 +318,12 @@ const Feed: React.FC<FeedProps> = ({}) => {
                     variables: {
                       groupid: groupSelected,
                       body: messageVal,
-                      authorid: user?.id,
+                      author: {
+                        username: user.username,
+                        email: user.email,
+                        id: user.id,
+                        profile_picture: user.profile_picture,
+                      },
                       messageid: generateId(24),
                     },
                   });
