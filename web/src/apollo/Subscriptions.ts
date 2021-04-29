@@ -5,7 +5,12 @@ export const GET_ALL_MESSAGES = gql`
     GetAllMessages {
       body
       messageid
-      authorid
+      author {
+        username
+        email
+        profile_picture
+        id
+      }
       groupid
     }
   }

@@ -3,6 +3,7 @@ type Query {
   GetAllUsers: [GroupUser]
   GetGroups(authorid: String): [Group]
   GetInitialMessages(groupid: String): [Message]
+  GetChatPaths: [String]
 }
 
 type Mutation {

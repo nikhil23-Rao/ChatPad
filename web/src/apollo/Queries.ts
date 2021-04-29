@@ -46,3 +46,9 @@ export const GET_INITIAL_MESSAGES = gql`
     }
   }
 `;
+
+export const GET_CHAT_PATHS = gql`
+  query GetChatPaths {
+    GetChatPaths
+  }
+`;

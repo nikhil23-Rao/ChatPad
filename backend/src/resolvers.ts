@@ -52,6 +52,17 @@ const resolvers = {
       });
       return messages;
     },
+    GetChatPaths: async (_: void, __: void) => {
+      const allGroups:
+        | GroupType
+        | Model<any, any>[]
+        | any = await Group.findAll();
+      const ids = [];
+      for (const group in allGroups) {
+        ids.push(allGroups[group].id);
+      }
+      return ids;
+    },
   },
   Mutation: {
     Register: async (_: void, args: UserType) => {
@@ -131,16 +142,25 @@ const resolvers = {
       return true;
     },
     SendMessage: async (_: void, args: GroupType) => {
-      const previousMessages = await Message.findAll({
+      const messages: any = await Message.findAll({
         where: { groupid: args.groupid },
       });
-      await Message.sync({ force: true });
+      // await Message.sync({ force: true });
       const message = await Message.build({
         body: args.body,
         author: args.author,
         messageid: args.messageid,
         groupid: args.groupid,
       });
+
+      const previousMessages = [];
+
+      for (const message in messages) {
+        previousMessages.push(messages[message].dataValues);
+      }
+
+      console.log("PREVIOUS", previousMessages);
+
       await message.save();
       const payload = {
         GetAllMessages: [

@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import jwtDecode from 'jwt-decode';
 import { useSession } from 'next-auth/client';
-import feedStyles from '../styles/feed.module.css';
+import feedStyles from '../../styles/feed.module.css';
 import client from '@/../apollo-client';
-import { GET_CHAT_PATHS, GET_GROUPS, GET_INITIAL_MESSAGES, GET_USER_ID } from '../apollo/Queries';
-import { Search } from '../components/Search';
+import { GET_CHAT_PATHS, GET_GROUPS, GET_INITIAL_MESSAGES, GET_USER_ID } from '../../apollo/Queries';
+import { Search } from '../../components/Search';
 import { useMutation, useQuery, useSubscription } from '@apollo/client';
 import { IconButton } from '@material-ui/core';
 import { SEND_MESSAGE, START_SUBSCRIPTION } from '@/apollo/Mutations';
@@ -12,10 +12,38 @@ import { generateId } from '@/utils/GenerateId';
 import Head from 'next/head';
 import { GET_ALL_MESSAGES } from '@/apollo/Subscriptions';
 import { useRouter } from 'next/dist/client/router';
+import { GetStaticProps } from 'next';
 
-interface FeedProps {}
+interface ChatProps {
+  currId: string;
+}
 
-const Feed: React.FC<FeedProps> = ({}) => {
+export const getStaticPaths = async () => {
+  const res = await client.query({ query: GET_CHAT_PATHS });
+  const paths = res.data.GetChatPaths.map((id) => {
+    return {
+      params: {
+        id,
+      },
+    };
+  });
+
+  return {
+    paths,
+    fallback: false,
+  };
+};
+
+export const getStaticProps = async (context) => {
+  const id = context.params.id;
+  return {
+    props: {
+      currId: id,
+    },
+  };
+};
+
+const Chat: React.FC<ChatProps> = ({ currId }) => {
   const [groupSelected, setGroupSelected] = useState('');
   const [messageVal, setMessageVal] = useState('');
   const [session] = useSession();
@@ -29,8 +57,6 @@ const Feed: React.FC<FeedProps> = ({}) => {
   const router = useRouter();
 
   const GetUser = async () => {
-    const paths = await client.query({ query: GET_CHAT_PATHS });
-    console.log(paths);
     const token = localStorage.getItem('token');
     if (session && !token) {
       const result = await client.query({ query: GET_USER_ID, variables: { email: session.user.email } });
@@ -68,9 +94,9 @@ const Feed: React.FC<FeedProps> = ({}) => {
   const [StartSubscription] = useMutation(START_SUBSCRIPTION);
   const { data: realtimeData } = useSubscription(GET_ALL_MESSAGES);
 
-  const messagesForGroup = [];
-
   useEffect(() => {
+    console.log('CURRENT ID', currId);
+    setGroupSelected(currId);
     window.scrollTo(0, document.body.scrollHeight);
     GetUser();
     if (window.screen.availHeight < 863 || window.screen.availWidth < 1800) {
@@ -80,8 +106,7 @@ const Feed: React.FC<FeedProps> = ({}) => {
       console.log(data);
     }
     if (realtimeData) {
-      const res = realtimeData.GetAllMessages.filter((message) => message.groupid === groupSelected);
-      console.log('RES', res);
+      console.log(realtimeData);
     }
     console.log(messageData);
     console.log(groupSelected);
@@ -118,21 +143,20 @@ const Feed: React.FC<FeedProps> = ({}) => {
               return;
             }
           })}
-        {/* {groupSelected !== '' &&
-          realtimeData &&
+        {realtimeData &&
           realtimeData.GetAllMessages &&
           user &&
           realtimeData.GetAllMessages.map((message) => {
             return (
               <>
-                <div className={message.authorid === user.id ? feedStyles.yourmessage : feedStyles.message}>
+                <div className={message.author.id === user.id ? feedStyles.yourmessage : feedStyles.message}>
                   <p style={{ marginLeft: 5, marginTop: 10 }} className={feedStyles.text}>
                     {message.body}
                   </p>
                 </div>
               </>
             );
-          })} */}
+          })}
         )
         {groupSelected === '' && (
           <>
@@ -339,4 +363,4 @@ const Feed: React.FC<FeedProps> = ({}) => {
   );
 };
 
-export default Feed;
+export default Chat;
