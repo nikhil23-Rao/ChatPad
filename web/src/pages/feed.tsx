@@ -68,8 +68,6 @@ const Feed: React.FC<FeedProps> = ({}) => {
   const [StartSubscription] = useMutation(START_SUBSCRIPTION);
   const { data: realtimeData } = useSubscription(GET_ALL_MESSAGES);
 
-  const messagesForGroup = [];
-
   useEffect(() => {
     window.scrollTo(0, document.body.scrollHeight);
     GetUser();
@@ -277,10 +275,10 @@ const Feed: React.FC<FeedProps> = ({}) => {
             alt=""
             style={{ width: 70, height: 70, borderRadius: 35, marginTop: '3%', marginLeft: '3%' }}
           />
-          <p style={{ fontWeight: 'bold', color: '#000', position: 'relative', bottom: 55, left: 89 }}>
+          <p style={{ fontFamily: 'Lato', color: '#000', position: 'relative', bottom: 55, left: 89 }}>
             {user && user.username}
           </p>{' '}
-          <p style={{ fontWeight: 'bold', color: '#6E6969', position: 'relative', bottom: 55, left: 89 }}>
+          <p style={{ fontFamily: 'Lato', color: '#6E6969', position: 'relative', bottom: 55, left: 89 }}>
             {user && user.email}
           </p>
         </div>
