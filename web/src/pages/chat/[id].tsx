@@ -14,6 +14,7 @@ import { GET_ALL_MESSAGES } from '@/apollo/Subscriptions';
 import { useRouter } from 'next/dist/client/router';
 import { GetStaticProps } from 'next';
 import { Loader } from '@/components/loader';
+import { animateScroll } from 'react-scroll';
 
 interface ChatProps {
   currId: string;
@@ -48,6 +49,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   const [groupSelected, setGroupSelected] = useState('');
   const [messageVal, setMessageVal] = useState('');
   const [session] = useSession();
+  const chatRef = useRef<null | HTMLElement>();
   const [user, setUser] = useState<{
     username: string | null | undefined;
     email: string | null | undefined;
@@ -95,6 +97,9 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   const { data: realtimeData } = useSubscription(GET_ALL_MESSAGES);
 
   useEffect(() => {
+    animateScroll.scrollToBottom({
+      containerId: 'chatDiv',
+    });
     console.log('CURRENT ID', currId);
     setGroupSelected(currId);
     GetUser();
@@ -110,18 +115,21 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
     console.log(messageData);
     console.log(groupSelected);
     console.log('REALTIME', realtimeData);
-  }, [session, groupSelected, messageData, realtimeData]);
+  }, [session, groupSelected, messageData, realtimeData, animateScroll]);
 
   if (loading) return <Loader />;
 
   return (
     <>
+      <audio className="audio-element" id="sound">
+        <source src="/sound/chatpadsound.mp3"></source>
+      </audio>
       <Head>
         <title>ChatPad</title>
         <link rel="icon" href="/images/chatpadlogo.png" />
       </Head>
       <div>
-        <div style={{ overflowY: 'scroll', height: '88.9vh', overflowX: 'hidden' }}>
+        <div style={{ overflowY: 'scroll', height: '88.9vh', overflowX: 'hidden' }} id="chatDiv" ref={chatRef as any}>
           {groupSelected !== '' &&
             messageData &&
             !messageLoading &&
