@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Lato&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Lato&family=Libre+Franklin&display=swap');
 @media screen and (min-width: 1400px) {
   .leftsidebar {
     height: 1900px;
@@ -17,11 +19,10 @@
 .leftsidebar {
   position: fixed;
   width: 350px;
-  height: 730px;
+  height: 1000px;
   left: 0px;
-  top: 120px;
-  background: #e3f6fc;
-  border-radius: 14px 14px 0px 0px;
+  top: 100px;
+  border-right: 1px #eeeeee solid;
 }
 
 .bottomtab {
@@ -35,21 +36,22 @@
 
 .profile {
   position: fixed;
+  font-family: 'Lato' sans-serif;
   width: 350px;
+  border-right: 1px #eeeeee solid;
+  border-bottom: 1px #eeeeee solid;
   height: 100px;
   left: 0px;
   top: 0px;
-  background: #e3f6fc;
-  border-radius: 0px 0px 14px 14px;
 }
 
 .inputfield {
   position: fixed;
   width: 1200px;
   margin-bottom: 100px;
-  top: 800px;
+  top: 760px;
   outline-width: 0;
-  height: 40px;
+  height: 50px;
   margin-left: 4%;
   left: 300px;
   background: #fdfdfd;
@@ -100,32 +102,41 @@
   cursor: pointer;
 }
 
+.groupName {
+  font-family: 'Lato', sans-serif;
+  font-family: 'Libre Franklin', sans-serif;
+}
+
 .message {
   position: relative;
   width: 506px;
-  height: 84px;
-  left: 464px;
+  bottom: 5px;
+  top: 80px;
+  left: 440px;
+  margin-bottom: 10px;
+  display: block;
   overflow: hidden;
-  top: 100px;
-  height: 1%;
-  background: #e3f6fc;
-  margin-bottom: 20px;
+  background: #eeeeee;
   border-radius: 0px 14px 14px 14px;
 }
 
 .yourmessage {
   position: relative;
   width: 506px;
-  top: 100px;
+  bottom: 5px;
+  top: 80px;
   left: 1200px;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
+  display: block;
   overflow: hidden;
-  background: #f3ba4a;
+  background: #8ab6d6;
   border-radius: 14px 0px 14px 14px;
 }
 
 .text {
   padding: 10px 20px;
+  font-family: 'Lato', sans-serif;
+  font-family: 'Libre Franklin', sans-serif;
 }
 
 .sendbutton {

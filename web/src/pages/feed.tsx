@@ -118,35 +118,19 @@ const Feed: React.FC<FeedProps> = ({}) => {
               return;
             }
           })}
-        {/* {groupSelected !== '' &&
-          realtimeData &&
-          realtimeData.GetAllMessages &&
-          user &&
-          realtimeData.GetAllMessages.map((message) => {
-            return (
-              <>
-                <div className={message.authorid === user.id ? feedStyles.yourmessage : feedStyles.message}>
-                  <p style={{ marginLeft: 5, marginTop: 10 }} className={feedStyles.text}>
-                    {message.body}
-                  </p>
-                </div>
-              </>
-            );
-          })} */}
         )
         {groupSelected === '' && (
           <>
             <div
               style={{
                 position: 'fixed',
-                top: '50%',
+                top: '40%',
                 left: '50%',
-                transform: 'translate(-50%, -50%)',
               }}
             >
-              <img src="/images/chatpadlogo.png" style={{ borderRadius: 100 }} alt="" />
+              <img src="/images/chatpadlogo.png" alt="" />
             </div>
-            <p style={{ top: '62%', position: 'fixed', left: '37%' }}>
+            <p style={{ top: '62%', position: 'fixed', left: '39.5%' }}>
               To start chatting select a group on the left hand side, or create a new group.
             </p>
           </>
@@ -171,6 +155,7 @@ const Feed: React.FC<FeedProps> = ({}) => {
           </div>
         </div>
         <div className={feedStyles.leftsidebar}>
+          <h1 style={{ fontSize: 24, marginRight: 35, marginTop: 15, fontFamily: 'Lato' }}>Groups</h1>
           {data.GetGroups.length === 0 && <h1>CREATE ONE FATTY</h1>}
           {data.GetGroups.map((group) => {
             if (group.members.length === 2) {
@@ -202,7 +187,6 @@ const Feed: React.FC<FeedProps> = ({}) => {
 
                   <p
                     style={{
-                      fontWeight: 'bold',
                       color: groupSelected === group.id ? '#fff' : '#000',
                       position: 'relative',
                       bottom: 60,
@@ -233,7 +217,6 @@ const Feed: React.FC<FeedProps> = ({}) => {
                   </div>
                   <p
                     style={{
-                      fontWeight: 'bold',
                       color: groupSelected === group.id ? '#fff' : '#000',
                       position: 'relative',
                       bottom: 50,
@@ -275,7 +258,6 @@ const Feed: React.FC<FeedProps> = ({}) => {
 
                   <p
                     style={{
-                      fontWeight: 'bold',
                       color: groupSelected === group.id ? '#fff' : '#000',
                       position: 'relative',
                       bottom: 85,

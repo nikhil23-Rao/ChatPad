@@ -91,7 +91,6 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
     variables: { groupid: groupSelected },
   });
   const [SendMessage] = useMutation(SEND_MESSAGE);
-  const [StartSubscription] = useMutation(START_SUBSCRIPTION);
   const { data: realtimeData } = useSubscription(GET_ALL_MESSAGES);
 
   useEffect(() => {
@@ -122,42 +121,47 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
         <link rel="icon" href="/images/chatpadlogo.png" />
       </Head>
       <div style={{ backgroundColor: '#FCFDFC' }}>
-        {groupSelected !== '' &&
-          messageData &&
-          !messageLoading &&
-          user &&
-          messageData.GetInitialMessages.map((message) => {
-            if (!realtimeData) {
+        <div style={{ overflowY: 'scroll', height: '110vh' }}>
+          {groupSelected !== '' &&
+            messageData &&
+            !messageLoading &&
+            user &&
+            messageData.GetInitialMessages.map((message) => {
+              if (!realtimeData) {
+                return (
+                  <>
+                    <div>
+                      {/* <div style={{ position: 'relative', left: 440, top: 80 }}>
+                        <img src={message.author.profile_picture} alt="" />
+                      </div> */}
+                      <div className={message.author.id === user.id ? feedStyles.yourmessage : feedStyles.message}>
+                        <p style={{ marginLeft: 5, marginTop: 10 }} className={feedStyles.text}>
+                          {message.body}
+                        </p>
+                      </div>
+                    </div>
+                  </>
+                );
+              } else {
+                return;
+              }
+            })}
+          {realtimeData &&
+            realtimeData.GetAllMessages &&
+            user &&
+            realtimeData.GetAllMessages.map((message) => {
               return (
                 <>
-                  <div>
-                    <div className={message.author.id === user.id ? feedStyles.yourmessage : feedStyles.message}>
-                      <p style={{ marginLeft: 5, marginTop: 10 }} className={feedStyles.text}>
-                        {message.body}
-                      </p>
-                    </div>
+                  <div className={message.author.id === user.id ? feedStyles.yourmessage : feedStyles.message}>
+                    <p style={{ marginLeft: 5, marginTop: 10 }} className={feedStyles.text}>
+                      {message.body}
+                    </p>
                   </div>
                 </>
               );
-            } else {
-              return;
-            }
-          })}
-        {realtimeData &&
-          realtimeData.GetAllMessages &&
-          user &&
-          realtimeData.GetAllMessages.map((message) => {
-            return (
-              <>
-                <div className={message.author.id === user.id ? feedStyles.yourmessage : feedStyles.message}>
-                  <p style={{ marginLeft: 5, marginTop: 10 }} className={feedStyles.text}>
-                    {message.body}
-                  </p>
-                </div>
-              </>
-            );
-          })}
-        )
+            })}
+          )
+        </div>
         {groupSelected === '' && (
           <>
             <div
@@ -195,6 +199,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
           </div>
         </div>
         <div className={feedStyles.leftsidebar}>
+          <h1 style={{ fontSize: 24, marginRight: 35, marginTop: 15, fontFamily: 'Lato' }}>Groups</h1>
           {data.GetGroups.length === 0 && <h1>CREATE ONE FATTY</h1>}
           {data.GetGroups.map((group) => {
             if (group.members.length === 2) {
@@ -202,7 +207,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                 <div
                   className={feedStyles.sidebarcontent}
                   style={{
-                    backgroundColor: groupSelected === group.id ? '#6588de' : '#6588de1a',
+                    backgroundColor: groupSelected === group.id ? '#8ab6d6' : '#6588de1a',
                     boxShadow: groupSelected === group.id ? '0px 8px 40px rgba(0, 72, 251, 0.3)' : '',
                   }}
                   key={group.id}
@@ -226,12 +231,14 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
 
                   <p
                     style={{
-                      fontWeight: 'bold',
+                      fontWeight: groupSelected === group.id ? 'bold' : 'normal',
+                      fontFamily: 'Lato',
                       color: groupSelected === group.id ? '#fff' : '#000',
                       position: 'relative',
                       bottom: 60,
                       left: 65,
                     }}
+                    className={feedStyles.groupName}
                   >
                     {group.name}
                   </p>
@@ -242,7 +249,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                 <div
                   className={feedStyles.sidebarcontent}
                   style={{
-                    backgroundColor: groupSelected === group.id ? '#6588de' : '#6588de1a',
+                    backgroundColor: groupSelected === group.id ? '#8ab6d6' : '#6588de1a',
                     boxShadow: groupSelected === group.id ? '0px 8px 40px rgba(0, 72, 251, 0.3)' : '',
                   }}
                   key={group.id}
@@ -257,11 +264,12 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                   </div>
                   <p
                     style={{
-                      fontWeight: 'bold',
-                      color: groupSelected === group.id ? '#fff' : '#000',
+                      fontWeight: groupSelected === group.id ? 'bold' : 'normal',
+                      fontFamily: 'Lato',
                       position: 'relative',
                       bottom: 50,
                       left: 75,
+                      color: groupSelected === group.id ? '#fff' : '#000',
                     }}
                   >
                     {group.name}
@@ -274,7 +282,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                 <div
                   className={feedStyles.sidebarcontent}
                   style={{
-                    backgroundColor: groupSelected === group.id ? '#6588de' : '#6588de1a',
+                    backgroundColor: groupSelected === group.id ? '#8ab6d6' : '#6588de1a',
                     boxShadow: groupSelected === group.id ? '0px 8px 40px rgba(0, 72, 251, 0.3)' : '',
                   }}
                   key={group.id}
@@ -299,7 +307,8 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
 
                   <p
                     style={{
-                      fontWeight: 'bold',
+                      fontWeight: groupSelected === group.id ? 'bold' : 'normal',
+                      fontFamily: 'Lato',
                       color: groupSelected === group.id ? '#fff' : '#000',
                       position: 'relative',
                       bottom: 85,
@@ -319,44 +328,50 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
             alt=""
             style={{ width: 70, height: 70, borderRadius: 35, marginTop: '3%', marginLeft: '3%' }}
           />
-          <p style={{ fontWeight: 'bold', color: '#000', position: 'relative', bottom: 55, left: 89 }}>
+          <p
+            style={{
+              color: '#000',
+              position: 'relative',
+              bottom: 55,
+              left: 89,
+              fontFamily: 'Lato',
+            }}
+          >
             {user && user.username}
           </p>{' '}
-          <p style={{ fontWeight: 'bold', color: '#6E6969', position: 'relative', bottom: 55, left: 89 }}>
+          <p style={{ fontFamily: 'Lato', color: '#6E6969', position: 'relative', bottom: 55, left: 89 }}>
             {user && user.email}
           </p>
         </div>
         {groupSelected !== '' && user ? (
-          <div style={{ textAlign: 'center' }}>
-            <input
-              className={feedStyles.inputfield}
-              placeholder="Send a message..."
-              value={messageVal}
-              onKeyPress={async (e) => {
-                if (e.key === 'Enter') {
-                  // Check If Text Is Empty Before Submitting
-                  if (!messageVal.trim()) {
-                    return;
-                  }
-                  await SendMessage({
-                    variables: {
-                      groupid: groupSelected,
-                      body: messageVal,
-                      author: {
-                        username: user.username,
-                        email: user.email,
-                        id: user.id,
-                        profile_picture: user.profile_picture,
-                      },
-                      messageid: generateId(24),
-                    },
-                  });
-                  setMessageVal('');
+          <input
+            className={feedStyles.inputfield}
+            placeholder="Send a message..."
+            value={messageVal}
+            onKeyPress={async (e) => {
+              if (e.key === 'Enter') {
+                // Check If Text Is Empty Before Submitting
+                if (!messageVal.trim()) {
+                  return;
                 }
-              }}
-              onChange={(e) => setMessageVal(e.currentTarget.value)}
-            />
-          </div>
+                await SendMessage({
+                  variables: {
+                    groupid: groupSelected,
+                    body: messageVal,
+                    author: {
+                      username: user.username,
+                      email: user.email,
+                      id: user.id,
+                      profile_picture: user.profile_picture,
+                    },
+                    messageid: generateId(24),
+                  },
+                });
+                setMessageVal('');
+              }
+            }}
+            onChange={(e) => setMessageVal(e.currentTarget.value)}
+          />
         ) : null}
       </div>
     </>
