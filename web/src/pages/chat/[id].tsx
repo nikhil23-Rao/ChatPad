@@ -97,7 +97,6 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   useEffect(() => {
     console.log('CURRENT ID', currId);
     setGroupSelected(currId);
-    window.scrollTo(0, document.body.scrollHeight);
     GetUser();
     if (window.screen.availHeight < 863 || window.screen.availWidth < 1800) {
       document.body.style.zoom = '80%';
@@ -122,7 +121,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
         <link rel="icon" href="/images/chatpadlogo.png" />
       </Head>
       <div style={{ backgroundColor: '#FCFDFC' }}>
-        <div style={{ overflowY: 'scroll', height: '110vh' }}>
+        <div style={{ overflowY: 'scroll', height: '88vh', overflowX: 'hidden' }}>
           {groupSelected !== '' &&
             messageData &&
             !messageLoading &&
@@ -164,8 +163,8 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                   <div
                     style={{
                       position: 'relative',
-                      left: message.author.id !== user.id ? 390 : 1710,
-                      top: message.author.id !== user.id ? 90 : 87,
+                      left: 394,
+                      top: 90,
                     }}
                   >
                     {message.author.id !== user.id ? (
@@ -180,7 +179,6 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                 </>
               );
             })}
-          )
         </div>
         {groupSelected === '' && (
           <>
@@ -342,7 +340,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
             }
           })}
         </div>
-        <div className={feedStyles.profile} style={{ backgroundColor: '#FCFDFC', flex: 1 }}>
+        <div className={feedStyles.profile}>
           <img
             src={user! && (user.profile_picture as string | undefined)}
             alt=""
@@ -364,34 +362,36 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
           </p>
         </div>
         {groupSelected !== '' && user ? (
-          <input
-            className={feedStyles.inputfield}
-            placeholder="Send a message..."
-            value={messageVal}
-            onKeyPress={async (e) => {
-              if (e.key === 'Enter') {
-                // Check If Text Is Empty Before Submitting
-                if (!messageVal.trim()) {
-                  return;
-                }
-                await SendMessage({
-                  variables: {
-                    groupid: groupSelected,
-                    body: messageVal,
-                    author: {
-                      username: user.username,
-                      email: user.email,
-                      id: user.id,
-                      profile_picture: user.profile_picture,
+          <div style={{ textAlign: 'center' }}>
+            <input
+              className={feedStyles.inputfield}
+              placeholder="Send a message..."
+              value={messageVal}
+              onKeyPress={async (e) => {
+                if (e.key === 'Enter') {
+                  // Check If Text Is Empty Before Submitting
+                  if (!messageVal.trim()) {
+                    return;
+                  }
+                  await SendMessage({
+                    variables: {
+                      groupid: groupSelected,
+                      body: messageVal,
+                      author: {
+                        username: user.username,
+                        email: user.email,
+                        id: user.id,
+                        profile_picture: user.profile_picture,
+                      },
+                      messageid: generateId(24),
                     },
-                    messageid: generateId(24),
-                  },
-                });
-                setMessageVal('');
-              }
-            }}
-            onChange={(e) => setMessageVal(e.currentTarget.value)}
-          />
+                  });
+                  setMessageVal('');
+                }
+              }}
+              onChange={(e) => setMessageVal(e.currentTarget.value)}
+            />
+          </div>
         ) : null}
       </div>
     </>

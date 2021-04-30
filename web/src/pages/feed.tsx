@@ -66,7 +66,6 @@ const Feed: React.FC<FeedProps> = ({}) => {
     variables: { groupid: groupSelected },
   });
   const [SendMessage] = useMutation(SEND_MESSAGE);
-  const [StartSubscription] = useMutation(START_SUBSCRIPTION);
   const { data: realtimeData } = useSubscription(GET_ALL_MESSAGES);
 
   useEffect(() => {
@@ -117,7 +116,6 @@ const Feed: React.FC<FeedProps> = ({}) => {
               return;
             }
           })}
-        )
         {groupSelected === '' && (
           <>
             <div
