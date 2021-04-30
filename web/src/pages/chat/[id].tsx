@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import jwtDecode from 'jwt-decode';
 import { useSession } from 'next-auth/client';
 import feedStyles from '../../styles/feed.module.css';
@@ -131,9 +131,17 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                 return (
                   <>
                     <div>
-                      {/* <div style={{ position: 'relative', left: 440, top: 80 }}>
-                        <img src={message.author.profile_picture} alt="" />
-                      </div> */}
+                      <div
+                        style={{
+                          position: 'relative',
+                          left: message.author.id !== user.id ? 390 : 1710,
+                          top: message.author.id !== user.id ? 90 : 86,
+                        }}
+                      >
+                        {message.author.id !== user.id ? (
+                          <img src={message.author.profile_picture} style={{ borderRadius: 100, width: 40 }} alt="" />
+                        ) : null}
+                      </div>
                       <div className={message.author.id === user.id ? feedStyles.yourmessage : feedStyles.message}>
                         <p style={{ marginLeft: 5, marginTop: 10 }} className={feedStyles.text}>
                           {message.body}
@@ -152,6 +160,17 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
             realtimeData.GetAllMessages.map((message) => {
               return (
                 <>
+                  <div
+                    style={{
+                      position: 'relative',
+                      left: message.author.id !== user.id ? 390 : 1710,
+                      top: message.author.id !== user.id ? 90 : 87,
+                    }}
+                  >
+                    {message.author.id !== user.id ? (
+                      <img src={message.author.profile_picture} style={{ borderRadius: 100, width: 40 }} alt="" />
+                    ) : null}
+                  </div>
                   <div className={message.author.id === user.id ? feedStyles.yourmessage : feedStyles.message}>
                     <p style={{ marginLeft: 5, marginTop: 10 }} className={feedStyles.text}>
                       {message.body}
@@ -322,7 +341,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
             }
           })}
         </div>
-        <div className={feedStyles.profile}>
+        <div className={feedStyles.profile} style={{ backgroundColor: '#FCFDFC', flex: 1 }}>
           <img
             src={user! && (user.profile_picture as string | undefined)}
             alt=""

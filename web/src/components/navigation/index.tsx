@@ -99,7 +99,7 @@ const Navigation = () => {
           <div className={tw(`hidden md:block`)}>
             <div className={tw(`ml-4 flex items-center md:ml-6`)}>
               <Button modifier="border-0 mr-2" onClick={() => router.push('/login')}>
-                Log in
+                Login
               </Button>
               <Button primary onClick={() => router.push('/register')}>
                 Register
