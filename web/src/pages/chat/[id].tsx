@@ -120,8 +120,8 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
         <title>ChatPad</title>
         <link rel="icon" href="/images/chatpadlogo.png" />
       </Head>
-      <div style={{ backgroundColor: '#FCFDFC' }}>
-        <div style={{ overflowY: 'scroll', height: '88vh', overflowX: 'hidden' }}>
+      <div>
+        <div style={{ overflowY: 'scroll', height: '88.9vh', overflowX: 'hidden' }}>
           {groupSelected !== '' &&
             messageData &&
             !messageLoading &&
@@ -180,23 +180,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
               );
             })}
         </div>
-        {groupSelected === '' && (
-          <>
-            <div
-              style={{
-                position: 'fixed',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-              }}
-            >
-              <img src="/images/chatpadlogo.png" style={{ borderRadius: 100 }} alt="" />
-            </div>
-            <p style={{ top: '62%', position: 'fixed', left: '37%' }}>
-              To start chatting select a group on the left hand side, or create a new group.
-            </p>
-          </>
-        )}
+
         <div style={{ top: -10, right: 80, position: 'absolute' }}>
           <div className="outer-menu">
             <input className="checkbox-toggle" type="checkbox" />
