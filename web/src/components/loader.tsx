@@ -7,7 +7,7 @@ import LinearProgress from '@material-ui/core/LinearProgress';
 const useStylesFacebook = makeStyles((theme: Theme) =>
   createStyles({
     root: {
-      position: 'relative',
+      position: 'fixed',
       top: '50%',
       left: '50%',
       transform: 'translate(-50%, -50%)',
