@@ -13,6 +13,7 @@ import Head from 'next/head';
 import { GET_ALL_MESSAGES } from '@/apollo/Subscriptions';
 import { useRouter } from 'next/dist/client/router';
 import { GetStaticProps } from 'next';
+import { Loader } from '@/components/loader';
 
 interface ChatProps {
   currId: string;
@@ -112,7 +113,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
     console.log('REALTIME', realtimeData);
   }, [session, groupSelected, messageData, realtimeData]);
 
-  if (loading) return <h1>Loading...</h1>;
+  if (loading) return <Loader />;
 
   return (
     <>
