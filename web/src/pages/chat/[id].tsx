@@ -3,7 +3,7 @@ import jwtDecode from 'jwt-decode';
 import { useSession } from 'next-auth/client';
 import feedStyles from '../../styles/feed.module.css';
 import client from '@/../apollo-client';
-import { GET_CHAT_PATHS, GET_GROUPS, GET_INITIAL_MESSAGES, GET_USER_ID } from '../../apollo/Queries';
+import { GET_CHAT_PATHS, GET_GROUPS, GET_GROUP_NAME, GET_INITIAL_MESSAGES, GET_USER_ID } from '../../apollo/Queries';
 import { Search } from '../../components/Search';
 import { useMutation, useQuery, useSubscription } from '@apollo/client';
 import { IconButton } from '@material-ui/core';
@@ -90,11 +90,14 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   };
 
   const { data, loading } = useQuery(GET_GROUPS, { variables: { authorid: user?.id } });
-  const { data: messageData, loading: messageLoading } = useQuery(GET_INITIAL_MESSAGES, {
+  const { data: messageData, loading: messageLoading, refetch } = useQuery(GET_INITIAL_MESSAGES, {
     variables: { groupid: groupSelected },
   });
   const [SendMessage] = useMutation(SEND_MESSAGE);
   const { data: realtimeData } = useSubscription(GET_ALL_MESSAGES);
+  const { data: GroupNameData, loading: GroupNameLoading } = useQuery(GET_GROUP_NAME, {
+    variables: { groupid: groupSelected },
+  });
 
   const playSound = () => {
     const audio = document.getElementById('sound');
@@ -104,29 +107,42 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   };
 
   useEffect(() => {
-    animateScroll.scrollToBottom({
-      containerId: 'chatDiv',
-      smooth: false,
-      duration: 0,
-    });
+    setTimeout(() => {
+      animateScroll.scrollToBottom({
+        containerId: 'chatDiv',
+        smooth: false,
+        duration: 0,
+      });
+    }, 500);
+
     console.log('CURRENT ID', currId);
     setGroupSelected(currId);
     GetUser();
     if (window.screen.availHeight < 863 || window.screen.availWidth < 1800) {
       document.body.style.zoom = '80%';
     }
-    if (data) {
-      console.log(data);
-    }
+    // if (data) {
+    //   console.log(data);
+    // }
     if (realtimeData) {
       console.log(realtimeData);
     }
-    console.log(messageData);
-    console.log(groupSelected);
-    console.log('REALTIME', realtimeData);
-  }, [session, groupSelected, messageData, realtimeData, animateScroll]);
+    // console.log(messageData);
+    // console.log(groupSelected);
+    // console.log('REALTIME', realtimeData);
+  }, [session, groupSelected, messageData]);
+
+  //@TODO
+  // useEffect(() => {
+  //   document.addEventListener('visibilitychange', function () {
+  //     if (document.visibilityState === 'hidden') {
+  //       playSound();
+  //     } else return;
+  //   });
+  // }, [realtimeData]);
 
   if (loading) return <Loader />;
+  if (GroupNameLoading) return <Loader />;
 
   return (
     <>
@@ -138,7 +154,69 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
         <link rel="icon" href="/images/chatpadlogo.png" />
       </Head>
       <div>
-        <div style={{ overflowY: 'scroll', height: '88.9vh', overflowX: 'hidden' }} id="chatDiv" ref={chatRef as any}>
+        {GroupNameData && groupSelected !== '' && groupSelected !== undefined && groupSelected !== null && (
+          <nav className="navbar navbar-light" style={{ background: 'transparent' }}>
+            <span className="navbar-brand mb-0 h1" style={{ marginLeft: 500, display: 'inline' }}>
+              {GroupNameData.GetGroupName.members.length === 1 ? (
+                <img
+                  src={GroupNameData.GetGroupName.members[0].profile_picture}
+                  style={{ width: 40, height: 40, borderRadius: 100, display: 'inline', marginRight: 10 }}
+                  alt=""
+                />
+              ) : GroupNameData.GetGroupName.members.length === 2 ? (
+                <>
+                  <img
+                    src={GroupNameData.GetGroupName.members[0].profile_picture}
+                    style={{ width: 30, height: 30, borderRadius: 100, display: 'inline' }}
+                    alt=""
+                  />{' '}
+                  <img
+                    src={GroupNameData.GetGroupName.members[1].profile_picture}
+                    style={{
+                      width: 30,
+                      height: 30,
+                      borderRadius: 100,
+                      display: 'inline',
+                      marginRight: 10,
+                      position: 'relative',
+                      top: -10,
+                      right: 10,
+                    }}
+                    alt=""
+                  />
+                </>
+              ) : null}
+              <p style={{ display: 'inline', fontFamily: 'Lato', fontWeight: 'bold', fontSize: 28 }}>
+                {GroupNameData.GetGroupName.name}
+              </p>
+              <p
+                style={{
+                  fontSize: 12,
+                  fontFamily: 'Lato',
+                  position: 'relative',
+                  textAlign: 'left',
+                  bottom: 5,
+                  marginLeft: GroupNameData.GetGroupName.members.length === 2 ? 75 : 50,
+                }}
+              >
+                Last Active 2 Hours Ago
+              </p>
+            </span>
+          </nav>
+        )}
+        <div
+          style={{
+            overflowY: 'scroll',
+            height:
+              (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
+              (typeof window !== 'undefined' && window.screen.availWidth) < 1800
+                ? '110vh'
+                : '82vh', // Screen size monitor different height from laptop
+            overflowX: 'hidden',
+          }}
+          id="chatDiv"
+          ref={chatRef as any}
+        >
           {groupSelected !== '' &&
             messageData &&
             !messageLoading &&
@@ -159,6 +237,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                           <img src={message.author.profile_picture} style={{ borderRadius: 100, width: 40 }} alt="" />
                         ) : null}
                       </div>
+
                       <div className={message.author.id === user.id ? feedStyles.yourmessage : feedStyles.message}>
                         <p style={{ marginLeft: 5, marginTop: 10 }} className={feedStyles.text}>
                           {message.body}
@@ -175,9 +254,6 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
             realtimeData.GetAllMessages &&
             user &&
             realtimeData.GetAllMessages.map((message) => {
-              if (message.author.id !== user.id) {
-                playSound();
-              }
               return (
                 <>
                   <div
@@ -222,7 +298,6 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
         </div>
         <div className={feedStyles.leftsidebar}>
           <h1 style={{ fontSize: 24, marginRight: 35, marginTop: 15, fontFamily: 'Lato' }}>Groups</h1>
-          {data.GetGroups.length === 0 && <h1>CREATE ONE FATTY</h1>}
           {data.GetGroups.map((group) => {
             if (group.members.length === 2) {
               return (
@@ -391,6 +466,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                     },
                   });
                   setMessageVal('');
+                  await refetch();
                 }
               }}
               onChange={(e) => setMessageVal(e.currentTarget.value)}

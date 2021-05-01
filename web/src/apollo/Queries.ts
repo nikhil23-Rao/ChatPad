@@ -52,3 +52,18 @@ export const GET_CHAT_PATHS = gql`
     GetChatPaths
   }
 `;
+
+export const GET_GROUP_NAME = gql`
+  query GetGroupName($groupid: String) {
+    GetGroupName(groupid: $groupid) {
+      members {
+        username
+        profile_picture
+        email
+        id
+      }
+      name
+      id
+    }
+  }
+`;

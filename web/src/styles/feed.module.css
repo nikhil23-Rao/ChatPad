@@ -115,8 +115,8 @@
   left: 440px;
   display: block;
   overflow: hidden;
-  background: #eeeeee;
-  border-radius: 0px 14px 14px 14px;
+  background: #e5e5e9;
+  border-radius: 0px 50px 50px 50px;
 }
 
 .yourmessage {
@@ -128,8 +128,9 @@
   margin-bottom: 10px;
   display: block;
   overflow: hidden;
-  background: #8ab6d6;
-  border-radius: 14px 0px 14px 14px;
+  background: #0993f6;
+  color: #fff;
+  border-radius: 50px 0px 50px 50px;
 }
 
 .text {
