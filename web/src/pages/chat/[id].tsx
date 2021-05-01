@@ -99,6 +99,8 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   useEffect(() => {
     animateScroll.scrollToBottom({
       containerId: 'chatDiv',
+      smooth: false,
+      duration: 0,
     });
     console.log('CURRENT ID', currId);
     setGroupSelected(currId);
@@ -142,8 +144,8 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                       <div
                         style={{
                           position: 'relative',
-                          left: message.author.id !== user.id ? 390 : 1710,
-                          top: message.author.id !== user.id ? 90 : 86,
+                          left: 392,
+                          top: 120,
                         }}
                       >
                         {message.author.id !== user.id ? (
@@ -171,8 +173,8 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                   <div
                     style={{
                       position: 'relative',
-                      left: 394,
-                      top: 90,
+                      left: 392,
+                      top: 120,
                     }}
                   >
                     {message.author.id !== user.id ? (
