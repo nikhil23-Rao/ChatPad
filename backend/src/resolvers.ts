@@ -63,6 +63,10 @@ const resolvers = {
       }
       return ids;
     },
+    GetGroupName: async (_: void, args: { groupid: string }) => {
+      const group = await Group.findOne({ where: { id: args.groupid } });
+      return group;
+    },
   },
   Mutation: {
     Register: async (_: void, args: UserType) => {
