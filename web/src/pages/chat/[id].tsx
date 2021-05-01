@@ -96,6 +96,13 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   const [SendMessage] = useMutation(SEND_MESSAGE);
   const { data: realtimeData } = useSubscription(GET_ALL_MESSAGES);
 
+  const playSound = () => {
+    const audio = document.getElementById('sound');
+    if (audio) {
+      (audio as HTMLMediaElement).play();
+    }
+  };
+
   useEffect(() => {
     animateScroll.scrollToBottom({
       containerId: 'chatDiv',
@@ -168,6 +175,9 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
             realtimeData.GetAllMessages &&
             user &&
             realtimeData.GetAllMessages.map((message) => {
+              if (message.author.id !== user.id) {
+                playSound();
+              }
               return (
                 <>
                   <div
