@@ -168,7 +168,11 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
         {GroupNameData && groupSelected !== '' && groupSelected !== undefined && groupSelected !== null && (
           <nav
             className="navbar navbar-light"
-            style={{ background: darkMode ? '#303437' : 'transparent', position: 'relative', height: 100 }}
+            style={{
+              background: darkMode ? '#1A202C' : 'transparent',
+              position: 'relative',
+              height: 100,
+            }}
           >
             <span className="navbar-brand mb-0 h1" style={{ marginLeft: 500, display: 'inline' }}>
               {GroupNameData.GetGroupName.members.length === 1 ? (
@@ -281,7 +285,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                 ? '90vh'
                 : '69vh', // Screen size monitor different height from laptop
             overflowX: 'hidden',
-            backgroundColor: darkMode ? '#303437' : '#fff',
+            backgroundColor: darkMode ? '#1A202C' : '#fff',
           }}
           id="chatDiv"
           ref={chatRef as any}
@@ -397,7 +401,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
               />
             </div>
             <div className="menu">
-              <div style={{ marginRight: '22%', backgroundColor: darkMode ? '#303437' : '' }}>
+              <div style={{ marginRight: '22%', backgroundColor: darkMode ? '#1A202C' : '' }}>
                 <div>
                   <div className="mt-1" style={{ width: '300%' }}>
                     <Search />
@@ -409,7 +413,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
         </div>
         <div
           className={feedStyles.leftsidebar}
-          style={{ backgroundColor: darkMode ? '#303437' : '#fff', borderRightColor: darkMode ? '#fff' : '' }}
+          style={{ backgroundColor: darkMode ? '#1A202C' : '#fff', borderRightColor: darkMode ? '#fff' : '' }}
         >
           <h1
             style={{
@@ -545,7 +549,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
         </div>
         <div
           className={feedStyles.profile}
-          style={{ backgroundColor: darkMode ? '#303437' : '#fff', borderRightColor: darkMode ? '#fff' : '' }}
+          style={{ backgroundColor: darkMode ? '#1A202C' : '#fff', borderRightColor: darkMode ? '#fff' : '' }}
         >
           <img
             src={user! && (user.profile_picture as string | undefined)}
@@ -575,16 +579,17 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
             {user && user.email}
           </p>
         </div>
-        <div style={{ height: '20vh', backgroundColor: darkMode ? '#303437' : '#fff' }}></div>
+        <div style={{ height: '20vh', backgroundColor: darkMode ? '#1A202C' : '#fff' }}></div>
         {groupSelected !== '' && user ? (
           <div
             style={{
               textAlign: 'center',
-              backgroundColor: darkMode ? '#303437' : '#fff',
+              backgroundColor: darkMode ? '#1A202C' : '#fff',
             }}
           >
             <Input
               size="lg"
+              _placeholder={{ color: '#fff' }}
               placeholder="Send a message..."
               value={messageVal}
               style={{

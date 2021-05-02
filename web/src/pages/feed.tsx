@@ -111,7 +111,16 @@ const Feed: React.FC<FeedProps> = ({}) => {
         <title>ChatPad</title>
         <link rel="icon" href="/images/chatpadlogo.png" />
       </Head>
-      <div style={{ height: '100vh', backgroundColor: darkMode ? '#303437' : '' }}></div>
+      <div
+        style={{
+          height:
+            (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
+            (typeof window !== 'undefined' && window.screen.availWidth) < 1800
+              ? '150vh'
+              : '100vh',
+          backgroundColor: darkMode ? '#1A202C' : '',
+        }}
+      ></div>
       <div>
         {groupSelected === '' && (
           <>
@@ -124,8 +133,8 @@ const Feed: React.FC<FeedProps> = ({}) => {
             >
               <i className="fa fa-paper-plane fa-5x" style={{ color: darkMode ? '#fff' : '#000' }}></i>
             </div>
-            <p style={{ top: '62%', position: 'fixed', left: '39.5%', color: darkMode ? '#fff' : '#000' }}>
-              To start chatting select a group on the left hand side, or create a new group.
+            <p style={{ top: '62%', position: 'fixed', left: '39%', color: darkMode ? '#fff' : '#000' }}>
+              To start, select a group on the left hand side or create a new group.
             </p>
           </>
         )}
@@ -150,7 +159,7 @@ const Feed: React.FC<FeedProps> = ({}) => {
         </div>
         <div
           className={feedStyles.leftsidebar}
-          style={{ backgroundColor: darkMode ? '#303437' : '#fff', borderRightColor: darkMode ? '#fff' : '' }}
+          style={{ backgroundColor: darkMode ? '#1A202C' : '#fff', borderRightColor: darkMode ? '#fff' : '' }}
         >
           <h1
             style={{
@@ -286,7 +295,7 @@ const Feed: React.FC<FeedProps> = ({}) => {
         </div>
         <div
           className={feedStyles.profile}
-          style={{ backgroundColor: darkMode ? '#303437' : '#fff', borderRightColor: darkMode ? '#fff' : '' }}
+          style={{ backgroundColor: darkMode ? '#1A202C' : '#fff', borderRightColor: darkMode ? '#fff' : '' }}
         >
           <img
             src={user! && (user.profile_picture as string | undefined)}
