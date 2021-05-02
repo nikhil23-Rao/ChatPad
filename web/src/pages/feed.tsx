@@ -18,6 +18,7 @@ interface FeedProps {}
 
 const Feed: React.FC<FeedProps> = ({}) => {
   const [groupSelected, setGroupSelected] = useState('');
+  const [darkMode, setDarkMode] = useState(false);
   const [messageVal, setMessageVal] = useState('');
   const [session] = useSession();
   const [user, setUser] = useState<{
@@ -48,6 +49,20 @@ const Feed: React.FC<FeedProps> = ({}) => {
         dark_theme: result.data.GetUserId[1],
         profile_picture: session.user.image!,
       };
+      setDarkMode(currentUser.dark_theme === 'true' ? true : false);
+      setUser(currentUser);
+    }
+    if (token) {
+      const currentUser: {
+        username: string;
+        email: string;
+        id: string;
+        profile_picture: string;
+        iat: string;
+        oauth: boolean;
+        dark_theme: string;
+      } = jwtDecode(token!);
+      setDarkMode(currentUser.dark_theme === 'true' ? true : false);
       setUser(currentUser);
     }
     if (token) {
@@ -96,40 +111,20 @@ const Feed: React.FC<FeedProps> = ({}) => {
         <title>ChatPad</title>
         <link rel="icon" href="/images/chatpadlogo.png" />
       </Head>
-      <div style={{ backgroundColor: '#FCFDFC' }}>
-        {groupSelected !== '' &&
-          messageData &&
-          !messageLoading &&
-          user &&
-          messageData.GetInitialMessages.map((message) => {
-            if (!realtimeData) {
-              return (
-                <>
-                  <div>
-                    <div className={message.author.id === user.id ? feedStyles.yourmessage : feedStyles.message}>
-                      <p style={{ marginLeft: 5, marginTop: 10 }} className={feedStyles.text}>
-                        {message.body}
-                      </p>
-                    </div>
-                  </div>
-                </>
-              );
-            } else {
-              return;
-            }
-          })}
+      <div style={{ height: '100vh', backgroundColor: darkMode ? '#303437' : '' }}></div>
+      <div>
         {groupSelected === '' && (
           <>
             <div
               style={{
                 position: 'fixed',
-                top: '40%',
+                top: '46%',
                 left: '50%',
               }}
             >
-              <img src="/images/chatpadlogo.png" alt="" />
+              <i className="fa fa-paper-plane fa-5x" style={{ color: darkMode ? '#fff' : '#000' }}></i>
             </div>
-            <p style={{ top: '62%', position: 'fixed', left: '39.5%' }}>
+            <p style={{ top: '62%', position: 'fixed', left: '39.5%', color: darkMode ? '#fff' : '#000' }}>
               To start chatting select a group on the left hand side, or create a new group.
             </p>
           </>
@@ -153,16 +148,28 @@ const Feed: React.FC<FeedProps> = ({}) => {
             </div>
           </div>
         </div>
-        <div className={feedStyles.leftsidebar}>
-          <h1 style={{ fontSize: 24, marginRight: 35, marginTop: 15, fontFamily: 'Lato' }}>Groups</h1>
-          {data.GetGroups.length === 0 && <h1>CREATE ONE FATTY</h1>}
+        <div
+          className={feedStyles.leftsidebar}
+          style={{ backgroundColor: darkMode ? '#303437' : '#fff', borderRightColor: darkMode ? '#fff' : '' }}
+        >
+          <h1
+            style={{
+              fontSize: 24,
+              marginRight: 35,
+              marginTop: 15,
+              fontFamily: 'Lato',
+              color: darkMode ? '#fff' : '#000',
+            }}
+          >
+            Groups
+          </h1>
           {data.GetGroups.map((group) => {
             if (group.members.length === 2) {
               return (
                 <div
                   className={feedStyles.sidebarcontent}
                   style={{
-                    backgroundColor: groupSelected === group.id ? '#6588de' : '#6588de1a',
+                    backgroundColor: groupSelected === group.id ? '#8ab6d6' : darkMode ? '#fff' : '#6588de1a',
                     boxShadow: groupSelected === group.id ? '0px 8px 40px rgba(0, 72, 251, 0.3)' : '',
                   }}
                   key={group.id}
@@ -186,11 +193,14 @@ const Feed: React.FC<FeedProps> = ({}) => {
 
                   <p
                     style={{
+                      fontWeight: groupSelected === group.id ? 'bold' : 'normal',
+                      fontFamily: 'Lato',
                       color: groupSelected === group.id ? '#fff' : '#000',
                       position: 'relative',
                       bottom: 60,
                       left: 65,
                     }}
+                    className={feedStyles.groupName}
                   >
                     {group.name}
                   </p>
@@ -201,7 +211,7 @@ const Feed: React.FC<FeedProps> = ({}) => {
                 <div
                   className={feedStyles.sidebarcontent}
                   style={{
-                    backgroundColor: groupSelected === group.id ? '#6588de' : '#6588de1a',
+                    backgroundColor: groupSelected === group.id ? '#8ab6d6' : darkMode ? '#fff' : '#6588de1a',
                     boxShadow: groupSelected === group.id ? '0px 8px 40px rgba(0, 72, 251, 0.3)' : '',
                   }}
                   key={group.id}
@@ -216,10 +226,12 @@ const Feed: React.FC<FeedProps> = ({}) => {
                   </div>
                   <p
                     style={{
-                      color: groupSelected === group.id ? '#fff' : '#000',
+                      fontWeight: groupSelected === group.id ? 'bold' : 'normal',
+                      fontFamily: 'Lato',
                       position: 'relative',
                       bottom: 50,
                       left: 75,
+                      color: groupSelected === group.id ? '#fff' : '#000',
                     }}
                   >
                     {group.name}
@@ -232,17 +244,17 @@ const Feed: React.FC<FeedProps> = ({}) => {
                 <div
                   className={feedStyles.sidebarcontent}
                   style={{
-                    backgroundColor: groupSelected === group.id ? '#6588de' : '#6588de1a',
+                    backgroundColor: groupSelected === group.id ? '#8ab6d6' : darkMode ? '#fff' : '#6588de1a',
                     boxShadow: groupSelected === group.id ? '0px 8px 40px rgba(0, 72, 251, 0.3)' : '',
                   }}
                   key={group.id}
                   onClick={() => (window.location.href = `/chat/${group.id}`)}
                 >
-                  <div style={{ marginTop: '5%', marginLeft: '5%', paddingTop: '3%' }}>
+                  <div style={{ marginTop: '5%', marginLeft: '6%', paddingTop: '3%' }}>
                     <img
                       src={group.members[0].profile_picture}
                       alt=""
-                      style={{ width: 30, height: 30, borderRadius: 25 }}
+                      style={{ width: 30, height: 30, borderRadius: 25, position: 'relative', top: 3 }}
                     />
                   </div>
 
@@ -257,6 +269,8 @@ const Feed: React.FC<FeedProps> = ({}) => {
 
                   <p
                     style={{
+                      fontWeight: groupSelected === group.id ? 'bold' : 'normal',
+                      fontFamily: 'Lato',
                       color: groupSelected === group.id ? '#fff' : '#000',
                       position: 'relative',
                       bottom: 85,
@@ -270,51 +284,38 @@ const Feed: React.FC<FeedProps> = ({}) => {
             }
           })}
         </div>
-        <div className={feedStyles.profile}>
+        <div
+          className={feedStyles.profile}
+          style={{ backgroundColor: darkMode ? '#303437' : '#fff', borderRightColor: darkMode ? '#fff' : '' }}
+        >
           <img
             src={user! && (user.profile_picture as string | undefined)}
             alt=""
             style={{ width: 70, height: 70, borderRadius: 35, marginTop: '3%', marginLeft: '3%' }}
           />
-          <p style={{ fontFamily: 'Lato', color: '#000', position: 'relative', bottom: 55, left: 89 }}>
+          <p
+            style={{
+              color: darkMode ? '#EDEDEE' : '#000',
+              position: 'relative',
+              bottom: 55,
+              left: 89,
+              fontFamily: 'Lato',
+            }}
+          >
             {user && user.username}
           </p>{' '}
-          <p style={{ fontFamily: 'Lato', color: '#6E6969', position: 'relative', bottom: 55, left: 89 }}>
+          <p
+            style={{
+              fontFamily: 'Lato',
+              color: darkMode ? '#FDFDFD' : '#6E6969',
+              position: 'relative',
+              bottom: 55,
+              left: 89,
+            }}
+          >
             {user && user.email}
           </p>
         </div>
-        {groupSelected !== '' && user ? (
-          <div style={{ textAlign: 'center' }}>
-            <input
-              className={feedStyles.inputfield}
-              placeholder="Send a message..."
-              value={messageVal}
-              onKeyPress={async (e) => {
-                if (e.key === 'Enter') {
-                  // Check If Text Is Empty Before Submitting
-                  if (!messageVal.trim()) {
-                    return;
-                  }
-                  await SendMessage({
-                    variables: {
-                      groupid: groupSelected,
-                      body: messageVal,
-                      author: {
-                        username: user.username,
-                        email: user.email,
-                        id: user.id,
-                        profile_picture: user.profile_picture,
-                      },
-                      messageid: generateId(24),
-                    },
-                  });
-                  setMessageVal('');
-                }
-              }}
-              onChange={(e) => setMessageVal(e.currentTarget.value)}
-            />
-          </div>
-        ) : null}
       </div>
     </>
   );

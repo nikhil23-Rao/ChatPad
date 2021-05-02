@@ -123,7 +123,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
         smooth: false,
         duration: 0,
       });
-    }, 168); // Load time
+    }, 500); // Load time
 
     console.log('CURRENT ID', currId);
     setGroupSelected(currId);
@@ -308,9 +308,25 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                       </div>
 
                       <div className={message.author.id === user.id ? feedStyles.yourmessage : feedStyles.message}>
-                        <p style={{ marginLeft: 5, marginTop: 10, fontSize: 23 }} className={feedStyles.text}>
-                          {message.body}
-                        </p>
+                        {!message.body.includes('https://') ? (
+                          <p style={{ marginLeft: 5, marginTop: 10, fontSize: 20 }} className={feedStyles.text}>
+                            {message.body}
+                          </p>
+                        ) : (
+                          <p
+                            style={{
+                              marginLeft: 5,
+                              marginTop: 10,
+                              fontSize: 20,
+                              cursor: 'pointer',
+                              textDecoration: 'underline',
+                            }}
+                            onClick={() => window.open(message.body)}
+                            className={feedStyles.text}
+                          >
+                            {message.body}
+                          </p>
+                        )}
                       </div>
                     </div>
                   </>
@@ -337,9 +353,25 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                   </div> */}
 
                   <div className={message.author.id === user.id ? feedStyles.yourmessage : feedStyles.message}>
-                    <p style={{ marginLeft: 5, marginTop: 10, fontSize: 20 }} className={feedStyles.text}>
-                      {message.body}
-                    </p>
+                    {!message.body.includes('https://') ? (
+                      <p style={{ marginLeft: 5, marginTop: 10, fontSize: 20 }} className={feedStyles.text}>
+                        {message.body}
+                      </p>
+                    ) : (
+                      <p
+                        style={{
+                          marginLeft: 5,
+                          marginTop: 10,
+                          fontSize: 20,
+                          cursor: 'pointer',
+                          textDecoration: 'underline',
+                        }}
+                        onClick={() => window.open(message.body)}
+                        className={feedStyles.text}
+                      >
+                        {message.body}
+                      </p>
+                    )}
                   </div>
                 </>
               );
@@ -365,7 +397,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
               />
             </div>
             <div className="menu">
-              <div style={{ marginRight: '22%' }}>
+              <div style={{ marginRight: '22%', backgroundColor: darkMode ? '#303437' : '' }}>
                 <div>
                   <div className="mt-1" style={{ width: '300%' }}>
                     <Search />
