@@ -111,7 +111,6 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
 
   useEffect(() => {
     console.log(window.scrollY);
-    window.scrollTo(0, document.body.scrollHeight);
     setTimeout(() => {
       animateScroll.scrollToBottom({
         containerId: 'chatDiv',
@@ -129,13 +128,14 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
     // if (data) {
     //   console.log(data);
     // }
+
     if (realtimeData) {
       console.log(realtimeData);
     }
     // console.log(messageData);
     // console.log(groupSelected);
     // console.log('REALTIME', realtimeData);
-  }, [session, groupSelected, messageData, darkMode]);
+  }, [session, groupSelected, messageData, realtimeData]);
 
   //@TODO
   // useEffect(() => {
@@ -162,7 +162,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
         {GroupNameData && groupSelected !== '' && groupSelected !== undefined && groupSelected !== null && (
           <nav
             className="navbar navbar-light"
-            style={{ background: darkMode ? '#303437' : 'transparent', top: 28, position: 'relative', height: 100 }}
+            style={{ background: darkMode ? '#303437' : 'transparent', position: 'relative', height: 100 }}
           >
             <span className="navbar-brand mb-0 h1" style={{ marginLeft: 500, display: 'inline' }}>
               {GroupNameData.GetGroupName.members.length === 1 ? (
@@ -268,10 +268,11 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
         <div
           style={{
             overflowY: 'scroll',
+            flex: 1,
             height:
               (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
               (typeof window !== 'undefined' && window.screen.availWidth) < 1800
-                ? '106vh'
+                ? '90vh'
                 : '86vh', // Screen size monitor different height from laptop
             overflowX: 'hidden',
             backgroundColor: darkMode ? '#303437' : '#fff',
@@ -328,6 +329,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                       <img src={message.author.profile_picture} style={{ borderRadius: 100, width: 40 }} alt="" />
                     ) : null}
                   </div> */}
+
                   <div className={message.author.id === user.id ? feedStyles.yourmessage : feedStyles.message}>
                     <p style={{ marginLeft: 5, marginTop: 10 }} className={feedStyles.text}>
                       {message.body}
@@ -528,6 +530,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
             {user && user.email}
           </p>
         </div>
+        <div style={{ height: '20vh', backgroundColor: darkMode ? '#303437' : '#fff' }}></div>
         {groupSelected !== '' && user ? (
           <div
             style={{
@@ -543,7 +546,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                 width: '50%',
                 position: 'relative',
                 borderRadius: 100,
-                bottom: 3,
+                top: -100,
                 height: 60,
                 right: -100,
                 color: darkMode ? '#fff' : '#000',
