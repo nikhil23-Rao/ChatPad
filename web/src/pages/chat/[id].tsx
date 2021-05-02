@@ -48,6 +48,7 @@ export const getStaticProps = async (context) => {
 
 const Chat: React.FC<ChatProps> = ({ currId }) => {
   const [groupSelected, setGroupSelected] = useState('');
+  const [bgColor, setBgColor] = useState('');
   const [messageVal, setMessageVal] = useState('');
   const [session] = useSession();
   const chatRef = useRef<null | HTMLElement>();
@@ -109,13 +110,15 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   };
 
   useEffect(() => {
-    setTimeout(() => {
-      animateScroll.scrollToBottom({
-        containerId: 'chatDiv',
-        smooth: false,
-        duration: 0,
-      });
-    }, 500);
+    console.log(window.scrollY);
+    window.scrollTo(0, document.body.scrollHeight);
+    // setTimeout(() => {
+    //   animateScroll.scrollToBottom({
+    //     containerId: 'chatDiv',
+    //     smooth: false,
+    //     duration: 0,
+    //   });
+    // }, 500);
 
     console.log('CURRENT ID', currId);
     setGroupSelected(currId);
@@ -157,7 +160,10 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
       </Head>
       <div>
         {GroupNameData && groupSelected !== '' && groupSelected !== undefined && groupSelected !== null && (
-          <nav className="navbar navbar-light" style={{ background: darkMode ? '#303437' : 'transparent' }}>
+          <nav
+            className="navbar navbar-light"
+            style={{ background: darkMode ? '#303437' : 'transparent', top: 28, position: 'relative', height: 100 }}
+          >
             <span className="navbar-brand mb-0 h1" style={{ marginLeft: 500, display: 'inline' }}>
               {GroupNameData.GetGroupName.members.length === 1 ? (
                 <img
@@ -266,10 +272,9 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
               (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
               (typeof window !== 'undefined' && window.screen.availWidth) < 1800
                 ? '106vh'
-                : '82vh', // Screen size monitor different height from laptop
+                : '86vh', // Screen size monitor different height from laptop
             overflowX: 'hidden',
             backgroundColor: darkMode ? '#303437' : '#fff',
-            flex: 1,
           }}
           id="chatDiv"
           ref={chatRef as any}
@@ -313,7 +318,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
             realtimeData.GetAllMessages.map((message) => {
               return (
                 <>
-                  <div
+                  {/* <div
                     style={{
                       position: 'relative',
                       left: 392,
@@ -322,7 +327,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                     {message.author.id !== user.id ? (
                       <img src={message.author.profile_picture} style={{ borderRadius: 100, width: 40 }} alt="" />
                     ) : null}
-                  </div>
+                  </div> */}
                   <div className={message.author.id === user.id ? feedStyles.yourmessage : feedStyles.message}>
                     <p style={{ marginLeft: 5, marginTop: 10 }} className={feedStyles.text}>
                       {message.body}
@@ -538,7 +543,8 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                 width: '50%',
                 position: 'relative',
                 borderRadius: 100,
-
+                bottom: 3,
+                height: 60,
                 right: -100,
                 color: darkMode ? '#fff' : '#000',
               }}

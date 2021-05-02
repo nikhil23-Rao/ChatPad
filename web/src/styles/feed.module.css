@@ -45,21 +45,6 @@
   top: 0px;
 }
 
-.inputfield {
-  position: fixed;
-  width: 1200px;
-  margin-bottom: 100px;
-  top: 768px;
-  outline-width: 0;
-  height: 50px;
-  margin-left: 6%;
-  left: 300px;
-  border: 1px solid rgba(150, 169, 186, 0.7);
-  box-sizing: border-box;
-  border-radius: 14px;
-  padding-left: 15px;
-}
-
 .chattext {
   font-style: normal;
   font-weight: normal;
@@ -71,7 +56,6 @@
 }
 
 .chatprofile {
-  position: absolute;
   width: 44px;
   height: 44px;
   left: 410px;
@@ -118,9 +102,9 @@
 .message {
   position: relative;
   width: 506px;
-  bottom: 5px;
-  top: 80px;
+  bottom: 0px;
   left: 440px;
+  margin-bottom: 10px;
   display: block;
   overflow: hidden;
   background: #e5e5e9;
@@ -130,13 +114,13 @@
 .yourmessage {
   position: relative;
   width: 506px;
-  bottom: 5px;
-  top: 80px;
+  bottom: 0px;
   left: 1200px;
   margin-bottom: 10px;
   display: block;
   overflow: hidden;
-  background: #0993f6;
+  background: linear-gradient(#0993f6, #0993f6) 0 100px/100% 100% no-repeat fixed,
+    linear-gradient(rgb(255, 143, 178) 0%, rgb(167, 151, 255) 50%, rgb(0, 229, 255) 100%) center/100% 100%;
   color: #fff;
   border-radius: 50px 0px 50px 50px;
 }
@@ -145,20 +129,6 @@
   padding: 10px 20px;
   font-family: 'Lato', sans-serif;
   font-family: 'Libre Franklin', sans-serif;
-}
-
-.sendbutton {
-  position: relative;
-  width: 80px;
-  height: 40px;
-  color: #fff;
-  border-radius: 14px;
-  transform: rotate(-40deg);
-}
-
-.container {
-  background-color: #fcfdfc;
-  flex: 1;
 }
 
 .darkcolor {
