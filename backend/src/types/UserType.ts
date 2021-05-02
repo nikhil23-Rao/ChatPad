@@ -7,4 +7,5 @@ export interface UserType extends Model {
   profile_picture?: string;
   id?: string;
   oauth?: boolean;
+  dark_theme?: boolean;
 }

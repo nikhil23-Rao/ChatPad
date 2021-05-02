@@ -24,6 +24,10 @@ export const User = sequelize.define("User", {
     type: DataTypes.BOOLEAN,
     allowNull: false,
   },
+  dark_theme: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+  },
   id: {
     primaryKey: true,
     type: DataTypes.STRING,

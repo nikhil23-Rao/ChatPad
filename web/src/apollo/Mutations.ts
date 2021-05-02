@@ -43,3 +43,9 @@ export const START_SUBSCRIPTION = gql`
     StartSubscription(groupid: $groupid, messageid: $messageid)
   }
 `;
+
+export const TOGGLE_THEME = gql`
+  mutation ToggleTheme($authorid: String) {
+    ToggleTheme(authorid: $authorid)
+  }
+`;

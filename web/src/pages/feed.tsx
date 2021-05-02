@@ -40,10 +40,12 @@ const Feed: React.FC<FeedProps> = ({}) => {
         email: string;
         id: string;
         profile_picture: string;
+        dark_theme: string;
       } = {
         username: session.user.name!,
         email: session.user.email!,
-        id: result.data.GetUserId,
+        id: result.data.GetUserId[0],
+        dark_theme: result.data.GetUserId[1],
         profile_picture: session.user.image!,
       };
       setUser(currentUser);

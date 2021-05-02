@@ -7,7 +7,7 @@ import { GET_CHAT_PATHS, GET_GROUPS, GET_GROUP_NAME, GET_INITIAL_MESSAGES, GET_U
 import { Search } from '../../components/Search';
 import { useMutation, useQuery, useSubscription } from '@apollo/client';
 import { IconButton } from '@material-ui/core';
-import { SEND_MESSAGE, START_SUBSCRIPTION } from '@/apollo/Mutations';
+import { SEND_MESSAGE, START_SUBSCRIPTION, TOGGLE_THEME } from '@/apollo/Mutations';
 import { generateId } from '@/utils/GenerateId';
 import Head from 'next/head';
 import { GET_ALL_MESSAGES } from '@/apollo/Subscriptions';
@@ -57,6 +57,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
     username: string | null | undefined;
     email: string | null | undefined;
     id: string | null | undefined;
+    dark_theme: string | null | undefined;
     profile_picture: string | null | undefined;
     iat?: string | null | undefined;
   } | null>(null);
@@ -71,12 +72,15 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
         email: string;
         id: string;
         profile_picture: string;
+        dark_theme: string;
       } = {
         username: session.user.name!,
         email: session.user.email!,
-        id: result.data.GetUserId,
+        id: result.data.GetUserId[0],
+        dark_theme: result.data.GetUserId[1],
         profile_picture: session.user.image!,
       };
+      setDarkMode(currentUser.dark_theme === 'true' ? true : false);
       setUser(currentUser);
     }
     if (token) {
@@ -87,7 +91,9 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
         profile_picture: string;
         iat: string;
         oauth: boolean;
+        dark_theme: string;
       } = jwtDecode(token!);
+      setDarkMode(currentUser.dark_theme === 'true' ? true : false);
       setUser(currentUser);
     }
   };
@@ -97,6 +103,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
     variables: { groupid: groupSelected },
   });
   const [SendMessage] = useMutation(SEND_MESSAGE);
+  const [ToggleTheme] = useMutation(TOGGLE_THEME);
   const { data: realtimeData } = useSubscription(GET_ALL_MESSAGES);
   const { data: GroupNameData, loading: GroupNameLoading } = useQuery(GET_GROUP_NAME, {
     variables: { groupid: groupSelected },
@@ -110,7 +117,6 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   };
 
   useEffect(() => {
-    console.log(window.scrollY);
     setTimeout(() => {
       animateScroll.scrollToBottom({
         containerId: 'chatDiv',
@@ -273,7 +279,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
               (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
               (typeof window !== 'undefined' && window.screen.availWidth) < 1800
                 ? '90vh'
-                : '86vh', // Screen size monitor different height from laptop
+                : '69vh', // Screen size monitor different height from laptop
             overflowX: 'hidden',
             backgroundColor: darkMode ? '#303437' : '#fff',
           }}
@@ -349,7 +355,14 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
               </div>
             </div>
             <div style={{ top: 36, right: 60, position: 'relative' }}>
-              <Switch size="lg" onChange={() => setDarkMode(!darkMode)} />
+              <Switch
+                size="lg"
+                onChange={async () => {
+                  setDarkMode(!darkMode);
+                  user && ToggleTheme({ variables: { authorid: user.id } });
+                }}
+                isChecked={darkMode}
+              />
             </div>
             <div className="menu">
               <div style={{ marginRight: '22%' }}>

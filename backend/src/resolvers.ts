@@ -23,7 +23,7 @@ const resolvers = {
       const user: UserType | null = await User.findOne({
         where: { email: args.email },
       });
-      return user?.id;
+      return [user?.id, `${user?.dark_theme}`];
     },
     GetAllUsers: async () => {
       const users: UserType | Model<any, any>[] = await User.findAll();
@@ -70,7 +70,7 @@ const resolvers = {
   },
   Mutation: {
     Register: async (_: void, args: UserType) => {
-      // await User.sync({ force: true });
+      await User.sync({ force: true });
 
       const salt = await bcrypt.genSalt(10);
       console.log(process.env.OAUTH_PASSWORD);
@@ -188,6 +188,22 @@ const resolvers = {
       group.messages?.pop();
       await group.save();
       return true;
+    },
+    ToggleTheme: async (_: void, args: { authorid: string }) => {
+      const user: UserType | null = await User.findOne({
+        where: { id: args.authorid },
+      });
+      if (!user) return "Invalid ID";
+      if (user.dark_theme) {
+        user.dark_theme = false;
+        await user.save();
+        return true;
+      }
+      if (!user.dark_theme) {
+        user.dark_theme = true;
+        await user?.save();
+        return true;
+      }
     },
   },
 };
