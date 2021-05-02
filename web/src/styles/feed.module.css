@@ -120,7 +120,8 @@
   display: block;
   overflow: hidden;
   background: linear-gradient(#0993f6, #0993f6) 0 100px/100% 100% no-repeat fixed,
-    linear-gradient(rgb(255, 143, 178) 0%, rgb(167, 151, 255) 50%, rgb(0, 229, 255) 100%) center/100% 100%;
+    linear-gradient(rgb(255, 143, 178) 0%, rgb(167, 151, 255) 50%, rgb(0, 229, 255) 100%, #0993f6 100%, #0993f6)
+      center/100% 100%;
   color: #fff;
   border-radius: 50px 0px 50px 50px;
 }

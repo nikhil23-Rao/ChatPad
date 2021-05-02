@@ -112,13 +112,13 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   useEffect(() => {
     console.log(window.scrollY);
     window.scrollTo(0, document.body.scrollHeight);
-    // setTimeout(() => {
-    //   animateScroll.scrollToBottom({
-    //     containerId: 'chatDiv',
-    //     smooth: false,
-    //     duration: 0,
-    //   });
-    // }, 500);
+    setTimeout(() => {
+      animateScroll.scrollToBottom({
+        containerId: 'chatDiv',
+        smooth: false,
+        duration: 0,
+      });
+    }, 500);
 
     console.log('CURRENT ID', currId);
     setGroupSelected(currId);
