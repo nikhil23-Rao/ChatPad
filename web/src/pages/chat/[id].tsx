@@ -117,7 +117,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
         smooth: false,
         duration: 0,
       });
-    }, 500);
+    }, 168); // Load time
 
     console.log('CURRENT ID', currId);
     setGroupSelected(currId);
@@ -302,7 +302,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                       </div>
 
                       <div className={message.author.id === user.id ? feedStyles.yourmessage : feedStyles.message}>
-                        <p style={{ marginLeft: 5, marginTop: 10 }} className={feedStyles.text}>
+                        <p style={{ marginLeft: 5, marginTop: 10, fontSize: 23 }} className={feedStyles.text}>
                           {message.body}
                         </p>
                       </div>
@@ -331,7 +331,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                   </div> */}
 
                   <div className={message.author.id === user.id ? feedStyles.yourmessage : feedStyles.message}>
-                    <p style={{ marginLeft: 5, marginTop: 10 }} className={feedStyles.text}>
+                    <p style={{ marginLeft: 5, marginTop: 10, fontSize: 20 }} className={feedStyles.text}>
                       {message.body}
                     </p>
                   </div>
