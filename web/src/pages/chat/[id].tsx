@@ -15,6 +15,7 @@ import { useRouter } from 'next/dist/client/router';
 import { GetStaticProps } from 'next';
 import { Loader } from '@/components/loader';
 import { animateScroll } from 'react-scroll';
+import { Input, Switch } from '@chakra-ui/react';
 
 interface ChatProps {
   currId: string;
@@ -50,6 +51,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   const [messageVal, setMessageVal] = useState('');
   const [session] = useSession();
   const chatRef = useRef<null | HTMLElement>();
+  const [darkMode, setDarkMode] = useState(false);
   const [user, setUser] = useState<{
     username: string | null | undefined;
     email: string | null | undefined;
@@ -130,7 +132,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
     // console.log(messageData);
     // console.log(groupSelected);
     // console.log('REALTIME', realtimeData);
-  }, [session, groupSelected, messageData]);
+  }, [session, groupSelected, messageData, darkMode]);
 
   //@TODO
   // useEffect(() => {
@@ -155,7 +157,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
       </Head>
       <div>
         {GroupNameData && groupSelected !== '' && groupSelected !== undefined && groupSelected !== null && (
-          <nav className="navbar navbar-light" style={{ background: 'transparent' }}>
+          <nav className="navbar navbar-light" style={{ background: darkMode ? '#303437' : 'transparent' }}>
             <span className="navbar-brand mb-0 h1" style={{ marginLeft: 500, display: 'inline' }}>
               {GroupNameData.GetGroupName.members.length === 1 ? (
                 <img
@@ -185,8 +187,55 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                     alt=""
                   />
                 </>
+              ) : GroupNameData.GetGroupName.members.length > 2 ? (
+                <>
+                  <div style={{ display: 'inline', position: 'relative', left: 50 }}>
+                    <img
+                      src={GroupNameData.GetGroupName.members[0].profile_picture}
+                      style={{
+                        width: 31,
+                        height: 31,
+                        borderRadius: 100,
+                        display: 'inline',
+                        position: 'relative',
+                        top: 8,
+                        left: 18,
+                      }}
+                      alt=""
+                    />{' '}
+                    <img
+                      src={GroupNameData.GetGroupName.members[1].profile_picture}
+                      style={{
+                        width: 31,
+                        height: 31,
+                        borderRadius: 100,
+                        display: 'inline',
+                        position: 'relative',
+                        top: -10,
+                        right: 5,
+                      }}
+                      alt=""
+                    />
+                    <div
+                      className={feedStyles.navdot}
+                      style={{ position: 'relative', top: 10, right: 60, width: 30, height: 30 }}
+                    >
+                      <p style={{ position: 'relative', left: 2, top: 2 }}>
+                        +{GroupNameData.GetGroupName.members.length - 2}
+                      </p>
+                    </div>
+                  </div>
+                </>
               ) : null}
-              <p style={{ display: 'inline', fontFamily: 'Lato', fontWeight: 'bold', fontSize: 28 }}>
+              <p
+                style={{
+                  display: 'inline',
+                  fontFamily: 'Lato',
+                  fontWeight: 'bold',
+                  fontSize: 28,
+                  color: darkMode ? '#fff' : '#000',
+                }}
+              >
                 {GroupNameData.GetGroupName.name}
               </p>
               <p
@@ -195,11 +244,17 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                   fontFamily: 'Lato',
                   position: 'relative',
                   textAlign: 'left',
+                  color: darkMode ? '#fff' : '#000',
                   bottom: 5,
-                  marginLeft: GroupNameData.GetGroupName.members.length === 2 ? 75 : 50,
+                  marginLeft:
+                    GroupNameData.GetGroupName.members.length === 2
+                      ? 75
+                      : GroupNameData.GetGroupName.members.length > 2
+                      ? 131
+                      : 50,
                 }}
               >
-                Last Active 2 Hours Ago
+                Last active 2 hours ago
               </p>
             </span>
           </nav>
@@ -210,9 +265,11 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
             height:
               (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
               (typeof window !== 'undefined' && window.screen.availWidth) < 1800
-                ? '110vh'
+                ? '106vh'
                 : '82vh', // Screen size monitor different height from laptop
             overflowX: 'hidden',
+            backgroundColor: darkMode ? '#303437' : '#fff',
+            flex: 1,
           }}
           id="chatDiv"
           ref={chatRef as any}
@@ -260,7 +317,6 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                     style={{
                       position: 'relative',
                       left: 392,
-                      top: 120,
                     }}
                   >
                     {message.author.id !== user.id ? (
@@ -285,6 +341,9 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                 <i className="fa fa-plus  fa-2x"></i>
               </div>
             </div>
+            <div style={{ top: 36, right: 60, position: 'relative' }}>
+              <Switch size="lg" onChange={() => setDarkMode(!darkMode)} />
+            </div>
             <div className="menu">
               <div style={{ marginRight: '22%' }}>
                 <div>
@@ -296,15 +355,28 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
             </div>
           </div>
         </div>
-        <div className={feedStyles.leftsidebar}>
-          <h1 style={{ fontSize: 24, marginRight: 35, marginTop: 15, fontFamily: 'Lato' }}>Groups</h1>
+        <div
+          className={feedStyles.leftsidebar}
+          style={{ backgroundColor: darkMode ? '#303437' : '#fff', borderRightColor: darkMode ? '#fff' : '' }}
+        >
+          <h1
+            style={{
+              fontSize: 24,
+              marginRight: 35,
+              marginTop: 15,
+              fontFamily: 'Lato',
+              color: darkMode ? '#fff' : '#000',
+            }}
+          >
+            Groups
+          </h1>
           {data.GetGroups.map((group) => {
             if (group.members.length === 2) {
               return (
                 <div
                   className={feedStyles.sidebarcontent}
                   style={{
-                    backgroundColor: groupSelected === group.id ? '#8ab6d6' : '#6588de1a',
+                    backgroundColor: groupSelected === group.id ? '#8ab6d6' : darkMode ? '#fff' : '#6588de1a',
                     boxShadow: groupSelected === group.id ? '0px 8px 40px rgba(0, 72, 251, 0.3)' : '',
                   }}
                   key={group.id}
@@ -346,7 +418,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                 <div
                   className={feedStyles.sidebarcontent}
                   style={{
-                    backgroundColor: groupSelected === group.id ? '#8ab6d6' : '#6588de1a',
+                    backgroundColor: groupSelected === group.id ? '#8ab6d6' : darkMode ? '#fff' : '#6588de1a',
                     boxShadow: groupSelected === group.id ? '0px 8px 40px rgba(0, 72, 251, 0.3)' : '',
                   }}
                   key={group.id}
@@ -379,17 +451,17 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                 <div
                   className={feedStyles.sidebarcontent}
                   style={{
-                    backgroundColor: groupSelected === group.id ? '#8ab6d6' : '#6588de1a',
+                    backgroundColor: groupSelected === group.id ? '#8ab6d6' : darkMode ? '#fff' : '#6588de1a',
                     boxShadow: groupSelected === group.id ? '0px 8px 40px rgba(0, 72, 251, 0.3)' : '',
                   }}
                   key={group.id}
                   onClick={() => (window.location.href = `/chat/${group.id}`)}
                 >
-                  <div style={{ marginTop: '5%', marginLeft: '5%', paddingTop: '3%' }}>
+                  <div style={{ marginTop: '5%', marginLeft: '6%', paddingTop: '3%' }}>
                     <img
                       src={group.members[0].profile_picture}
                       alt=""
-                      style={{ width: 30, height: 30, borderRadius: 25 }}
+                      style={{ width: 30, height: 30, borderRadius: 25, position: 'relative', top: 3 }}
                     />
                   </div>
 
@@ -419,7 +491,10 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
             }
           })}
         </div>
-        <div className={feedStyles.profile}>
+        <div
+          className={feedStyles.profile}
+          style={{ backgroundColor: darkMode ? '#303437' : '#fff', borderRightColor: darkMode ? '#fff' : '' }}
+        >
           <img
             src={user! && (user.profile_picture as string | undefined)}
             alt=""
@@ -427,7 +502,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
           />
           <p
             style={{
-              color: '#000',
+              color: darkMode ? '#EDEDEE' : '#000',
               position: 'relative',
               bottom: 55,
               left: 89,
@@ -436,16 +511,37 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
           >
             {user && user.username}
           </p>{' '}
-          <p style={{ fontFamily: 'Lato', color: '#6E6969', position: 'relative', bottom: 55, left: 89 }}>
+          <p
+            style={{
+              fontFamily: 'Lato',
+              color: darkMode ? '#FDFDFD' : '#6E6969',
+              position: 'relative',
+              bottom: 55,
+              left: 89,
+            }}
+          >
             {user && user.email}
           </p>
         </div>
         {groupSelected !== '' && user ? (
-          <div style={{ textAlign: 'center' }}>
-            <input
-              className={feedStyles.inputfield}
+          <div
+            style={{
+              textAlign: 'center',
+              backgroundColor: darkMode ? '#303437' : '#fff',
+            }}
+          >
+            <Input
+              size="lg"
               placeholder="Send a message..."
               value={messageVal}
+              style={{
+                width: '50%',
+                position: 'relative',
+                borderRadius: 100,
+
+                right: -100,
+                color: darkMode ? '#fff' : '#000',
+              }}
               onKeyPress={async (e) => {
                 if (e.key === 'Enter') {
                   // Check If Text Is Empty Before Submitting
@@ -466,7 +562,6 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                     },
                   });
                   setMessageVal('');
-                  await refetch();
                 }
               }}
               onChange={(e) => setMessageVal(e.currentTarget.value)}

@@ -54,7 +54,6 @@
   height: 50px;
   margin-left: 6%;
   left: 300px;
-  background: #fdfdfd;
   border: 1px solid rgba(150, 169, 186, 0.7);
   box-sizing: border-box;
   border-radius: 14px;
@@ -85,6 +84,15 @@
   height: 28px;
   width: 28px;
   background-color: #fff;
+  border-radius: 50%;
+  position: relative;
+  margin-left: 35px;
+  top: -27px;
+}
+
+.navdot {
+  display: inline-flex;
+  background-color: #d3d3d3;
   border-radius: 50%;
   position: relative;
   margin-left: 35px;
@@ -151,4 +159,8 @@
 .container {
   background-color: #fcfdfc;
   flex: 1;
+}
+
+.darkcolor {
+  color: #303437;
 }
