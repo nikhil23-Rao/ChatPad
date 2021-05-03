@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useCombobox, useMultipleSelection } from 'downshift';
 import { items, comboboxStyles, comboboxWrapperStyles } from './shared';
-import { Button, Input } from '@chakra-ui/react';
+import { Button, Input, useToast } from '@chakra-ui/react';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 import { Avatar, Chip } from '@material-ui/core';
 import { CREATE_GROUP } from '@/apollo/Mutations';
@@ -14,6 +14,7 @@ export const Search = () => {
   const [error, setError] = useState(false);
   const [nameError, setNameError] = useState(false);
   const [nameVal, setNameVal] = useState('');
+  const toast = useToast();
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const {
@@ -177,13 +178,17 @@ export const Search = () => {
               if (selectedItems.length === 0) {
                 return setError(true);
               }
-              setLoading(true);
-              await client.mutate({
-                mutation: CREATE_GROUP,
-                variables: { id: generateId(24), members, name: nameVal },
-              });
-              setLoading(false);
-              router.reload();
+              if (members !== []) {
+                setLoading(true);
+                await client.mutate({
+                  mutation: CREATE_GROUP,
+                  variables: { id: generateId(24), members, name: nameVal },
+                });
+                setLoading(false);
+                router.reload();
+              } else if (members === []) {
+                toast({ status: 'error', title: 'Oops! Something failed.' });
+              }
             } catch (err) {
               console.log(err);
             }

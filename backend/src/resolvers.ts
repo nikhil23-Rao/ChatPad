@@ -36,8 +36,13 @@ const resolvers = {
         | any = await Group.findAll();
       let groups = [];
       for (const group in allGroups) {
+        console.log(
+          allGroups[group].dataValues.members.some(
+            (m: GroupType) => m.id === args.authorid
+          )
+        );
         if (
-          allGroups[group].members.some(
+          allGroups[group].dataValues.members.some(
             (m: GroupType) => m.id === args.authorid
           )
         ) {
@@ -70,7 +75,7 @@ const resolvers = {
   },
   Mutation: {
     Register: async (_: void, args: UserType) => {
-      await User.sync({ force: true });
+      // await User.sync({ force: true });
 
       const salt = await bcrypt.genSalt(10);
       console.log(process.env.OAUTH_PASSWORD);

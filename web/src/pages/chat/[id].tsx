@@ -303,11 +303,18 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                         style={{
                           position: 'relative',
                           left: 392,
-                          top: 120,
                         }}
                       >
                         {message.author.id !== user.id ? (
-                          <img src={message.author.profile_picture} style={{ borderRadius: 100, width: 40 }} alt="" />
+                          <div className="flex w-full h-screen items-center justify-center">
+                            <div className="w-32 h-32 rounded-full conic-gradient relative">
+                              <img
+                                className="rounded-full w-full h-full bg-white"
+                                src={message.author.profile_picture}
+                                alt=""
+                              />
+                            </div>
+                          </div>
                         ) : null}
                       </div>
 
@@ -345,16 +352,30 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
             realtimeData.GetAllMessages.map((message) => {
               return (
                 <>
-                  {/* <div
+                  <div
                     style={{
                       position: 'relative',
-                      left: 392,
+                      left: 372,
+                      top: 55,
                     }}
                   >
                     {message.author.id !== user.id ? (
-                      <img src={message.author.profile_picture} style={{ borderRadius: 100, width: 40 }} alt="" />
+                      <div className="border">
+                        <img
+                          style={{
+                            width: 50,
+                            height: 50,
+                            borderRadius: 100,
+                            left: 2.4999,
+                            top: 2,
+                            position: 'relative',
+                          }}
+                          src={message.author.profile_picture}
+                          alt=""
+                        />
+                      </div>
                     ) : null}
-                  </div> */}
+                  </div>
 
                   <div className={message.author.id === user.id ? feedStyles.yourmessage : feedStyles.message}>
                     {!message.body.includes('https://') ? (
