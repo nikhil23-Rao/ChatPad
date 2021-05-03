@@ -123,7 +123,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
         smooth: false,
         duration: 0,
       });
-    }, 500); // Load time
+    }, 168); // Load time
 
     console.log('CURRENT ID', currId);
     setGroupSelected(currId);
@@ -302,23 +302,58 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                       <div
                         style={{
                           position: 'relative',
-                          left: 392,
+                          left: 372,
+                          top: 75,
                         }}
                       >
                         {message.author.id !== user.id ? (
-                          <div className="flex w-full h-screen items-center justify-center">
-                            <div className="w-32 h-32 rounded-full conic-gradient relative">
-                              <img
-                                className="rounded-full w-full h-full bg-white"
-                                src={message.author.profile_picture}
-                                alt=""
-                              />
-                            </div>
+                          <div className="border">
+                            <img
+                              style={{
+                                width: 50,
+                                height: 50,
+                                borderRadius: 100,
+                                left: 2.4999,
+                                top: 2,
+                                position: 'relative',
+                              }}
+                              src={message.author.profile_picture}
+                              alt=""
+                            />
                           </div>
                         ) : null}
                       </div>
 
-                      <div className={message.author.id === user.id ? feedStyles.yourmessage : feedStyles.message}>
+                      {message.author.id !== user.id ? (
+                        <p
+                          style={{
+                            color: darkMode ? '#ebeef0' : '#000',
+                            position: 'relative',
+                            left: 445,
+                            fontSize: 14,
+                            fontFamily: 'Lato',
+                          }}
+                        >
+                          {message.author.username} • 2 mins
+                        </p>
+                      ) : (
+                        <p
+                          style={{
+                            color: darkMode ? '#ebeef0' : '#000',
+                            position: 'relative',
+                            fontFamily: 'Lato',
+                            left: 1626,
+                            top: 10,
+                            fontSize: 14,
+                          }}
+                        >
+                          You • Now
+                        </p>
+                      )}
+                      <div
+                        className={message.author.id === user.id ? feedStyles.yourmessage : feedStyles.message}
+                        style={{ marginBottom: message.author.id !== user.id ? -40 : -4 }}
+                      >
                         {!message.body.includes('https://') ? (
                           <p style={{ marginLeft: 5, marginTop: 10, fontSize: 20 }} className={feedStyles.text}>
                             {message.body}
@@ -356,7 +391,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                     style={{
                       position: 'relative',
                       left: 372,
-                      top: 55,
+                      top: 75,
                     }}
                   >
                     {message.author.id !== user.id ? (
@@ -377,7 +412,37 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                     ) : null}
                   </div>
 
-                  <div className={message.author.id === user.id ? feedStyles.yourmessage : feedStyles.message}>
+                  {message.author.id !== user.id ? (
+                    <p
+                      style={{
+                        color: darkMode ? '#ebeef0' : '#000',
+                        position: 'relative',
+                        left: 445,
+                        fontSize: 14,
+                        fontFamily: 'Lato',
+                      }}
+                    >
+                      {message.author.username} • 2 mins
+                    </p>
+                  ) : (
+                    <p
+                      style={{
+                        color: darkMode ? '#ebeef0' : '#000',
+                        position: 'relative',
+                        fontFamily: 'Lato',
+                        left: 1626,
+                        top: 10,
+                        fontSize: 14,
+                      }}
+                    >
+                      You • Now
+                    </p>
+                  )}
+
+                  <div
+                    className={message.author.id === user.id ? feedStyles.yourmessage : feedStyles.message}
+                    style={{ marginBottom: message.author.id !== user.id ? -40 : -4 }}
+                  >
                     {!message.body.includes('https://') ? (
                       <p style={{ marginLeft: 5, marginTop: 10, fontSize: 20 }} className={feedStyles.text}>
                         {message.body}
@@ -406,9 +471,12 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
         <div style={{ top: -10, right: 80, position: 'absolute' }}>
           <div className="outer-menu">
             <input className="checkbox-toggle" type="checkbox" />
-            <div className="hamburger rainbow-box" style={{ borderRadius: 50 }}>
+            <div
+              className="hamburger rainbow-box"
+              style={{ borderRadius: 50, backgroundColor: darkMode ? '#1A202C' : '' }}
+            >
               <div>
-                <i className="fa fa-plus  fa-2x"></i>
+                <i className="fa fa-plus  fa-2x" style={{ color: darkMode ? '#fff' : '' }}></i>
               </div>
             </div>
             <div style={{ top: 36, right: 60, position: 'relative' }}>
@@ -610,7 +678,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
           >
             <Input
               size="lg"
-              _placeholder={{ color: '#fff' }}
+              _placeholder={{ color: darkMode ? '#fff' : '#7c7c82' }}
               placeholder="Send a message..."
               value={messageVal}
               style={{
