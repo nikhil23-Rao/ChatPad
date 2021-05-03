@@ -16,7 +16,7 @@ import { useRouter } from 'next/dist/client/router';
 import { GetStaticProps } from 'next';
 import { Loader } from '@/components/loader';
 import { animateScroll } from 'react-scroll';
-import { Input, InputGroup, InputRightElement, Switch } from '@chakra-ui/react';
+import { Input, InputGroup, InputRightElement, Switch, Textarea } from '@chakra-ui/react';
 import EmojiEmotionsIcon from '@material-ui/icons/EmojiEmotions';
 interface ChatProps {
   currId: string;
@@ -279,7 +279,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
         <div
           onClick={() => setShowEmoji(false)}
           style={{
-            overflowY: 'scroll',
+            overflowY: 'auto',
             flex: 1,
             height:
               (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
@@ -504,7 +504,10 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
         </div>
         <div
           className={feedStyles.leftsidebar}
-          style={{ backgroundColor: darkMode ? '#1A202C' : '#fff', borderRightColor: darkMode ? '#fff' : '' }}
+          style={{
+            backgroundColor: darkMode ? '#1A202C' : '#fff',
+            borderRightColor: darkMode ? '#fff' : '',
+          }}
         >
           <h1
             style={{
