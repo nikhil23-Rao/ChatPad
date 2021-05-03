@@ -1,0 +1,50 @@
+.borderMd {
+  border-width: 2px;
+}
+
+.btnGithub {
+  background: #000;
+  border: none;
+  width: 100%;
+}
+
+.btnGithub:hover,
+.btnGithub:focus {
+  background: #000;
+}
+
+.btnGoogle {
+  background: #de5246;
+  border: none;
+  width: 100%;
+}
+
+.btnGoogle:hover,
+.btnGoogle:focus {
+  background: #de5246;
+}
+
+.errTxt {
+  color: #dc143c;
+  position: relative;
+  bottom: 10px;
+  left: 5px;
+}
+
+.formControl:not(select) {
+  padding: 1.5rem 0.5rem;
+}
+
+select.formControl {
+  height: 52px;
+  padding-left: 0.5rem;
+}
+
+.formControl::placeholder {
+  color: #ccc;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+.formControl:focus {
+  box-shadow: none;
+}
