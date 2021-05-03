@@ -143,3 +143,9 @@
   height: 55.8px;
   border-radius: 100px;
 }
+
+.icon_gradient {
+  background: -webkit-linear-gradient(#0993f6 0%, rgb(146, 0, 255) 50%, rgb(255, 46, 25) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}

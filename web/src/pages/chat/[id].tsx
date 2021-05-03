@@ -11,12 +11,13 @@ import { SEND_MESSAGE, START_SUBSCRIPTION, TOGGLE_THEME } from '@/apollo/Mutatio
 import { generateId } from '@/utils/GenerateId';
 import Head from 'next/head';
 import { GET_ALL_MESSAGES } from '@/apollo/Subscriptions';
+import { Picker } from 'emoji-mart';
 import { useRouter } from 'next/dist/client/router';
 import { GetStaticProps } from 'next';
 import { Loader } from '@/components/loader';
 import { animateScroll } from 'react-scroll';
-import { Input, Switch } from '@chakra-ui/react';
-
+import { Input, InputGroup, InputRightElement, Switch } from '@chakra-ui/react';
+import EmojiEmotionsIcon from '@material-ui/icons/EmojiEmotions';
 interface ChatProps {
   currId: string;
 }
@@ -48,7 +49,7 @@ export const getStaticProps = async (context) => {
 
 const Chat: React.FC<ChatProps> = ({ currId }) => {
   const [groupSelected, setGroupSelected] = useState('');
-  const [bgColor, setBgColor] = useState('');
+  const [showEmoji, setShowEmoji] = useState(false);
   const [messageVal, setMessageVal] = useState('');
   const [session] = useSession();
   const chatRef = useRef<null | HTMLElement>();
@@ -123,7 +124,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
         smooth: false,
         duration: 0,
       });
-    }, 168); // Load time
+    }, 200); // Load time
 
     console.log('CURRENT ID', currId);
     setGroupSelected(currId);
@@ -276,6 +277,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
           </nav>
         )}
         <div
+          onClick={() => setShowEmoji(false)}
           style={{
             overflowY: 'scroll',
             flex: 1,
@@ -313,7 +315,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                                 width: 50,
                                 height: 50,
                                 borderRadius: 100,
-                                left: 2.4999,
+                                left: 2.49999999999999999999,
                                 top: 2,
                                 position: 'relative',
                               }}
@@ -401,7 +403,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                             width: 50,
                             height: 50,
                             borderRadius: 100,
-                            left: 2.4999,
+                            left: 2.49999999999999999999,
                             top: 2,
                             position: 'relative',
                           }}
@@ -669,51 +671,85 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
           </p>
         </div>
         <div style={{ height: '20vh', backgroundColor: darkMode ? '#1A202C' : '#fff' }}></div>
+
         {groupSelected !== '' && user ? (
           <div
             style={{
               textAlign: 'center',
               backgroundColor: darkMode ? '#1A202C' : '#fff',
+              position: 'relative',
             }}
           >
-            <Input
-              size="lg"
-              _placeholder={{ color: darkMode ? '#fff' : '#7c7c82' }}
-              placeholder="Send a message..."
-              value={messageVal}
+            <div
               style={{
-                width: '50%',
                 position: 'relative',
-                borderRadius: 100,
-                top: -100,
-                height: 60,
-                right: -100,
-                color: darkMode ? '#fff' : '#000',
               }}
-              onKeyPress={async (e) => {
-                if (e.key === 'Enter') {
-                  // Check If Text Is Empty Before Submitting
-                  if (!messageVal.trim()) {
-                    return;
-                  }
-                  await SendMessage({
-                    variables: {
-                      groupid: groupSelected,
-                      body: messageVal,
-                      author: {
-                        username: user.username,
-                        email: user.email,
-                        id: user.id,
-                        profile_picture: user.profile_picture,
-                      },
-                      messageid: generateId(24),
-                    },
-                  });
-                  setMessageVal('');
-                }
-              }}
-              onChange={(e) => setMessageVal(e.currentTarget.value)}
-            />
+            >
+              <InputGroup size="lg" style={{ width: '50%', top: -100, height: 60, left: 550 }}>
+                <Input
+                  placeholder="Type a message..."
+                  style={{
+                    color: darkMode ? '#fff' : '#000',
+                    borderRadius: 100,
+                  }}
+                  value={messageVal}
+                  _placeholder={{ color: darkMode ? '#fff' : '#7c7c82' }}
+                  onKeyPress={async (e) => {
+                    if (e.key === 'Enter') {
+                      // Check If Text Is Empty Before Submitting
+                      if (!messageVal.trim()) {
+                        return;
+                      }
+                      await SendMessage({
+                        variables: {
+                          groupid: groupSelected,
+                          body: messageVal,
+                          author: {
+                            username: user.username,
+                            email: user.email,
+                            id: user.id,
+                            profile_picture: user.profile_picture,
+                          },
+                          messageid: generateId(24),
+                        },
+                      });
+                      setMessageVal('');
+                    }
+                  }}
+                  onChange={(e) => setMessageVal(e.currentTarget.value)}
+                  onClick={() => showEmoji && setShowEmoji(false)}
+                />
+                <InputRightElement
+                  style={{
+                    backgroundColor: 'transparent',
+                    right: 8,
+                    cursor: 'pointer',
+                  }}
+                >
+                  <EmojiEmotionsIcon
+                    onClick={() => setShowEmoji(!showEmoji)}
+                    fontSize="large"
+                    style={{
+                      color: '#fff',
+                    }}
+                  />
+                </InputRightElement>
+              </InputGroup>
+            </div>
+            {showEmoji && (
+              <span>
+                <Picker
+                  style={{ position: 'absolute', bottom: 100 }}
+                  onSelect={(e: any) => {
+                    let sym = e.unified.split('-');
+                    let codesArray: any[] = [];
+                    sym.forEach((el) => codesArray.push('0x' + el));
+                    let emoji = String.fromCodePoint(...codesArray);
+                    setMessageVal(messageVal + '' + emoji + '');
+                  }}
+                />
+              </span>
+            )}
           </div>
         ) : null}
       </div>
