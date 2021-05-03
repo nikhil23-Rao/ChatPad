@@ -141,13 +141,16 @@ const Feed: React.FC<FeedProps> = ({}) => {
         <div style={{ top: -10, right: 80, position: 'absolute' }}>
           <div className="outer-menu">
             <input className="checkbox-toggle" type="checkbox" />
-            <div className="hamburger rainbow-box" style={{ borderRadius: 50 }}>
+            <div
+              className="hamburger rainbow-box"
+              style={{ borderRadius: 50, backgroundColor: darkMode ? '#1A202C' : '' }}
+            >
               <div>
-                <i className="fa fa-plus  fa-2x"></i>
+                <i className="fa fa-plus  fa-2x" style={{ color: darkMode ? '#fff' : '#000' }}></i>
               </div>
             </div>
             <div className="menu">
-              <div style={{ marginRight: '22%' }}>
+              <div style={{ marginRight: '22%', backgroundColor: darkMode ? '#1A202C' : '' }}>
                 <div>
                   <div className="mt-1" style={{ width: '300%' }}>
                     <Search />
