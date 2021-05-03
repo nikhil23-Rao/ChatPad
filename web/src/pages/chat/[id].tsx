@@ -730,7 +730,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                     onClick={() => setShowEmoji(!showEmoji)}
                     fontSize="large"
                     style={{
-                      color: '#fff',
+                      color: darkMode ? '#fff' : 'gray',
                     }}
                   />
                 </InputRightElement>
