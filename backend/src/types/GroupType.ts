@@ -12,4 +12,5 @@ export interface GroupType extends Model {
   pubsub?: any;
   name?: string;
   author?: any;
+  image?: boolean;
 }

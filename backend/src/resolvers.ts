@@ -151,15 +151,16 @@ const resolvers = {
       return true;
     },
     SendMessage: async (_: void, args: GroupType) => {
+      // await Message.sync({ force: true });
       const messages: any = await Message.findAll({
         where: { groupid: args.groupid },
       });
-      // await Message.sync({ force: true });
       const message = await Message.build({
         body: args.body,
         author: args.author,
         messageid: args.messageid,
         groupid: args.groupid,
+        image: args.image,
       });
 
       const previousMessages = [];
@@ -179,6 +180,7 @@ const resolvers = {
             messageid: args.messageid,
             author: args.author,
             groupid: args.groupid,
+            image: args.image,
           },
         ],
       };

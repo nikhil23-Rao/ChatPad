@@ -6,6 +6,11 @@ export const Message = sequelize.define("Message", {
     type: DataTypes.TEXT,
     allowNull: false,
   },
+  image: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: false,
+  },
   author: {
     type: DataTypes.JSON,
     allowNull: false,

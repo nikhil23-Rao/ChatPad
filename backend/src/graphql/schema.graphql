@@ -28,6 +28,7 @@ type Mutation {
     body: String
     author: User
     messageid: String
+    image: Boolean
   ): Boolean
 
   Login(email: String!, password: String): String!
@@ -42,6 +43,7 @@ type Message {
   messageid: String
   author: GroupUser
   groupid: String
+  image: Boolean
 }
 
 input User {
