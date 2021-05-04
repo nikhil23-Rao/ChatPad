@@ -43,6 +43,7 @@ export const GET_INITIAL_MESSAGES = gql`
         profile_picture
         id
       }
+      image
     }
   }
 `;

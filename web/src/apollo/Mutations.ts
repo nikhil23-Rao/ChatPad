@@ -33,8 +33,8 @@ export const CREATE_GROUP = gql`
 `;
 
 export const SEND_MESSAGE = gql`
-  mutation SendMessage($groupid: String, $body: String, $author: User, $messageid: String) {
-    SendMessage(groupid: $groupid, body: $body, author: $author, messageid: $messageid)
+  mutation SendMessage($groupid: String, $body: String, $author: User, $messageid: String, $image: Boolean) {
+    SendMessage(groupid: $groupid, body: $body, author: $author, messageid: $messageid, image: $image)
   }
 `;
 
