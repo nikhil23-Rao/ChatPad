@@ -51,6 +51,7 @@ export const getStaticProps = async (context) => {
 const Chat: React.FC<ChatProps> = ({ currId }) => {
   const [groupSelected, setGroupSelected] = useState('');
   const [showEmoji, setShowEmoji] = useState(false);
+  const [visible, setVisible] = useState(true);
   const [messageVal, setMessageVal] = useState('');
   const [session] = useSession();
   const chatRef = useRef<null | HTMLElement>();
@@ -501,7 +502,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
 
         <div style={{ top: -10, right: 80, position: 'absolute' }}>
           <div className="outer-menu">
-            <input className="checkbox-toggle" type="checkbox" />
+            <input className="checkbox-toggle" type="checkbox" onChange={() => setVisible(!visible)} />
             <div
               className="hamburger rainbow-box"
               style={{ borderRadius: 50, backgroundColor: darkMode ? '#1A202C' : '' }}
@@ -760,23 +761,27 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                     cursor: 'pointer',
                   }}
                 >
-                  <InsertPhotoIcon
-                    onClick={() => {
-                      document.getElementById('filepicker')?.click();
-                    }}
-                    fontSize="large"
-                    style={{
-                      color: darkMode ? '#fff' : 'gray',
-                    }}
-                  />
+                  {visible && (
+                    <>
+                      <InsertPhotoIcon
+                        onClick={() => {
+                          document.getElementById('filepicker')?.click();
+                        }}
+                        fontSize="large"
+                        style={{
+                          color: darkMode ? '#fff' : 'gray',
+                        }}
+                      />
 
-                  <EmojiEmotionsIcon
-                    onClick={() => setShowEmoji(!showEmoji)}
-                    fontSize="large"
-                    style={{
-                      color: darkMode ? '#fff' : 'gray',
-                    }}
-                  />
+                      <EmojiEmotionsIcon
+                        onClick={() => setShowEmoji(!showEmoji)}
+                        fontSize="large"
+                        style={{
+                          color: darkMode ? '#fff' : 'gray',
+                        }}
+                      />
+                    </>
+                  )}
 
                   <input
                     type="file"
