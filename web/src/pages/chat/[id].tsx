@@ -14,11 +14,11 @@ import { GET_ALL_MESSAGES } from '@/apollo/Subscriptions';
 import { Picker } from 'emoji-mart';
 import { useRouter } from 'next/dist/client/router';
 import { GetStaticProps } from 'next';
-import { Loader } from '@/components/loader';
 import { animateScroll } from 'react-scroll';
 import { Input, InputGroup, InputRightElement, Switch, Textarea, useToast } from '@chakra-ui/react';
 import EmojiEmotionsIcon from '@material-ui/icons/EmojiEmotions';
 import InsertPhotoIcon from '@material-ui/icons/InsertPhoto';
+import LoadingBar from 'react-top-loading-bar';
 interface ChatProps {
   currId: string;
 }
@@ -157,8 +157,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   //   });
   // }, [realtimeData]);
 
-  if (loading) return <Loader />;
-  if (GroupNameLoading) return <Loader />;
+  if (loading) return <LoadingBar color="red" progress={100} loaderSpeed={2000} height={4} />;
 
   return (
     <>
@@ -271,7 +270,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                     GroupNameData.GetGroupName.members.length === 2
                       ? 75
                       : GroupNameData.GetGroupName.members.length > 2
-                      ? 131
+                      ? 137
                       : 50,
                 }}
               >
@@ -524,7 +523,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
             <div className="menu">
               <div style={{ marginRight: '22%', backgroundColor: darkMode ? '#1A202C' : '' }}>
                 <div>
-                  <div className="mt-1" style={{ width: '300%' }}>
+                  <div className="mt-1" style={{ width: '300%', color: darkMode ? '#fff' : '#000' }}>
                     <Search />
                   </div>
                 </div>
@@ -673,7 +672,12 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
         </div>
         <div
           className={feedStyles.profile}
-          style={{ backgroundColor: darkMode ? '#1A202C' : '#fff', borderRightColor: darkMode ? '#fff' : '' }}
+          style={{
+            backgroundColor: darkMode ? '#1A202C' : '#fff',
+            borderRightColor: darkMode ? '#fff' : '',
+            cursor: 'pointer',
+          }}
+          onClick={() => router.push('/me')}
         >
           <img
             src={user! && (user.profile_picture as string | undefined)}
@@ -827,7 +831,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
             {showEmoji && (
               <span>
                 <Picker
-                  style={{ position: 'absolute', bottom: 100 }}
+                  style={{ position: 'absolute', bottom: 100, left: 1530 }}
                   onSelect={(e: any) => {
                     let sym = e.unified.split('-');
                     let codesArray: any[] = [];

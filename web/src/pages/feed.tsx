@@ -13,6 +13,7 @@ import Head from 'next/head';
 import { GET_ALL_MESSAGES } from '@/apollo/Subscriptions';
 import { useRouter } from 'next/dist/client/router';
 import { Loader } from '@/components/loader';
+import LoadingBar from 'react-top-loading-bar';
 
 interface FeedProps {}
 
@@ -103,7 +104,7 @@ const Feed: React.FC<FeedProps> = ({}) => {
     console.log('REALTIME', realtimeData);
   }, [session, groupSelected, messageData, realtimeData]);
 
-  if (loading) return <Loader />;
+  if (loading) return <LoadingBar color="red" progress={100} loaderSpeed={2000} height={4} />;
 
   return (
     <>
