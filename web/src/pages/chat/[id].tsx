@@ -19,6 +19,7 @@ import { Input, InputGroup, InputRightElement, Switch, Textarea, useToast } from
 import EmojiEmotionsIcon from '@material-ui/icons/EmojiEmotions';
 import InsertPhotoIcon from '@material-ui/icons/InsertPhoto';
 import LoadingBar from 'react-top-loading-bar';
+import { Theme } from '@/../context/theme';
 interface ChatProps {
   currId: string;
 }
@@ -122,6 +123,9 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   };
 
   useEffect(() => {
+    if (user && user.dark_theme === 'true') {
+      (document.body.style as any) = 'background: #1A202C';
+    }
     setTimeout(() => {
       animateScroll.scrollToBottom({
         containerId: 'chatDiv',
@@ -130,6 +134,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
       });
     }, 180); // Load time
 
+    (document.body.style as any) = 'overflow-y: hidden';
     console.log('CURRENT ID', currId);
     setGroupSelected(currId);
     GetUser();
@@ -146,7 +151,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
     // console.log(messageData);
     // console.log(groupSelected);
     // console.log('REALTIME', realtimeData);
-  }, [session, groupSelected, messageData, realtimeData]);
+  }, [session, groupSelected, messageData, realtimeData, user?.dark_theme]);
 
   //@TODO
   // useEffect(() => {
@@ -510,16 +515,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                 <i className="fa fa-plus  fa-2x" style={{ color: darkMode ? '#fff' : '' }}></i>
               </div>
             </div>
-            <div style={{ top: 36, right: 60, position: 'relative' }}>
-              <Switch
-                size="lg"
-                onChange={async () => {
-                  setDarkMode(!darkMode);
-                  user && ToggleTheme({ variables: { authorid: user.id } });
-                }}
-                isChecked={darkMode}
-              />
-            </div>
+
             <div className="menu">
               <div style={{ marginRight: '22%', backgroundColor: darkMode ? '#1A202C' : '' }}>
                 <div>
@@ -677,7 +673,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
             borderRightColor: darkMode ? '#fff' : '',
             cursor: 'pointer',
           }}
-          onClick={() => router.push('/me')}
+          onClick={() => (window.location.href = '/me')}
         >
           <img
             src={user! && (user.profile_picture as string | undefined)}

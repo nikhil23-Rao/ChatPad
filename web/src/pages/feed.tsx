@@ -27,6 +27,7 @@ const Feed: React.FC<FeedProps> = ({}) => {
     email: string | null | undefined;
     id: string | null | undefined;
     profile_picture: string | null | undefined;
+    dark_theme: string;
     iat?: string | null | undefined;
   } | null>(null);
   const router = useRouter();
@@ -74,6 +75,7 @@ const Feed: React.FC<FeedProps> = ({}) => {
         profile_picture: string;
         iat: string;
         oauth: boolean;
+        dark_theme: string;
       } = jwtDecode(token!);
       setUser(currentUser);
     }
@@ -87,6 +89,9 @@ const Feed: React.FC<FeedProps> = ({}) => {
   const { data: realtimeData } = useSubscription(GET_ALL_MESSAGES);
 
   useEffect(() => {
+    if (user && user.dark_theme === 'true') {
+      (document.body.style as any) = 'background: #1A202C';
+    }
     window.scrollTo(0, document.body.scrollHeight);
     GetUser();
     if (window.screen.availHeight < 863 || window.screen.availWidth < 1800) {
@@ -102,7 +107,7 @@ const Feed: React.FC<FeedProps> = ({}) => {
     console.log(messageData);
     console.log(groupSelected);
     console.log('REALTIME', realtimeData);
-  }, [session, groupSelected, messageData, realtimeData]);
+  }, [session, groupSelected, messageData, realtimeData, user?.dark_theme]);
 
   if (loading) return <LoadingBar color="red" progress={100} loaderSpeed={2000} height={4} />;
 
