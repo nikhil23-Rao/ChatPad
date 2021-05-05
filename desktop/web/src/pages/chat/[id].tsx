@@ -14,10 +14,11 @@ import { GET_ALL_MESSAGES } from '@/apollo/Subscriptions';
 import { Picker } from 'emoji-mart';
 import { useRouter } from 'next/dist/client/router';
 import { GetStaticProps } from 'next';
-import { Loader } from '@/components/loader';
 import { animateScroll } from 'react-scroll';
-import { Input, InputGroup, InputRightElement, Switch, Textarea } from '@chakra-ui/react';
+import { Input, InputGroup, InputRightElement, Switch, Textarea, useToast } from '@chakra-ui/react';
 import EmojiEmotionsIcon from '@material-ui/icons/EmojiEmotions';
+import InsertPhotoIcon from '@material-ui/icons/InsertPhoto';
+import LoadingBar from 'react-top-loading-bar';
 interface ChatProps {
   currId: string;
 }
@@ -50,6 +51,7 @@ export const getStaticProps = async (context) => {
 const Chat: React.FC<ChatProps> = ({ currId }) => {
   const [groupSelected, setGroupSelected] = useState('');
   const [showEmoji, setShowEmoji] = useState(false);
+  const [visible, setVisible] = useState(true);
   const [messageVal, setMessageVal] = useState('');
   const [session] = useSession();
   const chatRef = useRef<null | HTMLElement>();
@@ -99,6 +101,8 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
     }
   };
 
+  const toast = useToast();
+
   const { data, loading } = useQuery(GET_GROUPS, { variables: { authorid: user?.id } });
   const { data: messageData, loading: messageLoading, refetch } = useQuery(GET_INITIAL_MESSAGES, {
     variables: { groupid: groupSelected },
@@ -118,14 +122,18 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   };
 
   useEffect(() => {
+    if (user && user.dark_theme === 'true') {
+      (document.body.style as any) = 'background: #1A202C';
+    }
     setTimeout(() => {
       animateScroll.scrollToBottom({
         containerId: 'chatDiv',
         smooth: false,
         duration: 0,
       });
-    }, 200); // Load time
+    }, 180); // Load time
 
+    (document.body.style as any) = 'overflow-y: hidden';
     console.log('CURRENT ID', currId);
     setGroupSelected(currId);
     GetUser();
@@ -142,7 +150,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
     // console.log(messageData);
     // console.log(groupSelected);
     // console.log('REALTIME', realtimeData);
-  }, [session, groupSelected, messageData, realtimeData]);
+  }, [session, groupSelected, messageData, realtimeData, user?.dark_theme]);
 
   //@TODO
   // useEffect(() => {
@@ -153,8 +161,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   //   });
   // }, [realtimeData]);
 
-  if (loading) return <Loader />;
-  if (GroupNameLoading) return <Loader />;
+  if (loading) return <LoadingBar color="red" progress={100} loaderSpeed={2000} height={4} />;
 
   return (
     <>
@@ -267,7 +274,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                     GroupNameData.GetGroupName.members.length === 2
                       ? 75
                       : GroupNameData.GetGroupName.members.length > 2
-                      ? 131
+                      ? 137
                       : 50,
                 }}
               >
@@ -356,11 +363,20 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                         className={message.author.id === user.id ? feedStyles.yourmessage : feedStyles.message}
                         style={{ marginBottom: message.author.id !== user.id ? -40 : -4 }}
                       >
-                        {!message.body.includes('https://') ? (
-                          <p style={{ marginLeft: 5, marginTop: 10, fontSize: 20 }} className={feedStyles.text}>
-                            {message.body}
-                          </p>
-                        ) : (
+                        {message.image ? (
+                          <img
+                            style={{
+                              marginLeft: 5,
+                              marginTop: 10,
+                              fontSize: 20,
+                              width: 900,
+                              borderRadius: 50,
+                              height: '100%',
+                            }}
+                            src={message.body}
+                            className={feedStyles.text}
+                          />
+                        ) : message.body.includes('https://') ? (
                           <p
                             style={{
                               marginLeft: 5,
@@ -372,6 +388,10 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                             onClick={() => window.open(message.body)}
                             className={feedStyles.text}
                           >
+                            {message.body}
+                          </p>
+                        ) : (
+                          <p style={{ marginLeft: 5, marginTop: 10, fontSize: 20 }} className={feedStyles.text}>
                             {message.body}
                           </p>
                         )}
@@ -445,11 +465,20 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                     className={message.author.id === user.id ? feedStyles.yourmessage : feedStyles.message}
                     style={{ marginBottom: message.author.id !== user.id ? -40 : -4 }}
                   >
-                    {!message.body.includes('https://') ? (
-                      <p style={{ marginLeft: 5, marginTop: 10, fontSize: 20 }} className={feedStyles.text}>
-                        {message.body}
-                      </p>
-                    ) : (
+                    {message.image ? (
+                      <img
+                        style={{
+                          marginLeft: 5,
+                          marginTop: 10,
+                          fontSize: 20,
+                          width: 900,
+                          borderRadius: 50,
+                          height: '100%',
+                        }}
+                        src={message.body}
+                        className={feedStyles.text}
+                      />
+                    ) : message.body.includes('https://') ? (
                       <p
                         style={{
                           marginLeft: 5,
@@ -463,6 +492,10 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                       >
                         {message.body}
                       </p>
+                    ) : (
+                      <p style={{ marginLeft: 5, marginTop: 10, fontSize: 20 }} className={feedStyles.text}>
+                        {message.body}
+                      </p>
                     )}
                   </div>
                 </>
@@ -472,7 +505,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
 
         <div style={{ top: -10, right: 80, position: 'absolute' }}>
           <div className="outer-menu">
-            <input className="checkbox-toggle" type="checkbox" />
+            <input className="checkbox-toggle" type="checkbox" onChange={() => setVisible(!visible)} />
             <div
               className="hamburger rainbow-box"
               style={{ borderRadius: 50, backgroundColor: darkMode ? '#1A202C' : '' }}
@@ -481,20 +514,11 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                 <i className="fa fa-plus  fa-2x" style={{ color: darkMode ? '#fff' : '' }}></i>
               </div>
             </div>
-            <div style={{ top: 36, right: 60, position: 'relative' }}>
-              <Switch
-                size="lg"
-                onChange={async () => {
-                  setDarkMode(!darkMode);
-                  user && ToggleTheme({ variables: { authorid: user.id } });
-                }}
-                isChecked={darkMode}
-              />
-            </div>
+
             <div className="menu">
               <div style={{ marginRight: '22%', backgroundColor: darkMode ? '#1A202C' : '' }}>
                 <div>
-                  <div className="mt-1" style={{ width: '300%' }}>
+                  <div className="mt-1" style={{ width: '300%', color: darkMode ? '#fff' : '#000' }}>
                     <Search />
                   </div>
                 </div>
@@ -643,7 +667,12 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
         </div>
         <div
           className={feedStyles.profile}
-          style={{ backgroundColor: darkMode ? '#1A202C' : '#fff', borderRightColor: darkMode ? '#fff' : '' }}
+          style={{
+            backgroundColor: darkMode ? '#1A202C' : '#fff',
+            borderRightColor: darkMode ? '#fff' : '',
+            cursor: 'pointer',
+          }}
+          onClick={() => (window.location.href = '/me')}
         >
           <img
             src={user! && (user.profile_picture as string | undefined)}
@@ -694,6 +723,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                   style={{
                     color: darkMode ? '#fff' : '#000',
                     borderRadius: 100,
+                    paddingRight: 100,
                   }}
                   value={messageVal}
                   _placeholder={{ color: darkMode ? '#fff' : '#7c7c82' }}
@@ -713,6 +743,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                             id: user.id,
                             profile_picture: user.profile_picture,
                           },
+                          image: false,
                           messageid: generateId(24),
                         },
                       });
@@ -725,16 +756,69 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                 <InputRightElement
                   style={{
                     backgroundColor: 'transparent',
-                    right: 8,
+                    right: 24,
                     cursor: 'pointer',
                   }}
                 >
-                  <EmojiEmotionsIcon
-                    onClick={() => setShowEmoji(!showEmoji)}
-                    fontSize="large"
-                    style={{
-                      color: darkMode ? '#fff' : 'gray',
+                  {visible && (
+                    <>
+                      <InsertPhotoIcon
+                        onClick={() => {
+                          document.getElementById('filepicker')?.click();
+                        }}
+                        fontSize="large"
+                        style={{
+                          color: darkMode ? '#fff' : 'gray',
+                        }}
+                      />
+
+                      <EmojiEmotionsIcon
+                        onClick={() => setShowEmoji(!showEmoji)}
+                        fontSize="large"
+                        style={{
+                          color: darkMode ? '#fff' : 'gray',
+                        }}
+                      />
+                    </>
+                  )}
+
+                  <input
+                    type="file"
+                    id="filepicker"
+                    accept="image/x-png,image/gif,image/jpeg"
+                    onChange={(e: any) => {
+                      const file = e.target.files[0];
+
+                      const reader = new FileReader();
+                      reader.onloadend = async () => {
+                        console.log(reader.result);
+                        try {
+                          await SendMessage({
+                            variables: {
+                              groupid: groupSelected,
+                              body: reader.result,
+                              author: {
+                                username: user.username,
+                                email: user.email,
+                                id: user.id,
+                                profile_picture: user.profile_picture,
+                              },
+                              image: true,
+                              messageid: generateId(24),
+                            },
+                          });
+                        } catch (err) {
+                          toast({
+                            status: 'error',
+                            title: 'This image is too big! Please choose a smaller image.',
+                            position: 'top-right',
+                            isClosable: true,
+                          });
+                        }
+                      };
+                      reader.readAsDataURL(file);
                     }}
+                    style={{ display: 'none' }}
                   />
                 </InputRightElement>
               </InputGroup>
@@ -742,7 +826,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
             {showEmoji && (
               <span>
                 <Picker
-                  style={{ position: 'absolute', bottom: 100 }}
+                  style={{ position: 'absolute', bottom: 100, left: 1530 }}
                   onSelect={(e: any) => {
                     let sym = e.unified.split('-');
                     let codesArray: any[] = [];

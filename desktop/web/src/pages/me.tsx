@@ -1,5 +1,4 @@
 import client from '@/../apollo-client';
-import { Theme } from '@/../context/theme';
 import { GET_USER_ID } from '@/apollo/Queries';
 import jwtDecode from 'jwt-decode';
 import { useSession } from 'next-auth/client';
@@ -24,7 +23,6 @@ const Me: React.FC<MeProps> = ({}) => {
     profile_picture: string | null | undefined;
     iat?: string | null | undefined;
   } | null>(null);
-  const theme = useContext(Theme);
   const GetUser = async () => {
     const token = localStorage.getItem('token');
     if (session && !token) {

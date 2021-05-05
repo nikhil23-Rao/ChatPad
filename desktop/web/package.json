@@ -65,6 +65,7 @@
     "react-particles-js": "3.4.1",
     "react-scroll": "1.8.2",
     "react-toastify": "7.0.3",
+    "react-top-loading-bar": "2.0.1",
     "starwars-names": "1.6.0",
     "styled-components": "5.2.3",
     "subscriptions-transport-ws": "0.9.18",

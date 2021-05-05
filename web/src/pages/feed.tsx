@@ -304,7 +304,12 @@ const Feed: React.FC<FeedProps> = ({}) => {
         </div>
         <div
           className={feedStyles.profile}
-          style={{ backgroundColor: darkMode ? '#1A202C' : '#fff', borderRightColor: darkMode ? '#fff' : '' }}
+          style={{
+            backgroundColor: darkMode ? '#1A202C' : '#fff',
+            borderRightColor: darkMode ? '#fff' : '',
+            cursor: 'pointer',
+          }}
+          onClick={() => (window.location.href = '/me')}
         >
           <img
             src={user! && (user.profile_picture as string | undefined)}
