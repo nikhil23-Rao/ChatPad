@@ -15,6 +15,7 @@ interface MeProps {}
 const Me: React.FC<MeProps> = ({}) => {
   const [session] = useSession();
   const [darkModeSelected, setDarkModeSelected] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
   const [lightModeSelected, setLightModeSelected] = useState(false);
   const [user, setUser] = useState<{
     username: string | null | undefined;
@@ -43,6 +44,7 @@ const Me: React.FC<MeProps> = ({}) => {
         profile_picture: session.user.image!,
       };
       if (currentUser.dark_theme === 'true') {
+        setDarkMode(true);
         (document.body.style as any) = 'background: #1A202C';
       }
       setUser(currentUser);
@@ -157,13 +159,13 @@ const Me: React.FC<MeProps> = ({}) => {
                   authorid: user && user.id,
                 },
               });
-              window.location.reload();
+              window.location.reload(false);
             }}
           >
             <img
               style={{
                 marginLeft: 150,
-                border: lightModeSelected ? '5px solid #0993f6' : '',
+                border: user?.dark_theme === 'false' ? '5px solid #0993f6' : '',
               }}
               alt=""
               className="d-block border-bottom mb-2 width-full"
@@ -182,13 +184,13 @@ const Me: React.FC<MeProps> = ({}) => {
                   authorid: user && user.id,
                 },
               });
-              window.location.reload();
+              window.location.reload(false);
             }}
           >
             <img
               alt=""
               className="d-block border-bottom mb-2 width-full"
-              style={{ marginLeft: 100, border: darkModeSelected ? '5px solid #0993f6' : '' }}
+              style={{ marginLeft: 100, border: user?.dark_theme === 'true' ? '5px solid #0993f6' : '' }}
               src="https://github.githubassets.com/images/modules/settings/color_modes/dark_preview.svg"
             ></img>
             <p style={{ marginLeft: 170, fontFamily: 'Lato' }}>Dark Theme</p>

@@ -827,7 +827,15 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
             {showEmoji && (
               <span>
                 <Picker
-                  style={{ position: 'absolute', bottom: 100, left: 1530 }}
+                  style={{
+                    position: 'absolute',
+                    bottom: 100,
+                    left:
+                      (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
+                      (typeof window !== 'undefined' && window.screen.availWidth) < 1800
+                        ? 1420
+                        : 1530,
+                  }}
                   onSelect={(e: any) => {
                     let sym = e.unified.split('-');
                     let codesArray: any[] = [];
