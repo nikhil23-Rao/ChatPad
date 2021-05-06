@@ -55,6 +55,7 @@ const resolvers = {
     GetInitialMessages: async (_: void, args: { groupid: string }) => {
       const messages = await Message.findAll({
         where: { groupid: args.groupid },
+        order: [["time", "DESC"]],
       });
       return messages;
     },
@@ -155,6 +156,7 @@ const resolvers = {
       // await Message.sync({ force: true });
       const messages: any = await Message.findAll({
         where: { groupid: args.groupid },
+        order: [["time", "DESC"]],
       });
       const message = await Message.build({
         body: args.body,
