@@ -49,3 +49,9 @@ export const TOGGLE_THEME = gql`
     ToggleTheme(authorid: $authorid)
   }
 `;
+
+export const UPDATE_TIME = gql`
+  mutation UpdateTime {
+    UpdateTime
+  }
+`;

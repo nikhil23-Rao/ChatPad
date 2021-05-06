@@ -24,4 +24,8 @@ export const Message = sequelize.define("Message", {
     type: DataTypes.STRING,
     allowNull: false,
   },
+  time: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
 });

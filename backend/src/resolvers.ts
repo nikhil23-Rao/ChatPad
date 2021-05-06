@@ -9,6 +9,7 @@ import { pubsub } from "./server";
 import { Model } from "sequelize/types";
 import { MessageType } from "./types/MessageType";
 import { Message } from "./database/models/Message";
+import { sequelize } from "./database/src/connection";
 
 const NEW_MESSAGE = "NEW_MESSAGE";
 
@@ -161,6 +162,7 @@ const resolvers = {
         messageid: args.messageid,
         groupid: args.groupid,
         image: args.image,
+        time: 0,
       });
 
       const previousMessages = [];
@@ -181,6 +183,7 @@ const resolvers = {
             author: args.author,
             groupid: args.groupid,
             image: args.image,
+            time: 0,
           },
         ],
       };
@@ -211,6 +214,9 @@ const resolvers = {
         await user?.save();
         return true;
       }
+    },
+    UpdateTime: async (_: void, __: void) => {
+      await sequelize.query(`UPDATE "Messages" SET time = time + 1`);
     },
   },
 };

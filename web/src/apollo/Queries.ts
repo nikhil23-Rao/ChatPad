@@ -44,6 +44,7 @@ export const GET_INITIAL_MESSAGES = gql`
         id
       }
       image
+      time
     }
   }
 `;

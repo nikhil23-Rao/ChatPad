@@ -32,6 +32,8 @@ type Mutation {
   ): Boolean
 
   Login(email: String!, password: String): String!
+
+  UpdateTime: Boolean
 }
 
 type Subscription {
@@ -44,6 +46,7 @@ type Message {
   author: GroupUser
   groupid: String
   image: Boolean
+  time: Int
 }
 
 input User {

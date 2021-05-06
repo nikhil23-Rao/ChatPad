@@ -7,7 +7,7 @@ import { GET_CHAT_PATHS, GET_GROUPS, GET_GROUP_NAME, GET_INITIAL_MESSAGES, GET_U
 import { Search } from '../../components/Search';
 import { useMutation, useQuery, useSubscription } from '@apollo/client';
 import { IconButton } from '@material-ui/core';
-import { SEND_MESSAGE, START_SUBSCRIPTION, TOGGLE_THEME } from '@/apollo/Mutations';
+import { SEND_MESSAGE, START_SUBSCRIPTION, TOGGLE_THEME, UPDATE_TIME } from '@/apollo/Mutations';
 import { generateId } from '@/utils/GenerateId';
 import Head from 'next/head';
 import { GET_ALL_MESSAGES } from '@/apollo/Subscriptions';
@@ -109,7 +109,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
     variables: { groupid: groupSelected },
   });
   const [SendMessage] = useMutation(SEND_MESSAGE);
-  const [ToggleTheme] = useMutation(TOGGLE_THEME);
+  const [UpdateTime] = useMutation(UPDATE_TIME);
   const { data: realtimeData } = useSubscription(GET_ALL_MESSAGES);
   const { data: GroupNameData, loading: GroupNameLoading } = useQuery(GET_GROUP_NAME, {
     variables: { groupid: groupSelected },
@@ -153,7 +153,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
     // console.log('REALTIME', realtimeData);
   }, [session, groupSelected, messageData, realtimeData, user?.dark_theme]);
 
-  //@TODO
+  // @TODO
   // useEffect(() => {
   //   document.addEventListener('visibilitychange', function () {
   //     if (document.visibilityState === 'hidden') {
@@ -161,6 +161,12 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   //     } else return;
   //   });
   // }, [realtimeData]);
+
+  useEffect(() => {
+    setInterval(() => {
+      UpdateTime();
+    }, 60000);
+  }, []);
 
   if (loading) return <LoadingBar color="red" progress={100} loaderSpeed={2000} height={4} />;
 
@@ -344,7 +350,8 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                             fontFamily: 'Lato',
                           }}
                         >
-                          {message.author.username} • 2 mins
+                          {message.author.username} • {message.time === 0 ? '' : message.time}{' '}
+                          {message.time === 0 ? 'Now' : 'mins'}
                         </p>
                       ) : (
                         <p
@@ -357,7 +364,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                             fontSize: 14,
                           }}
                         >
-                          You • Now
+                          You • {message.time === 0 ? '' : message.time} {message.time === 0 ? 'Now' : 'mins'}
                         </p>
                       )}
                       <div
@@ -445,7 +452,8 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                         fontFamily: 'Lato',
                       }}
                     >
-                      {message.author.username} • 2 mins
+                      {message.author.username} • {message.time === 0 ? '' : message.time}{' '}
+                      {message.time === 0 ? 'Now' : 'mins'}
                     </p>
                   ) : (
                     <p
@@ -458,7 +466,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                         fontSize: 14,
                       }}
                     >
-                      You • Now
+                      You • {message.time === 0 ? '' : message.time} {message.time === 0 ? 'Now' : 'mins'}
                     </p>
                   )}
 

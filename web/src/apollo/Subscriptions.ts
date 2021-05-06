@@ -13,6 +13,7 @@ export const GET_ALL_MESSAGES = gql`
       }
       image
       groupid
+      time
     }
   }
 `;
