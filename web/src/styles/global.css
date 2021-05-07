@@ -371,8 +371,8 @@ h1 {
   grid-template-areas:
     'pc-project-1 pc-project-2 pc-project-3 pc-project-4'
     'pc-user pc-user pc-user pc-user-buttons';
-  max-width: 880px;
-  min-height: 500px;
+  max-width: 780px;
+  min-height: 400px;
   background: #fff;
   border-radius: 8px;
   box-shadow: 0px 0px 50px rgba(63, 57, 71, 0.15);

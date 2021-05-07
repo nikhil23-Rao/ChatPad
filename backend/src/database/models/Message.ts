@@ -28,4 +28,8 @@ export const Message = sequelize.define("Message", {
     type: DataTypes.INTEGER,
     allowNull: false,
   },
+  date: {
+    type: DataTypes.ARRAY(DataTypes.STRING),
+    allowNull: false,
+  },
 });

@@ -47,6 +47,7 @@ type Message {
   groupid: String
   image: Boolean
   time: Int
+  date: [String]
 }
 
 input User {

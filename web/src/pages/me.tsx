@@ -127,10 +127,33 @@ const Me: React.FC<MeProps> = ({}) => {
               position: 'absolute',
             }}
           >
-            <h3 style={{ top: 190, left: 22, position: 'relative', fontFamily: 'Lato' }}>
+            <h3
+              style={{
+                top: 190,
+                left:
+                  (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
+                  (typeof window !== 'undefined' && window.screen.availWidth) < 1800
+                    ? 22
+                    : '-6%',
+                position: 'relative',
+                fontFamily: 'Lato',
+              }}
+            >
               <p>Nikhil Rao</p>
             </h3>
-            <h3 style={{ top: 190, left: 22, position: 'relative', fontFamily: 'Lato', color: 'gray' }}>
+            <h3
+              style={{
+                top: 190,
+                left:
+                  (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
+                  (typeof window !== 'undefined' && window.screen.availWidth) < 1800
+                    ? 22
+                    : '-4%',
+                position: 'relative',
+                fontFamily: 'Lato',
+                color: 'gray',
+              }}
+            >
               <p>nikhil23.rao@gmail.com</p>
             </h3>
           </div>

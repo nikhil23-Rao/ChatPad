@@ -10,6 +10,7 @@ import { Model } from "sequelize/types";
 import { MessageType } from "./types/MessageType";
 import { Message } from "./database/models/Message";
 import { sequelize } from "./database/src/connection";
+import { formatAMPM } from "./utils/formatTime";
 
 const NEW_MESSAGE = "NEW_MESSAGE";
 
@@ -158,6 +159,12 @@ const resolvers = {
         where: { groupid: args.groupid },
         order: [["time", "DESC"]],
       });
+
+      var dateObj = new Date();
+      var month = dateObj.getUTCMonth() + 1; //months from 1-12
+      var day = dateObj.getUTCDate();
+      var year = dateObj.getUTCFullYear();
+      const newdate = month + "/" + day + "/" + year;
       const message = await Message.build({
         body: args.body,
         author: args.author,
@@ -165,6 +172,7 @@ const resolvers = {
         groupid: args.groupid,
         image: args.image,
         time: 0,
+        date: [newdate, formatAMPM(new Date())],
       });
 
       const previousMessages = [];

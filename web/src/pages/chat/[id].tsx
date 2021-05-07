@@ -169,9 +169,11 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   }, [realtimeData]);
 
   useEffect(() => {
-    setInterval(() => {
+    const clear = setInterval(() => {
       UpdateTime();
     }, 60000);
+
+    return () => clearInterval(clear);
   }, []);
 
   if (loading) return <LoadingBar color="red" progress={100} loaderSpeed={2000} height={4} />;
@@ -296,14 +298,26 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                   {messageData && !realtimeData
                     ? messageData.GetInitialMessages[messageData.GetInitialMessages.length - 1].time === 0
                       ? 'Currently active'
-                      : `Last active ${
+                      : messageData.GetInitialMessages[messageData.GetInitialMessages.length - 1].time > 0 &&
+                        messageData.GetInitialMessages[messageData.GetInitialMessages.length - 1].time < 60
+                      ? `Last active ${
                           messageData.GetInitialMessages[messageData.GetInitialMessages.length - 1].time
                         } mins ago`
-                    : realtimeData.GetAllMessages[realtimeData.GetAllMessages.length - 1].time === 0
-                    ? 'Currently active'
-                    : `Last active ${
-                        realtimeData.GetAllMessages[realtimeData.GetAllMessages.length - 1].time
-                      } mins ago`}
+                      : messageData.GetInitialMessages[messageData.GetInitialMessages.length - 1].time > 60 &&
+                        messageData.GetInitialMessages[messageData.GetInitialMessages.length - 1].time < 1440
+                      ? `Last active at ${
+                          messageData.GetInitialMessages[messageData.GetInitialMessages.length - 1].date[1]
+                        }`
+                      : messageData.GetInitialMessages[messageData.GetInitialMessages.length - 1].time >= 1440
+                      ? `Last active on ${
+                          messageData.GetInitialMessages[messageData.GetInitialMessages.length - 1].date[0]
+                        } at ${messageData.GetInitialMessages[messageData.GetInitialMessages.length - 1].date[1]}`
+                      : realtimeData.GetAllMessages[realtimeData.GetAllMessages.length - 1].time === 0
+                      ? 'Currently active'
+                      : `Last active ${
+                          realtimeData.GetAllMessages[realtimeData.GetAllMessages.length - 1].time
+                        } mins ago`
+                    : null}
                 </p>
               )}
             </span>
@@ -369,8 +383,17 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                             fontFamily: 'Lato',
                           }}
                         >
-                          {message.author.username} • {message.time === 0 ? '' : message.time}{' '}
-                          {message.time === 0 ? 'Now' : 'mins'}
+                          {message.author.username} •{' '}
+                          {message.time === 0
+                            ? ''
+                            : message.time > 0 && message.time < 1440
+                            ? message.time
+                            : message.time >= 1440
+                            ? message.date[0] + ' ' + message.date[1]
+                            : message.time >= 60 && message.time < 1440
+                            ? message.date[1]
+                            : null}{' '}
+                          {message.time === 0 ? 'Now' : message.time > 0 && message.time < 60 ? 'mins' : null}
                         </p>
                       ) : (
                         <p
@@ -378,12 +401,29 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                             color: darkMode ? '#ebeef0' : '#000',
                             position: 'relative',
                             fontFamily: 'Lato',
-                            left: 1626,
+                            left:
+                              message.time < 10
+                                ? 1625
+                                : message.time >= 10 && message.time < 60
+                                ? 1617
+                                : message.time >= 60 && message.time < 1440
+                                ? 1610
+                                : 1545,
                             top: 10,
                             fontSize: 14,
                           }}
                         >
-                          You • {message.time === 0 ? '' : message.time} {message.time === 0 ? 'Now' : 'mins'}
+                          You •{' '}
+                          {message.time === 0
+                            ? ''
+                            : message.time > 0 && message.time < 60
+                            ? message.time
+                            : message.time >= 1440
+                            ? message.date[0] + ' ' + message.date[1]
+                            : message.time >= 60 && message.time < 1440
+                            ? message.date[1]
+                            : null}{' '}
+                          {message.time === 0 ? 'Now' : message.time > 0 && message.time < 60 ? 'mins' : null}
                         </p>
                       )}
                       <div
@@ -471,8 +511,17 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                         fontFamily: 'Lato',
                       }}
                     >
-                      {message.author.username} • {message.time === 0 ? '' : message.time}{' '}
-                      {message.time === 0 ? 'Now' : 'mins'}
+                      {message.author.username} •{' '}
+                      {message.time === 0
+                        ? ''
+                        : message.time > 0 && message.time < 1440
+                        ? message.time
+                        : message.time >= 1440
+                        ? message.date[0] + ' ' + message.date[1]
+                        : message.time >= 60 && message.time < 1440
+                        ? message.date[1]
+                        : null}{' '}
+                      {message.time === 0 ? 'Now' : message.time > 0 && message.time < 60 ? 'mins' : null}
                     </p>
                   ) : (
                     <p
@@ -480,12 +529,29 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                         color: darkMode ? '#ebeef0' : '#000',
                         position: 'relative',
                         fontFamily: 'Lato',
-                        left: 1626,
+                        left:
+                          message.time < 10
+                            ? 1625
+                            : message.time >= 10 && message.time < 60
+                            ? 1617
+                            : message.time >= 60 && message.time < 1440
+                            ? 1610
+                            : 1560,
                         top: 10,
                         fontSize: 14,
                       }}
                     >
-                      You • {message.time === 0 ? '' : message.time} {message.time === 0 ? 'Now' : 'mins'}
+                      You •{' '}
+                      {message.time === 0
+                        ? ''
+                        : message.time > 0 && message.time < 60
+                        ? message.time
+                        : message.time >= 1440
+                        ? message.date[0] + ' ' + message.date[1]
+                        : message.time >= 60 && message.time < 1440
+                        ? message.date[1]
+                        : null}{' '}
+                      {message.time === 0 ? 'Now' : message.time > 0 && message.time < 60 ? 'mins' : null}
                     </p>
                   )}
 
