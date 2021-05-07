@@ -17,6 +17,7 @@ const Me: React.FC<MeProps> = ({}) => {
   const [darkModeSelected, setDarkModeSelected] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
   const [lightModeSelected, setLightModeSelected] = useState(false);
+  const [left, setLeft] = useState<string | number>('28.75rem');
   const [user, setUser] = useState<{
     username: string | null | undefined;
     email: string | null | undefined;
@@ -67,6 +68,12 @@ const Me: React.FC<MeProps> = ({}) => {
   };
   const [ToggleTheme] = useMutation(TOGGLE_THEME);
   useEffect(() => {
+    if (
+      (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
+      (typeof window !== 'undefined' && window.screen.availWidth) < 180
+    ) {
+      setLeft(460);
+    }
     GetUser();
     console.log(user);
     if (user && user.dark_theme == 'true') {
@@ -86,16 +93,9 @@ const Me: React.FC<MeProps> = ({}) => {
           style={{
             maxWidth: '100%',
             width: 880,
-            left:
-              (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
-              (typeof window !== 'undefined' && window.screen.availWidth) < 1800
-                ? 220
-                : 460,
             position: 'absolute',
-            marginLeft: 'auto',
-            marginRight: 'auto',
-            borderRadius: 8,
             height: 255,
+            left,
             objectFit: 'cover',
           }}
           alt=""

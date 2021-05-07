@@ -116,7 +116,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   });
 
   const playSound = () => {
-    const audio = document.getElementById('sound');
+    const audio: any = document.getElementById('sound');
     if (audio) {
       (audio as HTMLMediaElement).play();
     }
@@ -134,7 +134,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
       });
     }, 180); // Load time
 
-    (document.body.style as any) = 'overflow-y: hidden';
+    (document.body.style as any) = 'overflow: hidden';
     console.log('CURRENT ID', currId);
     setGroupSelected(currId);
     GetUser();
@@ -148,19 +148,25 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
     if (realtimeData) {
       console.log(realtimeData);
     }
-    // console.log(messageData);
+    console.log(messageData);
     // console.log(groupSelected);
     // console.log('REALTIME', realtimeData);
   }, [session, groupSelected, messageData, realtimeData, user?.dark_theme]);
 
-  // @TODO
-  // useEffect(() => {
-  //   document.addEventListener('visibilitychange', function () {
-  //     if (document.visibilityState === 'hidden') {
-  //       playSound();
-  //     } else return;
-  //   });
-  // }, [realtimeData]);
+  useEffect(() => {
+    document.addEventListener('visibilitychange', function () {
+      if (document.visibilityState === 'hidden' && realtimeData && user) {
+        for (const message in realtimeData.GetAllMessages) {
+          if (
+            realtimeData.GetAllMessages[message].author.id !== user.id &&
+            realtimeData.GetAllMessages[message].time === 0
+          ) {
+            playSound();
+          }
+        }
+      }
+    });
+  }, [realtimeData]);
 
   useEffect(() => {
     setInterval(() => {
@@ -269,24 +275,37 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
               >
                 {GroupNameData.GetGroupName.name}
               </p>
-              <p
-                style={{
-                  fontSize: 12,
-                  fontFamily: 'Lato',
-                  position: 'relative',
-                  textAlign: 'left',
-                  color: darkMode ? '#fff' : '#000',
-                  bottom: 5,
-                  marginLeft:
-                    GroupNameData.GetGroupName.members.length === 2
-                      ? 75
-                      : GroupNameData.GetGroupName.members.length > 2
-                      ? 137
-                      : 50,
-                }}
-              >
-                Last active 2 hours ago
-              </p>
+              {(messageData && messageData.GetInitialMessages.length === 0) ||
+              (realtimeData && realtimeData.GetAllMessages.length === 0) ? null : (
+                <p
+                  style={{
+                    fontSize: 12,
+                    fontFamily: 'Lato',
+                    position: 'relative',
+                    textAlign: 'left',
+                    color: darkMode ? '#fff' : '#000',
+                    bottom: 5,
+                    marginLeft:
+                      GroupNameData.GetGroupName.members.length === 2
+                        ? 75
+                        : GroupNameData.GetGroupName.members.length > 2
+                        ? 137
+                        : 50,
+                  }}
+                >
+                  {messageData && !realtimeData
+                    ? messageData.GetInitialMessages[messageData.GetInitialMessages.length - 1].time === 0
+                      ? 'Currently active'
+                      : `Last active ${
+                          messageData.GetInitialMessages[messageData.GetInitialMessages.length - 1].time
+                        } mins ago`
+                    : realtimeData.GetAllMessages[realtimeData.GetAllMessages.length - 1].time === 0
+                    ? 'Currently active'
+                    : `Last active ${
+                        realtimeData.GetAllMessages[realtimeData.GetAllMessages.length - 1].time
+                      } mins ago`}
+                </p>
+              )}
             </span>
           </nav>
         )}
@@ -323,14 +342,14 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                         }}
                       >
                         {message.author.id !== user.id ? (
-                          <div className={feedStyles.border}>
+                          <div className={feedStyles.border} style={{}}>
                             <img
                               style={{
                                 width: 50,
                                 height: 50,
                                 borderRadius: 100,
-                                left: 2.49999999999999999999,
-                                top: 2,
+                                left: 4,
+                                top: 3,
                                 position: 'relative',
                               }}
                               src={message.author.profile_picture}
@@ -431,8 +450,8 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                             width: 50,
                             height: 50,
                             borderRadius: 100,
-                            left: 2.49999999999999999999,
-                            top: 2,
+                            left: 4,
+                            top: 3,
                             position: 'relative',
                           }}
                           src={message.author.profile_picture}
