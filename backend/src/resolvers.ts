@@ -113,6 +113,7 @@ const resolvers = {
         id: user.id,
         oauth: user.oauth,
         profile_picture: user.profile_picture,
+        dark_theme: user.dark_theme,
       });
 
       return token;
@@ -138,6 +139,7 @@ const resolvers = {
         id: user.id,
         username: user.username,
         profile_picture: user.profile_picture,
+        dark_theme: user.dark_theme,
       });
 
       return token;

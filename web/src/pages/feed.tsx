@@ -115,6 +115,12 @@ const Feed: React.FC<FeedProps> = ({}) => {
 
     return () => clearInterval(clear);
   }, []);
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!session && !token) {
+      router.push('/login');
+    }
+  }, [session]);
 
   if (loading)
     return (

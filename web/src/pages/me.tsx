@@ -11,6 +11,7 @@ import { useMutation } from '@apollo/client';
 import { TOGGLE_THEME, UPDATE_TIME } from '@/apollo/Mutations';
 import LoadingBar from 'react-top-loading-bar';
 import { Button } from '@chakra-ui/react';
+import Link from 'next/link';
 
 interface MeProps {}
 
@@ -30,8 +31,7 @@ const Me: React.FC<MeProps> = ({}) => {
   } | null>(null);
   const theme = useContext(Theme);
   const GetUser = async () => {
-    const token = localStorage.getItem('token');
-    if (session && !token) {
+    if (session) {
       const result = await client.query({ query: GET_USER_ID, variables: { email: session.user.email } });
       const currentUser: {
         username: string;
@@ -52,21 +52,6 @@ const Me: React.FC<MeProps> = ({}) => {
       }
       setUser(currentUser);
     }
-    if (token) {
-      const currentUser: {
-        username: string;
-        email: string;
-        id: string;
-        profile_picture: string;
-        iat: string;
-        oauth: boolean;
-        dark_theme: string;
-      } = jwtDecode(token!);
-      setUser(currentUser);
-      if (currentUser.dark_theme === 'true') {
-        (document.body.style as any) = 'background: #1A202C';
-      }
-    }
   };
   const [ToggleTheme] = useMutation(TOGGLE_THEME);
   const [UpdateTime] = useMutation(UPDATE_TIME);
@@ -78,7 +63,6 @@ const Me: React.FC<MeProps> = ({}) => {
       setLeft(460);
     }
     GetUser();
-    console.log(user);
     if (user && user.dark_theme == 'true') {
       setDarkModeSelected(!darkModeSelected);
     } else {
@@ -96,17 +80,20 @@ const Me: React.FC<MeProps> = ({}) => {
       style={{ position: 'relative', backgroundColor: user && user.dark_theme === 'true' ? '#1A202C' : '' }}
     >
       <div>
-        <i
-          className="fa fa-paper-plane fa-4x"
-          onClick={() => (window.location.href = '/feed')}
-          style={{
-            color: user?.dark_theme === 'true' ? '#fff' : '',
-            cursor: 'pointer',
-            position: 'absolute',
-            top: 28,
-            left: 36,
-          }}
-        ></i>
+        <Link href="/feed">
+          <a>
+            <i
+              className="fa fa-paper-plane fa-4x"
+              style={{
+                color: user?.dark_theme === 'true' ? '#fff' : '',
+                cursor: 'pointer',
+                position: 'absolute',
+                top: 28,
+                left: 36,
+              }}
+            ></i>
+          </a>
+        </Link>
       </div>
       <div style={{ position: 'relative' }}>
         <img
@@ -173,9 +160,7 @@ const Me: React.FC<MeProps> = ({}) => {
             <div style={{ position: 'relative', top: 180, right: 80 }}>
               <Button
                 onClick={() => {
-                  signOut();
-                  localStorage.clear();
-                  window.location.href = '/login';
+                  signOut({ callbackUrl: '/login' });
                 }}
                 colorScheme="red"
               >
