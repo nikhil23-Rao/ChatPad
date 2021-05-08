@@ -176,7 +176,12 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
     return () => clearInterval(clear);
   }, []);
 
-  if (loading) return <LoadingBar color="red" progress={100} loaderSpeed={2000} height={4} />;
+  if (loading)
+    return (
+      <div style={{ backgroundColor: '#1A202C', height: '100vh' }}>
+        <LoadingBar color="red" progress={100} loaderSpeed={2000} height={4} />
+      </div>
+    );
 
   return (
     <>
@@ -295,7 +300,9 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                         : 50,
                   }}
                 >
-                  {messageData && !realtimeData
+                  {realtimeData && realtimeData.GetAllMessages[realtimeData.GetAllMessages.length - 1].time === 0
+                    ? 'Currently active'
+                    : messageData && !realtimeData
                     ? messageData.GetInitialMessages[messageData.GetInitialMessages.length - 1].time === 0
                       ? 'Currently active'
                       : messageData.GetInitialMessages[messageData.GetInitialMessages.length - 1].time > 0 &&

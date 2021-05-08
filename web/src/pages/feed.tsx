@@ -7,7 +7,7 @@ import { GET_CHAT_PATHS, GET_GROUPS, GET_INITIAL_MESSAGES, GET_USER_ID } from '.
 import { Search } from '../components/Search';
 import { useMutation, useQuery, useSubscription } from '@apollo/client';
 import { IconButton } from '@material-ui/core';
-import { SEND_MESSAGE, START_SUBSCRIPTION } from '@/apollo/Mutations';
+import { SEND_MESSAGE, START_SUBSCRIPTION, UPDATE_TIME } from '@/apollo/Mutations';
 import { generateId } from '@/utils/GenerateId';
 import Head from 'next/head';
 import { GET_ALL_MESSAGES } from '@/apollo/Subscriptions';
@@ -108,8 +108,21 @@ const Feed: React.FC<FeedProps> = ({}) => {
     console.log(groupSelected);
     console.log('REALTIME', realtimeData);
   }, [session, groupSelected, messageData, realtimeData, user?.dark_theme]);
+  const [UpdateTime] = useMutation(UPDATE_TIME);
+  useEffect(() => {
+    const clear = setInterval(() => {
+      UpdateTime();
+    }, 60000);
 
-  if (loading) return <LoadingBar color="red" progress={100} loaderSpeed={2000} height={4} />;
+    return () => clearInterval(clear);
+  }, []);
+
+  if (loading)
+    return (
+      <div style={{ backgroundColor: '#1A202C', height: '100vh' }}>
+        <LoadingBar color="red" progress={100} loaderSpeed={2000} height={4} />
+      </div>
+    );
 
   return (
     <>
