@@ -11,7 +11,7 @@ import { Message } from "./database/models/Message";
 import { sequelize } from "./database/src/connection";
 import { formatAMPM } from "./utils/formatTime";
 
-// PubSub Indicator
+// PubSub indicator
 const NEW_MESSAGE = "NEW_MESSAGE";
 
 const resolvers = {
