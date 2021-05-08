@@ -147,6 +147,7 @@ export const Search = () => {
           <div className="mb-3 ml-5">
             <Input
               isInvalid={nameError}
+              style={{ color: user?.dark_theme === 'true' ? '#fff' : '#000' }}
               placeholder="Group Name..."
               value={nameVal}
               onChange={(e) => setNameVal(e.currentTarget.value)}
@@ -163,7 +164,7 @@ export const Search = () => {
                 <Chip
                   avatar={<Avatar src={(selectedItem as any).profile_picture} />}
                   label={(selectedItem as any).email}
-                  style={{ position: 'relative' }}
+                  style={{ position: 'relative', backgroundColor: user?.dark_theme === 'true' ? '#fff' : '#000' }}
                   clickable
                   color="default"
                   key={`selected-item-`}
@@ -179,6 +180,7 @@ export const Search = () => {
             {...getInputProps(getDropdownProps({ preventKeyAction: isOpen }))}
             placeholder="Add Members By Email..."
             isInvalid={error}
+            style={{ color: user?.dark_theme === 'true' ? '#fff' : '#000' }}
             size="lg"
             required={true}
             color="gray.900"
