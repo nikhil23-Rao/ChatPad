@@ -8,4 +8,5 @@ export interface UserType extends Model {
   id?: string;
   oauth?: boolean;
   dark_theme?: boolean;
+  online?: boolean;
 }

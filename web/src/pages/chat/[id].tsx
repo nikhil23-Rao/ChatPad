@@ -7,7 +7,7 @@ import { GET_CHAT_PATHS, GET_GROUPS, GET_GROUP_NAME, GET_INITIAL_MESSAGES, GET_U
 import { Search } from '../../components/Search';
 import { useMutation, useQuery, useSubscription } from '@apollo/client';
 import { IconButton } from '@material-ui/core';
-import { SEND_MESSAGE, START_SUBSCRIPTION, TOGGLE_THEME, UPDATE_TIME } from '@/apollo/Mutations';
+import { SEND_MESSAGE, START_SUBSCRIPTION, SWITCH_ONLINE, TOGGLE_THEME, UPDATE_TIME } from '@/apollo/Mutations';
 import { generateId } from '@/utils/GenerateId';
 import Head from 'next/head';
 import { GET_ALL_MESSAGES } from '@/apollo/Subscriptions';
@@ -53,6 +53,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   const [groupSelected, setGroupSelected] = useState('');
   const [showEmoji, setShowEmoji] = useState(false);
   const [visible, setVisible] = useState(true);
+  const [closed, setClosed] = useState(false);
   const [messageVal, setMessageVal] = useState('');
   const [session] = useSession();
   const chatRef = useRef<null | HTMLElement>();
@@ -114,6 +115,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   const { data: GroupNameData, loading: GroupNameLoading } = useQuery(GET_GROUP_NAME, {
     variables: { groupid: groupSelected },
   });
+  const [SwitchOnline] = useMutation(SWITCH_ONLINE);
 
   const playSound = () => {
     const audio: any = document.getElementById('sound');
@@ -173,8 +175,20 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
       UpdateTime();
     }, 60000);
 
+    if (user) {
+      window.addEventListener('beforeunload', (ev) => {
+        setClosed(true);
+      });
+
+      SwitchOnline({ variables: { authorid: user?.id, value: true } });
+    }
+
+    if (closed === true) {
+      SwitchOnline({ variables: { authorid: user?.id, value: false } });
+    }
+
     return () => clearInterval(clear);
-  }, []);
+  }, [session, user, closed]);
 
   if (loading)
     return (
@@ -775,6 +789,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
           }}
           onClick={() => (window.location.href = '/me')}
         >
+          <div style={{ position: 'absolute', left: 54, top: 60 }} className="onlinedot"></div>
           <img
             src={user! && (user.profile_picture as string | undefined)}
             alt=""

@@ -772,3 +772,11 @@ a.socialIcon:hover,
     #1488cc
   ); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
 }
+
+.onlinedot {
+  height: 18px;
+  width: 18px;
+  background-color: lightgreen;
+  border-radius: 50%;
+  display: inline-block;
+}

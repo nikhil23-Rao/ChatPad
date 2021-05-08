@@ -103,6 +103,7 @@ const resolvers = {
         profile_picture: args.profile_picture,
         oauth: args.oauth,
         id: args.id,
+        online: true,
       });
 
       await user.save();
@@ -229,6 +230,18 @@ const resolvers = {
     },
     UpdateTime: async (_: void, __: void) => {
       await sequelize.query(`UPDATE "Messages" SET time = time + 1`);
+    },
+    SwitchOnline: async (
+      _: void,
+      args: { authorid: string; value: boolean }
+    ) => {
+      const user: UserType | null = await User.findOne({
+        where: { id: args.authorid },
+      });
+      if (!user) return "INVALID ID";
+      user.online = args.value;
+      await user.save();
+      return true;
     },
   },
 };

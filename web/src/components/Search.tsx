@@ -164,7 +164,7 @@ export const Search = () => {
                 <Chip
                   avatar={<Avatar src={(selectedItem as any).profile_picture} />}
                   label={(selectedItem as any).email}
-                  style={{ position: 'relative', backgroundColor: user?.dark_theme === 'true' ? '#fff' : '#000' }}
+                  style={{ position: 'relative', backgroundColor: user?.dark_theme === 'true' ? '#fff' : '' }}
                   clickable
                   color="default"
                   key={`selected-item-`}

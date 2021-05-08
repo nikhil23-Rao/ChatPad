@@ -58,102 +58,75 @@ const Login: React.FC<LoginProps> = ({ myproviders }: LoginProps) => {
           </div>
 
           <div className="col-md-7 col-lg-6 ml-auto">
-            <Formik
-              initialValues={{ email: '', password: '' }}
-              onSubmit={async (values, { setSubmitting }) => {
-                try {
-                  setSubmitting(true);
-                  const result = await client.mutate({
-                    mutation: LOGIN,
-                    variables: {
-                      email: values.email,
-                      password: values.password,
-                    },
-                  });
-                  localStorage.setItem('token', result.data.Login!);
-                  router.push('/feed');
-                } catch (err) {
-                  return setApolloError(true);
-                }
-              }}
-              validationSchema={loginValidationSchema}
-            >
-              {({ handleSubmit, handleChange, touched, errors, isSubmitting }) => {
-                const isInvalidEmail = errors.email && touched.email ? true : false;
-                const isInvalidPassword = errors.password && touched.password ? true : false;
-                return (
-                  <div className="row">
-                    <div
-                      className={tw('flex m-auto flex-col p-6 gap-5 sm:rounded-8 z-10 sm:w-400 w-full')}
-                      style={{ width: '34rem', height: '24rem', borderRadius: '0px', position: 'relative', left: 10 }}
-                    >
-                      <div className="card-body">
-                        <h5 className={tw('card-title text-3xl text-primary-100 font-bold')}>Welcome To ChatPad</h5>
-                        <div className={tw('text-primary-100 flex-wrap')}>
-                          By signing in you accept our&nbsp;
-                          <div>
-                            <a
-                              href="https://www.youtube.com/watch?v=dQw4w9WgXcQ&ab_channel=RickAstleyVEVO"
-                              className={tw('text-accent hover:underline')}
-                              style={{ color: 'navy' }}
-                            >
-                              Privacy Policy
-                            </a>
-                            &nbsp;and&nbsp;
-                            <a
-                              href="https://www.youtube.com/watch?v=dQw4w9WgXcQ&ab_channel=RickAstleyVEVO"
-                              className={tw('text-accent hover:underline')}
-                              style={{ color: 'navy' }}
-                            >
-                              Terms of Service
-                            </a>
-                            .
-                          </div>
-                        </div>
-                        {myproviders &&
-                          Object.values(myproviders).map((provider) => {
-                            if (provider.name.includes('Google')) {
-                              return (
-                                <div className="form-group col-lg-12 mx-auto" key={provider.id}>
-                                  <a
-                                    onClick={() => signIn(provider.id, { callbackUrl: 'http://localhost:3000/feed' })}
-                                    className={`btn btn-primary btn-block py-2 mb-3 ${registerStyles.btnGoogle}`}
-                                  >
-                                    <i className="fa fa-google fa-2x mr-1"></i>
-                                    <span
-                                      className="font-weight-bold"
-                                      style={{ bottom: 5, fontWeight: 'bold', marginLeft: 10, position: 'relative' }}
-                                    >
-                                      Continue with Google
-                                    </span>
-                                  </a>
-                                </div>
-                              );
-                            } else {
-                              return (
-                                <div className="form-group col-lg-12 mx-auto mt-5" key={provider.id}>
-                                  <a
-                                    onClick={() => signIn(provider.id, { callbackUrl: 'http://localhost:3000/feed' })}
-                                    className={`btn btn-primary btn-block py-2 mb-3 ${registerStyles.btnGithub}`}
-                                  >
-                                    <i className="fa fa-github fa-2x mr-1"></i>
-                                    <span
-                                      className="font-weight-bold"
-                                      style={{ bottom: 5, fontWeight: 'bold', marginLeft: 10, position: 'relative' }}
-                                    >
-                                      Continue with Github
-                                    </span>
-                                  </a>
-                                </div>
-                              );
-                            }
-                          })}
-                      </div>
+            <div className="row">
+              <div
+                className={tw('flex m-auto flex-col p-6 gap-5 sm:rounded-8 z-10 sm:w-400 w-full')}
+                style={{ width: '34rem', height: '24rem', borderRadius: '0px', position: 'relative', left: 10 }}
+              >
+                <div className="card-body">
+                  <h5 className={tw('card-title text-3xl text-primary-100 font-bold')}>Welcome To ChatPad</h5>
+                  <div className={tw('text-primary-100 flex-wrap')} style={{ marginLeft: 5 }}>
+                    By signing in you accept our&nbsp;
+                    <div>
+                      <a
+                        href="https://www.youtube.com/watch?v=dQw4w9WgXcQ&ab_channel=RickAstleyVEVO"
+                        className={tw('text-accent hover:underline')}
+                        style={{ color: 'navy' }}
+                      >
+                        Privacy Policy
+                      </a>
+                      &nbsp;and&nbsp;
+                      <a
+                        href="https://www.youtube.com/watch?v=dQw4w9WgXcQ&ab_channel=RickAstleyVEVO"
+                        className={tw('text-accent hover:underline')}
+                        style={{ color: 'navy' }}
+                      >
+                        Terms of Service
+                      </a>
+                      .
                     </div>
                   </div>
-                );
-              }}
-            </Formik>
+                  {myproviders &&
+                    Object.values(myproviders).map((provider) => {
+                      if (provider.name.includes('Google')) {
+                        return (
+                          <div className="form-group col-lg-12 mx-auto" key={provider.id}>
+                            <a
+                              onClick={() => signIn(provider.id, { callbackUrl: 'http://localhost:3000/feed' })}
+                              className={`btn btn-primary btn-block py-2 mb-3 ${registerStyles.btnGoogle}`}
+                            >
+                              <i className="fa fa-google fa-2x mr-1"></i>
+                              <span
+                                className="font-weight-bold"
+                                style={{ bottom: 5, fontWeight: 'bold', marginLeft: 10, position: 'relative' }}
+                              >
+                                Continue with Google
+                              </span>
+                            </a>
+                          </div>
+                        );
+                      } else {
+                        return (
+                          <div className="form-group col-lg-12 mx-auto mt-5" key={provider.id}>
+                            <a
+                              onClick={() => signIn(provider.id, { callbackUrl: 'http://localhost:3000/feed' })}
+                              className={`btn btn-primary btn-block py-2 mb-3 ${registerStyles.btnGithub}`}
+                            >
+                              <i className="fa fa-github fa-2x mr-1"></i>
+                              <span
+                                className="font-weight-bold"
+                                style={{ bottom: 5, fontWeight: 'bold', marginLeft: 10, position: 'relative' }}
+                              >
+                                Continue with Github
+                              </span>
+                            </a>
+                          </div>
+                        );
+                      }
+                    })}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

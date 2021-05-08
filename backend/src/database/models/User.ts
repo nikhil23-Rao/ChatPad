@@ -28,6 +28,11 @@ export const User = sequelize.define("User", {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
   },
+  online: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: true,
+    allowNull: false,
+  },
   id: {
     primaryKey: true,
     type: DataTypes.STRING,

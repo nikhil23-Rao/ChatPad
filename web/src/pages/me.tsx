@@ -6,7 +6,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { Accordion, AccordionDetails, AccordionSummary } from '@material-ui/core';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { useMutation } from '@apollo/client';
-import { TOGGLE_THEME, UPDATE_TIME } from '@/apollo/Mutations';
+import { SWITCH_ONLINE, TOGGLE_THEME, UPDATE_TIME } from '@/apollo/Mutations';
 import LoadingBar from 'react-top-loading-bar';
 import { Button } from '@chakra-ui/react';
 import Link from 'next/link';
@@ -16,6 +16,7 @@ interface MeProps {}
 const Me: React.FC<MeProps> = ({}) => {
   const [session] = useSession();
   const [darkModeSelected, setDarkModeSelected] = useState(false);
+  const [closed, setClosed] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
   const [lightModeSelected, setLightModeSelected] = useState(false);
   const [left, setLeft] = useState<string | number>('28.75rem');
@@ -53,23 +54,29 @@ const Me: React.FC<MeProps> = ({}) => {
   };
   const [ToggleTheme] = useMutation(TOGGLE_THEME);
   const [UpdateTime] = useMutation(UPDATE_TIME);
+  const [SwitchOnline] = useMutation(SWITCH_ONLINE);
   useEffect(() => {
-    if (
-      (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
-      (typeof window !== 'undefined' && window.screen.availWidth) < 180
-    ) {
-      setLeft(460);
-    }
     GetUser();
     if (user && user.dark_theme == 'true') {
       setDarkModeSelected(!darkModeSelected);
     } else {
       setLightModeSelected(!lightModeSelected);
     }
+  }, [session]);
+  useEffect(() => {
     setInterval(() => {
       UpdateTime();
     }, 60000);
-  }, [session]);
+    if (user) {
+      window.addEventListener('beforeunload', (ev) => {
+        setClosed(true);
+      });
+      if (closed === true) {
+        SwitchOnline({ variables: { authorid: user?.id, value: false } });
+      }
+      SwitchOnline({ variables: { authorid: user?.id, value: true } });
+    }
+  }, [user, closed, session]);
   if (!user) return <LoadingBar color="red" progress={100} loaderSpeed={2000} height={4} />;
 
   return (

@@ -7,7 +7,7 @@ import { GET_CHAT_PATHS, GET_GROUPS, GET_INITIAL_MESSAGES, GET_USER_ID } from '.
 import { Search } from '../components/Search';
 import { useMutation, useQuery, useSubscription } from '@apollo/client';
 import { IconButton } from '@material-ui/core';
-import { SEND_MESSAGE, START_SUBSCRIPTION, UPDATE_TIME } from '@/apollo/Mutations';
+import { SEND_MESSAGE, START_SUBSCRIPTION, SWITCH_ONLINE, UPDATE_TIME } from '@/apollo/Mutations';
 import { generateId } from '@/utils/GenerateId';
 import Head from 'next/head';
 import { GET_ALL_MESSAGES } from '@/apollo/Subscriptions';
@@ -20,7 +20,7 @@ interface FeedProps {}
 const Feed: React.FC<FeedProps> = ({}) => {
   const [groupSelected, setGroupSelected] = useState('');
   const [darkMode, setDarkMode] = useState(false);
-  const [messageVal, setMessageVal] = useState('');
+  const [closed, setClosed] = useState(false);
   const [session] = useSession();
   const [user, setUser] = useState<{
     username: string | null | undefined;
@@ -86,6 +86,7 @@ const Feed: React.FC<FeedProps> = ({}) => {
     variables: { groupid: groupSelected },
   });
   const { data: realtimeData } = useSubscription(GET_ALL_MESSAGES);
+  const [SwitchOnline] = useMutation(SWITCH_ONLINE);
 
   useEffect(() => {
     if (user && user.dark_theme === 'true') {
@@ -113,8 +114,18 @@ const Feed: React.FC<FeedProps> = ({}) => {
       UpdateTime();
     }, 60000);
 
+    if (user) {
+      window.addEventListener('beforeunload', (ev) => {
+        setClosed(true);
+      });
+      if (closed === true) {
+        SwitchOnline({ variables: { authorid: user?.id, value: false } });
+      }
+      SwitchOnline({ variables: { authorid: user?.id, value: true } });
+    }
+
     return () => clearInterval(clear);
-  }, []);
+  }, [session, user, closed]);
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!session && !token) {
@@ -329,6 +340,7 @@ const Feed: React.FC<FeedProps> = ({}) => {
           }}
           onClick={() => (window.location.href = '/me')}
         >
+          <div style={{ position: 'absolute', left: 54, top: 60 }} className="onlinedot"></div>
           <img
             src={user! && (user.profile_picture as string | undefined)}
             alt=""

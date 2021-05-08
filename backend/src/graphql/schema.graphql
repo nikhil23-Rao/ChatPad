@@ -34,6 +34,8 @@ type Mutation {
   Login(email: String!, password: String): String!
 
   UpdateTime: Boolean
+
+  SwitchOnline(authorid: String, value: Boolean): Boolean
 }
 
 type Subscription {
@@ -56,6 +58,7 @@ input User {
   profile_picture: String
   id: String
   dark_theme: Boolean
+  online: Boolean
 }
 
 type GroupUser {
@@ -64,6 +67,7 @@ type GroupUser {
   profile_picture: String
   id: String
   dark_theme: Boolean
+  online: Boolean
 }
 
 type Group {
