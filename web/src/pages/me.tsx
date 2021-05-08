@@ -153,16 +153,26 @@ const Me: React.FC<MeProps> = ({}) => {
                 left:
                   (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
                   (typeof window !== 'undefined' && window.screen.availWidth) < 1800
-                    ? '-70%'
-                    : '-104%',
+                    ? '-100%'
+                    : '-95%',
                 position: 'relative',
                 fontFamily: 'Lato',
                 color: '#000',
               }}
             >
-              <p>{user && user.username}</p>
+              <p>You</p>
             </h3>
-            <div style={{ position: 'relative', top: 180, right: 80 }}>
+            <div
+              style={{
+                position: 'relative',
+                top: 180,
+                right:
+                  (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
+                  (typeof window !== 'undefined' && window.screen.availWidth) < 1800
+                    ? 80
+                    : 78,
+              }}
+            >
               <Button
                 onClick={() => {
                   signOut({ callbackUrl: '/login' });
