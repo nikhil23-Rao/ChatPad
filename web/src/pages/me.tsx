@@ -2,7 +2,7 @@ import client from '@/../apollo-client';
 import { Theme } from '@/../context/theme';
 import { GET_USER_ID } from '@/apollo/Queries';
 import jwtDecode from 'jwt-decode';
-import { useSession } from 'next-auth/client';
+import { signOut, useSession } from 'next-auth/client';
 import React, { useContext, useEffect, useState } from 'react';
 import meStyles from '../styles/me.module.css';
 import { Accordion, AccordionDetails, AccordionSummary } from '@material-ui/core';
@@ -10,6 +10,7 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { useMutation } from '@apollo/client';
 import { TOGGLE_THEME, UPDATE_TIME } from '@/apollo/Mutations';
 import LoadingBar from 'react-top-loading-bar';
+import { Button } from '@chakra-ui/react';
 
 interface MeProps {}
 
@@ -169,6 +170,18 @@ const Me: React.FC<MeProps> = ({}) => {
             >
               <p>{user && user.username}</p>
             </h3>
+            <div style={{ position: 'relative', top: 180, right: 80 }}>
+              <Button
+                onClick={() => {
+                  signOut();
+                  localStorage.clear();
+                  window.location.href = '/login';
+                }}
+                colorScheme="red"
+              >
+                Logout
+              </Button>
+            </div>
           </div>
         </div>
       </div>
