@@ -1,4 +1,3 @@
-// Modules Imported For Use
 import express from "express";
 import { ApolloServer, PubSub } from "apollo-server-express";
 import fs from "fs";

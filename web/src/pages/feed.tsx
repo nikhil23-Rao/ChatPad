@@ -6,13 +6,10 @@ import client from '@/../apollo-client';
 import { GET_CHAT_PATHS, GET_GROUPS, GET_INITIAL_MESSAGES, GET_USER_ID } from '../apollo/Queries';
 import { Search } from '../components/Search';
 import { useMutation, useQuery, useSubscription } from '@apollo/client';
-import { IconButton } from '@material-ui/core';
-import { SEND_MESSAGE, START_SUBSCRIPTION, SWITCH_ONLINE, UPDATE_TIME } from '@/apollo/Mutations';
-import { generateId } from '@/utils/GenerateId';
+import { SWITCH_ONLINE, UPDATE_TIME } from '@/apollo/Mutations';
 import Head from 'next/head';
 import { GET_ALL_MESSAGES } from '@/apollo/Subscriptions';
 import { useRouter } from 'next/dist/client/router';
-import { Loader } from '@/components/loader';
 import LoadingBar from 'react-top-loading-bar';
 
 interface FeedProps {}
@@ -34,7 +31,6 @@ const Feed: React.FC<FeedProps> = ({}) => {
 
   const GetUser = async () => {
     const paths = await client.query({ query: GET_CHAT_PATHS });
-    console.log(paths);
     const token = localStorage.getItem('token');
     if (session && !token) {
       const result = await client.query({ query: GET_USER_ID, variables: { email: session.user.email } });
@@ -97,16 +93,6 @@ const Feed: React.FC<FeedProps> = ({}) => {
     if (window.screen.availHeight < 863 || window.screen.availWidth < 1800) {
       document.body.style.zoom = '80%';
     }
-    if (data) {
-      console.log(data);
-    }
-    if (realtimeData) {
-      const res = realtimeData.GetAllMessages.filter((message) => message.groupid === groupSelected);
-      console.log('RES', res);
-    }
-    console.log(messageData);
-    console.log(groupSelected);
-    console.log('REALTIME', realtimeData);
   }, [session, groupSelected, messageData, realtimeData, user?.dark_theme]);
   const [UpdateTime] = useMutation(UPDATE_TIME);
   useEffect(() => {
@@ -222,64 +208,34 @@ const Feed: React.FC<FeedProps> = ({}) => {
                   key={group.id}
                   onClick={() => (window.location.href = `/chat/${group.id}`)}
                 >
-                  <div style={{ marginTop: '5%', marginLeft: '3%', paddingTop: '3%' }}>
-                    <img
-                      src={group.members[0].profile_picture}
-                      alt=""
-                      style={{ width: 30, height: 30, borderRadius: 25 }}
-                    />
-                  </div>
-
-                  <div style={{ marginLeft: 3 }}>
-                    <img
-                      src={group.members[1].profile_picture}
-                      alt=""
-                      style={{ width: 30, height: 30, borderRadius: 25 }}
-                    />
-                  </div>
+                  {group.members[0].id === user?.id ? (
+                    <div style={{ marginTop: '5%', marginLeft: '3%', paddingTop: '3%' }}>
+                      <img
+                        src={group.members[1].profile_picture}
+                        alt=""
+                        style={{ width: 54, height: 54, borderRadius: 125 }}
+                      />
+                    </div>
+                  ) : (
+                    <div style={{ marginTop: '5%', marginLeft: '3%', paddingTop: '3%' }}>
+                      <img
+                        src={group.members[0].profile_picture}
+                        alt=""
+                        style={{ width: 54, height: 54, borderRadius: 125 }}
+                      />
+                    </div>
+                  )}
 
                   <p
                     style={{
                       fontWeight: groupSelected === group.id ? 'bold' : 'normal',
                       fontFamily: 'Lato',
                       color: groupSelected === group.id ? '#fff' : '#000',
-                      position: 'relative',
-                      bottom: 60,
-                      left: 65,
-                    }}
-                    className={feedStyles.groupName}
-                  >
-                    {group.name}
-                  </p>
-                </div>
-              );
-            } else if (group.members.length === 1) {
-              return (
-                <div
-                  className={feedStyles.sidebarcontent}
-                  style={{
-                    backgroundColor: groupSelected === group.id ? '#8ab6d6' : darkMode ? '#fff' : '#6588de1a',
-                    boxShadow: groupSelected === group.id ? '0px 8px 40px rgba(0, 72, 251, 0.3)' : '',
-                  }}
-                  key={group.id}
-                  onClick={() => (window.location.href = `/chat/${group.id}`)}
-                >
-                  <div style={{ marginTop: '5%', marginLeft: '3%', paddingTop: '3%' }}>
-                    <img
-                      src={group.members[0].profile_picture}
-                      alt=""
-                      style={{ width: 50, height: 50, borderRadius: 25 }}
-                    />
-                  </div>
-                  <p
-                    style={{
-                      fontWeight: groupSelected === group.id ? 'bold' : 'normal',
-                      fontFamily: 'Lato',
                       position: 'relative',
                       bottom: 50,
                       left: 75,
-                      color: groupSelected === group.id ? '#fff' : '#000',
                     }}
+                    className={feedStyles.groupName}
                   >
                     {group.name}
                   </p>
@@ -340,7 +296,7 @@ const Feed: React.FC<FeedProps> = ({}) => {
           }}
           onClick={() => (window.location.href = '/me')}
         >
-          <div style={{ position: 'absolute', left: 54, top: 60 }} className="onlinedot"></div>
+          <div style={{ position: 'absolute', left: 60, top: 63 }} className="onlinedot"></div>
           <img
             src={user! && (user.profile_picture as string | undefined)}
             alt=""

@@ -7,7 +7,6 @@ import { GroupType } from "./types/GroupType";
 import { Group } from "./database/models/Group";
 import { pubsub } from "./server";
 import { Model } from "sequelize/types";
-import { MessageType } from "./types/MessageType";
 import { Message } from "./database/models/Message";
 import { sequelize } from "./database/src/connection";
 import { formatAMPM } from "./utils/formatTime";
@@ -38,11 +37,6 @@ const resolvers = {
         | any = await Group.findAll();
       let groups = [];
       for (const group in allGroups) {
-        console.log(
-          allGroups[group].dataValues.members.some(
-            (m: GroupType) => m.id === args.authorid
-          )
-        );
         if (
           allGroups[group].dataValues.members.some(
             (m: GroupType) => m.id === args.authorid
@@ -81,10 +75,8 @@ const resolvers = {
       // await User.sync({ force: true });
 
       const salt = await bcrypt.genSalt(10);
-      console.log(process.env.OAUTH_PASSWORD);
       let password;
       await bcrypt.hash(process.env.OAUTH_PASSWORD!, salt, (err, hash) => {
-        console.log("", err);
         password = hash;
       });
 
@@ -183,8 +175,6 @@ const resolvers = {
       for (const message in messages) {
         previousMessages.push(messages[message].dataValues);
       }
-
-      console.log("PREVIOUS", previousMessages);
 
       await message.save();
       const payload = {

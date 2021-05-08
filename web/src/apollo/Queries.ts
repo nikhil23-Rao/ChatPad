@@ -13,6 +13,7 @@ export const GET_ALL_USERS = gql`
       email
       profile_picture
       id
+      online
     }
   }
 `;
@@ -25,6 +26,7 @@ export const GET_GROUPS = gql`
         email
         profile_picture
         id
+        online
       }
       id
       name
@@ -64,6 +66,7 @@ export const GET_GROUP_NAME = gql`
         profile_picture
         email
         id
+        online
       }
       name
       id

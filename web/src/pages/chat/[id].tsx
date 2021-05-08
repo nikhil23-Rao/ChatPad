@@ -6,20 +6,17 @@ import client from '@/../apollo-client';
 import { GET_CHAT_PATHS, GET_GROUPS, GET_GROUP_NAME, GET_INITIAL_MESSAGES, GET_USER_ID } from '../../apollo/Queries';
 import { Search } from '../../components/Search';
 import { useMutation, useQuery, useSubscription } from '@apollo/client';
-import { IconButton } from '@material-ui/core';
 import { SEND_MESSAGE, START_SUBSCRIPTION, SWITCH_ONLINE, TOGGLE_THEME, UPDATE_TIME } from '@/apollo/Mutations';
 import { generateId } from '@/utils/GenerateId';
 import Head from 'next/head';
 import { GET_ALL_MESSAGES } from '@/apollo/Subscriptions';
 import { Picker } from 'emoji-mart';
 import { useRouter } from 'next/dist/client/router';
-import { GetStaticProps } from 'next';
 import { animateScroll } from 'react-scroll';
 import { Input, InputGroup, InputRightElement, Switch, Textarea, useToast } from '@chakra-ui/react';
 import EmojiEmotionsIcon from '@material-ui/icons/EmojiEmotions';
 import InsertPhotoIcon from '@material-ui/icons/InsertPhoto';
 import LoadingBar from 'react-top-loading-bar';
-import { Theme } from '@/../context/theme';
 interface ChatProps {
   currId: string;
 }
@@ -137,22 +134,11 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
     }, 180); // Load time
 
     (document.body.style as any) = 'overflow: hidden';
-    console.log('CURRENT ID', currId);
     setGroupSelected(currId);
     GetUser();
     if (window.screen.availHeight < 863 || window.screen.availWidth < 1800) {
       document.body.style.zoom = '80%';
     }
-    // if (data) {
-    //   console.log(data);
-    // }
-
-    if (realtimeData) {
-      console.log(realtimeData);
-    }
-    console.log(messageData);
-    // console.log(groupSelected);
-    // console.log('REALTIME', realtimeData);
   }, [session, groupSelected, messageData, realtimeData, user?.dark_theme]);
 
   useEffect(() => {
@@ -217,33 +203,21 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
             }}
           >
             <span className="navbar-brand mb-0 h1" style={{ marginLeft: 500, display: 'inline' }}>
-              {GroupNameData.GetGroupName.members.length === 1 ? (
-                <img
-                  src={GroupNameData.GetGroupName.members[0].profile_picture}
-                  style={{ width: 40, height: 40, borderRadius: 100, display: 'inline', marginRight: 10 }}
-                  alt=""
-                />
-              ) : GroupNameData.GetGroupName.members.length === 2 ? (
+              {GroupNameData.GetGroupName.members.length === 2 ? (
                 <>
-                  <img
-                    src={GroupNameData.GetGroupName.members[0].profile_picture}
-                    style={{ width: 30, height: 30, borderRadius: 100, display: 'inline' }}
-                    alt=""
-                  />{' '}
-                  <img
-                    src={GroupNameData.GetGroupName.members[1].profile_picture}
-                    style={{
-                      width: 30,
-                      height: 30,
-                      borderRadius: 100,
-                      display: 'inline',
-                      marginRight: 10,
-                      position: 'relative',
-                      top: -10,
-                      right: 10,
-                    }}
-                    alt=""
-                  />
+                  {GroupNameData.GetGroupName.members[0].id === user?.id ? (
+                    <img
+                      src={GroupNameData.GetGroupName.members[1].profile_picture}
+                      style={{ width: 54, height: 54, borderRadius: 100, display: 'inline' }}
+                      alt=""
+                    />
+                  ) : (
+                    <img
+                      src={GroupNameData.GetGroupName.members[0].profile_picture}
+                      alt=""
+                      style={{ width: 54, height: 54, borderRadius: 125, display: 'inline' }}
+                    />
+                  )}
                 </>
               ) : GroupNameData.GetGroupName.members.length > 2 ? (
                 <>
@@ -291,6 +265,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                   fontFamily: 'Lato',
                   fontWeight: 'bold',
                   fontSize: 28,
+                  marginLeft: GroupNameData.GetGroupName.members.length === 2 ? 10 : '',
                   color: darkMode ? '#fff' : '#000',
                 }}
               >
@@ -305,10 +280,10 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                     position: 'relative',
                     textAlign: 'left',
                     color: darkMode ? '#fff' : '#000',
-                    bottom: 5,
+                    bottom: GroupNameData.GetGroupName.members.length === 2 ? 15 : 5,
                     marginLeft:
                       GroupNameData.GetGroupName.members.length === 2
-                        ? 75
+                        ? 66
                         : GroupNameData.GetGroupName.members.length > 2
                         ? 137
                         : 50,
@@ -671,64 +646,34 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                   key={group.id}
                   onClick={() => (window.location.href = `/chat/${group.id}`)}
                 >
-                  <div style={{ marginTop: '5%', marginLeft: '3%', paddingTop: '3%' }}>
-                    <img
-                      src={group.members[0].profile_picture}
-                      alt=""
-                      style={{ width: 30, height: 30, borderRadius: 25 }}
-                    />
-                  </div>
-
-                  <div style={{ marginLeft: 3 }}>
-                    <img
-                      src={group.members[1].profile_picture}
-                      alt=""
-                      style={{ width: 30, height: 30, borderRadius: 25 }}
-                    />
-                  </div>
+                  {group.members[0].id === user?.id ? (
+                    <div style={{ marginTop: '5%', marginLeft: '3%', paddingTop: '3%' }}>
+                      <img
+                        src={group.members[1].profile_picture}
+                        alt=""
+                        style={{ width: 54, height: 54, borderRadius: 125 }}
+                      />
+                    </div>
+                  ) : (
+                    <div style={{ marginTop: '5%', marginLeft: '3%', paddingTop: '3%' }}>
+                      <img
+                        src={group.members[0].profile_picture}
+                        alt=""
+                        style={{ width: 54, height: 54, borderRadius: 125 }}
+                      />
+                    </div>
+                  )}
 
                   <p
                     style={{
                       fontWeight: groupSelected === group.id ? 'bold' : 'normal',
                       fontFamily: 'Lato',
                       color: groupSelected === group.id ? '#fff' : '#000',
-                      position: 'relative',
-                      bottom: 60,
-                      left: 65,
-                    }}
-                    className={feedStyles.groupName}
-                  >
-                    {group.name}
-                  </p>
-                </div>
-              );
-            } else if (group.members.length === 1) {
-              return (
-                <div
-                  className={feedStyles.sidebarcontent}
-                  style={{
-                    backgroundColor: groupSelected === group.id ? '#8ab6d6' : darkMode ? '#fff' : '#6588de1a',
-                    boxShadow: groupSelected === group.id ? '0px 8px 40px rgba(0, 72, 251, 0.3)' : '',
-                  }}
-                  key={group.id}
-                  onClick={() => (window.location.href = `/chat/${group.id}`)}
-                >
-                  <div style={{ marginTop: '5%', marginLeft: '3%', paddingTop: '3%' }}>
-                    <img
-                      src={group.members[0].profile_picture}
-                      alt=""
-                      style={{ width: 50, height: 50, borderRadius: 25 }}
-                    />
-                  </div>
-                  <p
-                    style={{
-                      fontWeight: groupSelected === group.id ? 'bold' : 'normal',
-                      fontFamily: 'Lato',
                       position: 'relative',
                       bottom: 50,
                       left: 75,
-                      color: groupSelected === group.id ? '#fff' : '#000',
                     }}
+                    className={feedStyles.groupName}
                   >
                     {group.name}
                   </p>
@@ -907,7 +852,6 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
 
                       const reader = new FileReader();
                       reader.onloadend = async () => {
-                        console.log(reader.result);
                         try {
                           await SendMessage({
                             variables: {

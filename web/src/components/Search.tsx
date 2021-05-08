@@ -85,6 +85,7 @@ export const Search = () => {
         id: (selectedItems[item] as any).id,
         email: (selectedItems[item] as any).email,
         profile_picture: (selectedItems[item] as any).profile_picture,
+        online: (selectedItems[item] as any).online,
       } as never);
     }
     members.push({
