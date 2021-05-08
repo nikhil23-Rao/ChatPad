@@ -1,1 +1,1 @@
-web: npm run dev
+web: nodemon 'src/server.ts' --exec 'ts-node' src/server.ts -e ts,graphql
