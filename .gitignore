@@ -1,3 +1,5 @@
 .vscode
 web/node_modules/
 backend/node_modules/
+# Local Netlify folder
+.netlify
