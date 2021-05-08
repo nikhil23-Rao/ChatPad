@@ -124,7 +124,7 @@ const Login: React.FC<LoginProps> = ({ myproviders }: LoginProps) => {
                                       className="font-weight-bold"
                                       style={{ bottom: 5, fontWeight: 'bold', marginLeft: 10, position: 'relative' }}
                                     >
-                                      Sign in with Google
+                                      Continue with Google
                                     </span>
                                   </a>
                                 </div>
@@ -141,7 +141,7 @@ const Login: React.FC<LoginProps> = ({ myproviders }: LoginProps) => {
                                       className="font-weight-bold"
                                       style={{ bottom: 5, fontWeight: 'bold', marginLeft: 10, position: 'relative' }}
                                     >
-                                      Sign in with Github
+                                      Continue with Github
                                     </span>
                                   </a>
                                 </div>

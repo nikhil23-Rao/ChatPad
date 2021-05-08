@@ -1,10 +1,8 @@
 import client from '@/../apollo-client';
 import { Theme } from '@/../context/theme';
 import { GET_USER_ID } from '@/apollo/Queries';
-import jwtDecode from 'jwt-decode';
 import { signOut, useSession } from 'next-auth/client';
 import React, { useContext, useEffect, useState } from 'react';
-import meStyles from '../styles/me.module.css';
 import { Accordion, AccordionDetails, AccordionSummary } from '@material-ui/core';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { useMutation } from '@apollo/client';
