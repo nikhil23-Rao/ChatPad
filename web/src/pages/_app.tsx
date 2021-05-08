@@ -25,7 +25,9 @@ export default function MyApp({ Component, pageProps }: AppProps) {
       <ToastContainer />
       <ChakraProvider>
         <ApolloProvider client={client}>
-          <Component {...pageProps} />
+          <Provider session={pageProps.session}>
+            <Component {...pageProps} />
+          </Provider>
         </ApolloProvider>
       </ChakraProvider>
     </>

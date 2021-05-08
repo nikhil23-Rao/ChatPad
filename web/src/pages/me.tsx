@@ -87,12 +87,7 @@ const Me: React.FC<MeProps> = ({}) => {
       UpdateTime();
     }, 60000);
   }, [session]);
-  if (!user)
-    return (
-      <div style={{ backgroundColor: '#1A202C', height: '100vh' }}>
-        <LoadingBar color="red" progress={100} loaderSpeed={2000} height={4} />
-      </div>
-    );
+  if (!user) return <LoadingBar color="red" progress={100} loaderSpeed={2000} height={4} />;
 
   return (
     <div
@@ -101,10 +96,10 @@ const Me: React.FC<MeProps> = ({}) => {
     >
       <div>
         <i
-          className="fa fa-paper-plane fa-5x"
+          className="fa fa-paper-plane fa-4x"
           onClick={() => (window.location.href = '/feed')}
           style={{
-            color: user?.dark_theme ? '#fff' : '#000',
+            color: user?.dark_theme === 'true' ? '#fff' : '',
             cursor: 'pointer',
             position: 'absolute',
             top: 28,
@@ -120,7 +115,11 @@ const Me: React.FC<MeProps> = ({}) => {
             width: 980,
             position: 'absolute',
             height: 255,
-            left: '22.8%',
+            left:
+              (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
+              (typeof window !== 'undefined' && window.screen.availWidth) < 1800
+                ? '12.9%'
+                : '22.8%',
             borderRadius: '8px 8px 0px 0px',
             objectFit: 'cover',
           }}
@@ -158,7 +157,11 @@ const Me: React.FC<MeProps> = ({}) => {
             <h3
               style={{
                 top: 160,
-                left: '-104%',
+                left:
+                  (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
+                  (typeof window !== 'undefined' && window.screen.availWidth) < 1800
+                    ? '-70%'
+                    : '-104%',
                 position: 'relative',
                 fontFamily: 'Lato',
                 color: '#000',

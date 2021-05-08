@@ -8,12 +8,25 @@ import { CREATE_GROUP } from '@/apollo/Mutations';
 import { generateId } from '@/utils/GenerateId';
 import client from '@/../apollo-client';
 import { useRouter } from 'next/dist/client/router';
+import { useSession } from 'next-auth/client';
+import { GET_USER_ID } from '@/apollo/Queries';
+import jwtDecode from 'jwt-decode';
+import LoadingBar from 'react-top-loading-bar';
 
 export const Search = () => {
+  const [session] = useSession();
   const [inputValue, setInputValue] = useState<any>('');
   const [error, setError] = useState(false);
   const [nameError, setNameError] = useState(false);
   const [nameVal, setNameVal] = useState('');
+  const [user, setUser] = useState<{
+    username: string | null | undefined;
+    email: string | null | undefined;
+    id: string | null | undefined;
+    profile_picture: string | null | undefined;
+    dark_theme: string;
+    iat?: string | null | undefined;
+  } | null>(null);
   const toast = useToast();
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -27,7 +40,9 @@ export const Search = () => {
   const getFilteredItems = (items) =>
     items.filter(
       (item) =>
-        selectedItems.indexOf(item as never) < 0 && item.email.toLowerCase().startsWith(inputValue.toLowerCase()),
+        selectedItems.indexOf(item as never) < 0 &&
+        item.email.toLowerCase().startsWith(inputValue.toLowerCase()) &&
+        item.id !== user?.id,
     );
   const {
     isOpen,
@@ -61,9 +76,8 @@ export const Search = () => {
     },
   });
 
-  const members = [];
-
   const GetMembers = () => {
+    const members = [];
     for (const item in selectedItems) {
       console.log(selectedItems[item]);
       members.push({
@@ -72,7 +86,46 @@ export const Search = () => {
         email: (selectedItems[item] as any).email,
         profile_picture: (selectedItems[item] as any).profile_picture,
       } as never);
-      console.log(members);
+    }
+    members.push({
+      username: user?.username,
+      id: user?.id,
+      email: user?.email,
+      profile_picture: user?.profile_picture,
+    } as never);
+    return members;
+  };
+
+  const GetUser = async () => {
+    const token = localStorage.getItem('token');
+    if (session && !token) {
+      const result = await client.query({ query: GET_USER_ID, variables: { email: session.user.email } });
+      const currentUser: {
+        username: string;
+        email: string;
+        id: string;
+        profile_picture: string;
+        dark_theme: string;
+      } = {
+        username: session.user.name!,
+        email: session.user.email!,
+        id: result.data.GetUserId[0],
+        dark_theme: result.data.GetUserId[1],
+        profile_picture: session.user.image!,
+      };
+      setUser(currentUser);
+    }
+    if (token) {
+      const currentUser: {
+        username: string;
+        email: string;
+        id: string;
+        profile_picture: string;
+        iat: string;
+        oauth: boolean;
+        dark_theme: string;
+      } = jwtDecode(token!);
+      setUser(currentUser);
     }
   };
 
@@ -84,8 +137,8 @@ export const Search = () => {
     if (nameVal.length > 0) {
       setNameError(false);
     }
-    GetMembers();
-  }, [selectedItems, error, nameError]);
+    GetUser();
+  }, [selectedItems, error, nameError, session]);
 
   return (
     <div>
@@ -178,15 +231,15 @@ export const Search = () => {
               if (selectedItems.length === 0) {
                 return setError(true);
               }
-              if (members !== []) {
+              if (GetMembers() !== []) {
                 setLoading(true);
                 await client.mutate({
                   mutation: CREATE_GROUP,
-                  variables: { id: generateId(24), members, name: nameVal },
+                  variables: { id: generateId(24), members: GetMembers(), name: nameVal },
                 });
                 setLoading(false);
                 router.reload();
-              } else if (members === []) {
+              } else if (GetMembers() === []) {
                 toast({ status: 'error', title: 'Oops! Something failed.' });
               }
             } catch (err) {

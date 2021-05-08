@@ -178,7 +178,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
 
   if (loading)
     return (
-      <div style={{ backgroundColor: '#1A202C', height: '100vh' }}>
+      <div style={{ backgroundColor: user?.dark_theme === 'true' ? '#1A202C' : '', height: '100vh' }}>
         <LoadingBar color="red" progress={100} loaderSpeed={2000} height={4} />
       </div>
     );

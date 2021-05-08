@@ -85,7 +85,6 @@ const Feed: React.FC<FeedProps> = ({}) => {
   const { data: messageData, loading: messageLoading } = useQuery(GET_INITIAL_MESSAGES, {
     variables: { groupid: groupSelected },
   });
-  const [SendMessage] = useMutation(SEND_MESSAGE);
   const { data: realtimeData } = useSubscription(GET_ALL_MESSAGES);
 
   useEffect(() => {
@@ -119,7 +118,7 @@ const Feed: React.FC<FeedProps> = ({}) => {
 
   if (loading)
     return (
-      <div style={{ backgroundColor: '#1A202C', height: '100vh' }}>
+      <div style={{ backgroundColor: user?.dark_theme === 'true' ? '#1A202C' : '', height: '100vh' }}>
         <LoadingBar color="red" progress={100} loaderSpeed={2000} height={4} />
       </div>
     );
