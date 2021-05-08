@@ -12,7 +12,9 @@
     "deploy": "git add . && git commit -m Heroku && git push heroku master",
     "build:dev": "nodemon 'src/server.ts' --exec 'ts-node' src/server.ts -e ts,graphql"
   },
-  "engines": { "node": "14.15.4" },
+  "engines": {
+    "node": "14.15.4"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
