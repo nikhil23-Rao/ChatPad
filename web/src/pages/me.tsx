@@ -169,11 +169,12 @@ const Me: React.FC<MeProps> = ({}) => {
                 right:
                   (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
                   (typeof window !== 'undefined' && window.screen.availWidth) < 1800
-                    ? 80
+                    ? 89
                     : 78,
               }}
             >
               <Button
+                style={{ backgroundColor: '#E53E3E' }}
                 onClick={() => {
                   signOut({ callbackUrl: '/login' });
                 }}
