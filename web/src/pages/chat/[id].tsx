@@ -23,20 +23,18 @@ interface ChatProps {
 
 export const getStaticPaths = async () => {
   const res = await client.query({ query: GET_CHAT_PATHS });
-  if (res) {
-    const paths = res.data.GetChatPaths.map((id) => {
-      return {
-        params: {
-          id,
-        },
-      };
-    });
-
+  const paths = res.data.GetChatPaths.map((id) => {
     return {
-      paths,
-      fallback: false,
+      params: {
+        id,
+      },
     };
-  }
+  });
+
+  return {
+    paths,
+    fallback: false,
+  };
 };
 
 export const getStaticProps = async (context) => {
