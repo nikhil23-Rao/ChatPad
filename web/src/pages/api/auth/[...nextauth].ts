@@ -45,7 +45,6 @@ export default NextAuth({
           },
         });
       } catch (err) {
-        console.log(err);
         if (!err.message.includes('Account')) {
           await client.mutate({
             mutation: LOGIN,
