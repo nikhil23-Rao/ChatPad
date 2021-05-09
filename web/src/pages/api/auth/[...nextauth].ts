@@ -14,21 +14,21 @@ export default NextAuth({
     Providers.GitHub({
       clientId: process.env.GITHUB_CLIENT_ID!,
       clientSecret: process.env.GITHUB_CLIENT_SECRET!,
-      state: false,
     }),
     Providers.Google({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-      state: false,
     }),
   ],
   pages: {
     signIn: '/auth/signin',
     signOut: '/auth/signout',
+    error: '/register-error',
     verifyRequest: '/auth/verify-request',
     newUser: null,
   },
 
+  debug: true,
   callbacks: {
     signIn: async (profile, account): Promise<any> => {
       await GetGithubEmail(profile, account);
@@ -45,6 +45,7 @@ export default NextAuth({
           },
         });
       } catch (err) {
+        console.log(err);
         if (!err.message.includes('Account')) {
           await client.mutate({
             mutation: LOGIN,

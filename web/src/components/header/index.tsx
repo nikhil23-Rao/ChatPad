@@ -13,7 +13,7 @@ const Header = () => (
         <h1
           className={tw(`font-sans font-bold text-4xl md:text-5xl lg:text-8xl text-center leading-snug text-gray-800`)}
         >
-          Chat NIKIHL With Friends And Family. Anytime, Anywhere.
+          Chat With Friends And Family. Anytime, Anywhere.
         </h1>
         <div className={tw(`max-w-xl mx-auto`)}>
           <p className={tw(`mt-10 text-gray-500 text-center text-xl lg:text-3xl`)}></p>
