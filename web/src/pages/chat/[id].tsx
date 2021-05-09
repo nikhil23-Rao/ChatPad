@@ -33,7 +33,7 @@ export const getStaticPaths = async () => {
 
   return {
     paths,
-    fallback: false,
+    fallback: true,
   };
 };
 
@@ -49,6 +49,7 @@ export const getStaticProps = async (context) => {
 const Chat: React.FC<ChatProps> = ({ currId }) => {
   const [groupSelected, setGroupSelected] = useState('');
   const [showEmoji, setShowEmoji] = useState(false);
+  const router = useRouter();
   const [visible, setVisible] = useState(true);
   const [closed, setClosed] = useState(false);
   const [messageVal, setMessageVal] = useState('');
@@ -121,6 +122,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   };
 
   useEffect(() => {
+    console.log(router);
     if (user && user.dark_theme === 'true') {
       (document.body.style as any) = 'background: #1A202C';
     }
@@ -175,7 +177,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
     return () => clearInterval(clear);
   }, [session, user, closed]);
 
-  if (loading)
+  if (loading || router.isFallback)
     return (
       <div style={{ backgroundColor: user?.dark_theme === 'true' ? '#1A202C' : '', height: '100vh' }}>
         <LoadingBar color="red" progress={100} loaderSpeed={2000} height={4} />
