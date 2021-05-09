@@ -360,7 +360,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                                 height: 50,
                                 borderRadius: 100,
                                 left: 4,
-                                top: 3,
+                                top: 3.3,
                                 position: 'relative',
                               }}
                               src={message.author.profile_picture}
