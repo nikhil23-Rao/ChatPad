@@ -43,6 +43,7 @@ export default NextAuth({
             oauth: true,
           },
         });
+        return true;
       } catch (err) {
         console.log(err);
         if (!err.message.includes('Account')) {
@@ -52,6 +53,7 @@ export default NextAuth({
               email: profile.email,
             },
           });
+          return true;
         }
       }
     },
