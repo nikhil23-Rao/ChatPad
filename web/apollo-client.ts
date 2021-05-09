@@ -14,7 +14,7 @@ const wsLink = process.browser
   : null;
 
 const httplink = new HttpLink({
-  uri: 'http://chatpad-server.herokuapp.com/graphql',
+  uri: 'https://chatpad-server.herokuapp.com/graphql',
   credentials: 'same-origin',
 });
 
