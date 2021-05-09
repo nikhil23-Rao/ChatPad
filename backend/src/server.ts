@@ -12,7 +12,7 @@ import compression from "compression";
 import { createServer } from "http";
 
 if (!config.get("jwtPrivateKey")) {
-  console.error("FATAL ERROR: jwtKey Not Defined!");
+  console.error("FATAL ERROR: jwtKey Is Not Defined!");
   process.exit(1);
 }
 
