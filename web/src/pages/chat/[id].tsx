@@ -23,18 +23,20 @@ interface ChatProps {
 
 export const getStaticPaths = async () => {
   const res = await client.query({ query: GET_CHAT_PATHS });
-  const paths = res.data.GetChatPaths.map((id) => {
-    return {
-      params: {
-        id,
-      },
-    };
-  });
+  if (res) {
+    const paths = res.data.GetChatPaths.map((id) => {
+      return {
+        params: {
+          id,
+        },
+      };
+    });
 
-  return {
-    paths,
-    fallback: false,
-  };
+    return {
+      paths,
+      fallback: false,
+    };
+  }
 };
 
 export const getStaticProps = async (context) => {
@@ -63,7 +65,6 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
     profile_picture: string | null | undefined;
     iat?: string | null | undefined;
   } | null>(null);
-  const router = useRouter();
 
   const GetUser = async () => {
     const token = localStorage.getItem('token');
