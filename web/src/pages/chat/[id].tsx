@@ -352,7 +352,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                         }}
                       >
                         {message.author.id !== user.id ? (
-                          <div className={feedStyles.border} style={{}}>
+                          <div className={feedStyles.border}>
                             <img
                               style={{
                                 width: 50,
