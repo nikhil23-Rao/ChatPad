@@ -1,3 +1,4 @@
+// Heroku
 import { User } from "../src/database/models/User";
 import { UserType } from "./types/UserType";
 import bcrypt from "bcrypt";

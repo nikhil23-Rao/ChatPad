@@ -481,20 +481,18 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                     }}
                   >
                     {message.author.id !== user.id ? (
-                      <div className={feedStyles.border}>
-                        <img
-                          style={{
-                            width: 50,
-                            height: 50,
-                            borderRadius: 100,
-                            left: 4,
-                            top: 3,
-                            position: 'relative',
-                          }}
-                          src={message.author.profile_picture}
-                          alt=""
-                        />
-                      </div>
+                      <img
+                        style={{
+                          width: 50,
+                          height: 50,
+                          borderRadius: 100,
+                          left: 4,
+                          top: -4,
+                          position: 'relative',
+                        }}
+                        src={message.author.profile_picture}
+                        alt=""
+                      />
                     ) : null}
                   </div>
 
