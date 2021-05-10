@@ -13,7 +13,16 @@ import { GET_ALL_MESSAGES } from '@/apollo/Subscriptions';
 import { Picker } from 'emoji-mart';
 import { useRouter } from 'next/dist/client/router';
 import { animateScroll } from 'react-scroll';
-import { Input, InputGroup, InputRightElement, Switch, Textarea, useToast } from '@chakra-ui/react';
+import {
+  Input,
+  InputGroup,
+  InputRightElement,
+  Skeleton,
+  SkeletonCircle,
+  Switch,
+  Textarea,
+  useToast,
+} from '@chakra-ui/react';
 import EmojiEmotionsIcon from '@material-ui/icons/EmojiEmotions';
 import InsertPhotoIcon from '@material-ui/icons/InsertPhoto';
 import LoadingBar from 'react-top-loading-bar';
@@ -48,6 +57,7 @@ export const getStaticProps = async (context) => {
 
 const Chat: React.FC<ChatProps> = ({ currId }) => {
   const [groupSelected, setGroupSelected] = useState('');
+  const [messages, setMessages] = useState<any[]>([]);
   const [showEmoji, setShowEmoji] = useState(false);
   const router = useRouter();
   const [visible, setVisible] = useState(true);
@@ -122,7 +132,13 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   };
 
   useEffect(() => {
-    console.log(router);
+    if (messageData) {
+      setMessages([...messageData.GetInitialMessages]);
+      console.log('HELLO', messages);
+    }
+  }, [messageData]);
+
+  useEffect(() => {
     if (user && user.dark_theme === 'true') {
       (document.body.style as any) = 'background: #1A202C';
     }
@@ -133,6 +149,18 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
         duration: 0,
       });
     }, 180); // Load time
+
+    if (realtimeData && messages.includes(realtimeData.GetAllMessages[realtimeData.GetAllMessages.length - 1])) return;
+    if (
+      document.visibilityState !== 'hidden' &&
+      realtimeData &&
+      realtimeData.GetAllMessages[realtimeData.GetAllMessages.length - 1].groupid === groupSelected
+    ) {
+      setMessages([...messages, realtimeData.GetAllMessages[realtimeData.GetAllMessages.length - 1]]);
+      console.log('setting state');
+    }
+    console.log('HELLO pt2', messages);
+    console.log(realtimeData);
 
     (document.body.style as any) = 'overflow: hidden';
     setGroupSelected(currId);
@@ -213,11 +241,16 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                       alt=""
                     />
                   ) : (
-                    <img
-                      src={GroupNameData.GetGroupName.members[0].profile_picture}
-                      alt=""
-                      style={{ width: 54, height: 54, borderRadius: 125, display: 'inline' }}
-                    />
+                    <SkeletonCircle
+                      style={{ position: 'relative', display: 'inline', width: 100 }}
+                      isLoaded={!GroupNameLoading}
+                    >
+                      <img
+                        src={GroupNameData.GetGroupName.members[0].profile_picture}
+                        alt=""
+                        style={{ width: 54, height: 54, borderRadius: 125, display: 'inline' }}
+                      />
+                    </SkeletonCircle>
                   )}
                 </>
               ) : GroupNameData.GetGroupName.members.length > 2 ? (
@@ -338,136 +371,129 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
         >
           {groupSelected !== '' &&
             messageData &&
-            !messageLoading &&
             user &&
-            messageData.GetInitialMessages.map((message) => {
-              if (!realtimeData) {
-                return (
-                  <>
-                    <div>
-                      <div
+            messages.map((message) => {
+              return (
+                <>
+                  <div>
+                    <div
+                      style={{
+                        position: 'relative',
+                        left: 372,
+                        top: 75,
+                      }}
+                    >
+                      {message.author.id !== user.id ? (
+                        <img
+                          style={{
+                            width: 50,
+                            height: 50,
+                            borderRadius: 100,
+                            left: 4,
+                            top: 3.3,
+                            position: 'relative',
+                          }}
+                          src={message.author.profile_picture}
+                          alt=""
+                        />
+                      ) : null}
+                    </div>
+
+                    {message.author.id !== user.id ? (
+                      <p
                         style={{
+                          color: darkMode ? '#ebeef0' : '#000',
                           position: 'relative',
-                          left: 372,
-                          top: 75,
+                          left: 445,
+                          fontSize: 14,
+                          fontFamily: 'Lato',
                         }}
                       >
-                        {message.author.id !== user.id ? (
-                          <div className={feedStyles.border}>
-                            <img
-                              style={{
-                                width: 50,
-                                height: 50,
-                                borderRadius: 100,
-                                left: 4,
-                                top: 3.3,
-                                position: 'relative',
-                              }}
-                              src={message.author.profile_picture}
-                              alt=""
-                            />
-                          </div>
-                        ) : null}
-                      </div>
-
-                      {message.author.id !== user.id ? (
+                        {message.author.username} •{' '}
+                        {message.time === 0
+                          ? ''
+                          : message.time > 0 && message.time < 1440
+                          ? message.time
+                          : message.time >= 1440
+                          ? message.date[0] + ' ' + message.date[1]
+                          : message.time >= 60 && message.time < 1440
+                          ? message.date[1]
+                          : null}{' '}
+                        {message.time === 0 ? 'Now' : message.time > 0 && message.time < 60 ? 'mins' : null}
+                      </p>
+                    ) : (
+                      <p
+                        style={{
+                          color: darkMode ? '#ebeef0' : '#000',
+                          position: 'relative',
+                          fontFamily: 'Lato',
+                          left:
+                            message.time < 10
+                              ? 1625
+                              : message.time >= 10 && message.time < 60
+                              ? 1617
+                              : message.time >= 60 && message.time < 1440
+                              ? 1610
+                              : 1545,
+                          top: 10,
+                          fontSize: 14,
+                        }}
+                      >
+                        You •{' '}
+                        {message.time === 0
+                          ? ''
+                          : message.time > 0 && message.time < 60
+                          ? message.time
+                          : message.time >= 1440
+                          ? message.date[0] + ' ' + message.date[1]
+                          : message.time >= 60 && message.time < 1440
+                          ? message.date[1]
+                          : null}{' '}
+                        {message.time === 0 ? 'Now' : message.time > 0 && message.time < 60 ? 'mins' : null}
+                      </p>
+                    )}
+                    <div
+                      className={message.author.id === user.id ? feedStyles.yourmessage : feedStyles.message}
+                      style={{ marginBottom: message.author.id !== user.id ? -40 : -4 }}
+                    >
+                      {message.image ? (
+                        <img
+                          style={{
+                            marginLeft: 5,
+                            marginTop: 10,
+                            fontSize: 20,
+                            width: 900,
+                            borderRadius: 50,
+                            height: '100%',
+                          }}
+                          src={message.body}
+                          className={feedStyles.text}
+                        />
+                      ) : message.body.includes('https://') ? (
                         <p
                           style={{
-                            color: darkMode ? '#ebeef0' : '#000',
-                            position: 'relative',
-                            left: 445,
-                            fontSize: 14,
-                            fontFamily: 'Lato',
+                            marginLeft: 5,
+                            marginTop: 10,
+                            fontSize: 20,
+                            cursor: 'pointer',
+                            textDecoration: 'underline',
                           }}
+                          onClick={() => window.open(message.body)}
+                          className={feedStyles.text}
                         >
-                          {message.author.username} •{' '}
-                          {message.time === 0
-                            ? ''
-                            : message.time > 0 && message.time < 1440
-                            ? message.time
-                            : message.time >= 1440
-                            ? message.date[0] + ' ' + message.date[1]
-                            : message.time >= 60 && message.time < 1440
-                            ? message.date[1]
-                            : null}{' '}
-                          {message.time === 0 ? 'Now' : message.time > 0 && message.time < 60 ? 'mins' : null}
+                          {message.body}
                         </p>
                       ) : (
-                        <p
-                          style={{
-                            color: darkMode ? '#ebeef0' : '#000',
-                            position: 'relative',
-                            fontFamily: 'Lato',
-                            left:
-                              message.time < 10
-                                ? 1625
-                                : message.time >= 10 && message.time < 60
-                                ? 1617
-                                : message.time >= 60 && message.time < 1440
-                                ? 1610
-                                : 1545,
-                            top: 10,
-                            fontSize: 14,
-                          }}
-                        >
-                          You •{' '}
-                          {message.time === 0
-                            ? ''
-                            : message.time > 0 && message.time < 60
-                            ? message.time
-                            : message.time >= 1440
-                            ? message.date[0] + ' ' + message.date[1]
-                            : message.time >= 60 && message.time < 1440
-                            ? message.date[1]
-                            : null}{' '}
-                          {message.time === 0 ? 'Now' : message.time > 0 && message.time < 60 ? 'mins' : null}
+                        <p style={{ marginLeft: 5, marginTop: 10, fontSize: 20 }} className={feedStyles.text}>
+                          {message.body}
                         </p>
                       )}
-                      <div
-                        className={message.author.id === user.id ? feedStyles.yourmessage : feedStyles.message}
-                        style={{ marginBottom: message.author.id !== user.id ? -40 : -4 }}
-                      >
-                        {message.image ? (
-                          <img
-                            style={{
-                              marginLeft: 5,
-                              marginTop: 10,
-                              fontSize: 20,
-                              width: 900,
-                              borderRadius: 50,
-                              height: '100%',
-                            }}
-                            src={message.body}
-                            className={feedStyles.text}
-                          />
-                        ) : message.body.includes('https://') ? (
-                          <p
-                            style={{
-                              marginLeft: 5,
-                              marginTop: 10,
-                              fontSize: 20,
-                              cursor: 'pointer',
-                              textDecoration: 'underline',
-                            }}
-                            onClick={() => window.open(message.body)}
-                            className={feedStyles.text}
-                          >
-                            {message.body}
-                          </p>
-                        ) : (
-                          <p style={{ marginLeft: 5, marginTop: 10, fontSize: 20 }} className={feedStyles.text}>
-                            {message.body}
-                          </p>
-                        )}
-                      </div>
                     </div>
-                  </>
-                );
-              } else {
-                return;
-              }
+                  </div>
+                </>
+              );
             })}
-          {realtimeData &&
+          {/* {realtimeData &&
             realtimeData.GetAllMessages &&
             user &&
             realtimeData.GetAllMessages.map((message) => {
@@ -589,7 +615,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                   </div>
                 </>
               );
-            })}
+            })} */}
         </div>
 
         <div style={{ top: -10, right: 80, position: 'absolute' }}>
@@ -636,90 +662,94 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
           {data.GetGroups.map((group) => {
             if (group.members.length === 2) {
               return (
-                <div
-                  className={feedStyles.sidebarcontent}
-                  style={{
-                    backgroundColor: groupSelected === group.id ? '#8ab6d6' : darkMode ? '#fff' : '#6588de1a',
-                    boxShadow: groupSelected === group.id ? '0px 8px 40px rgba(0, 72, 251, 0.3)' : '',
-                  }}
-                  key={group.id}
-                  onClick={() => (window.location.href = `/chat/${group.id}`)}
-                >
-                  {group.members[0].id === user?.id ? (
-                    <div style={{ marginTop: '5%', marginLeft: '3%', paddingTop: '3%' }}>
-                      <img
-                        src={group.members[1].profile_picture}
-                        alt=""
-                        style={{ width: 54, height: 54, borderRadius: 125 }}
-                      />
-                    </div>
-                  ) : (
-                    <div style={{ marginTop: '5%', marginLeft: '3%', paddingTop: '3%' }}>
-                      <img
-                        src={group.members[0].profile_picture}
-                        alt=""
-                        style={{ width: 54, height: 54, borderRadius: 125 }}
-                      />
-                    </div>
-                  )}
-
-                  <p
+                <Skeleton style={{ borderRadius: 15, position: 'relative', width: 310, left: 5 }} isLoaded={!loading}>
+                  <div
+                    className={feedStyles.sidebarcontent}
                     style={{
-                      fontWeight: groupSelected === group.id ? 'bold' : 'normal',
-                      fontFamily: 'Lato',
-                      color: groupSelected === group.id ? '#fff' : '#000',
-                      position: 'relative',
-                      bottom: 50,
-                      left: 75,
+                      backgroundColor: groupSelected === group.id ? '#8ab6d6' : darkMode ? '#fff' : '#6588de1a',
+                      boxShadow: groupSelected === group.id ? '0px 8px 40px rgba(0, 72, 251, 0.3)' : '',
                     }}
-                    className={feedStyles.groupName}
+                    key={group.id}
+                    onClick={() => (window.location.href = `/chat/${group.id}`)}
                   >
-                    {group.name}
-                  </p>
-                </div>
+                    {group.members[0].id === user?.id ? (
+                      <div style={{ marginTop: '5%', marginLeft: '3%', paddingTop: '3%' }}>
+                        <img
+                          src={group.members[1].profile_picture}
+                          alt=""
+                          style={{ width: 54, height: 54, borderRadius: 125 }}
+                        />
+                      </div>
+                    ) : (
+                      <div style={{ marginTop: '5%', marginLeft: '3%', paddingTop: '3%' }}>
+                        <img
+                          src={group.members[0].profile_picture}
+                          alt=""
+                          style={{ width: 54, height: 54, borderRadius: 125 }}
+                        />
+                      </div>
+                    )}
+
+                    <p
+                      style={{
+                        fontWeight: groupSelected === group.id ? 'bold' : 'normal',
+                        fontFamily: 'Lato',
+                        color: groupSelected === group.id ? '#fff' : '#000',
+                        position: 'relative',
+                        bottom: 50,
+                        left: 75,
+                      }}
+                      className={feedStyles.groupName}
+                    >
+                      {group.name}
+                    </p>
+                  </div>
+                </Skeleton>
               );
             } else if (group.members.length > 2) {
               const restOfPeople = group.members.length - 2;
               return (
-                <div
-                  className={feedStyles.sidebarcontent}
-                  style={{
-                    backgroundColor: groupSelected === group.id ? '#8ab6d6' : darkMode ? '#fff' : '#6588de1a',
-                    boxShadow: groupSelected === group.id ? '0px 8px 40px rgba(0, 72, 251, 0.3)' : '',
-                  }}
-                  key={group.id}
-                  onClick={() => (window.location.href = `/chat/${group.id}`)}
-                >
-                  <div style={{ marginTop: '5%', marginLeft: '6%', paddingTop: '3%' }}>
-                    <img
-                      src={group.members[0].profile_picture}
-                      alt=""
-                      style={{ width: 30, height: 30, borderRadius: 25, position: 'relative', top: 3 }}
-                    />
-                  </div>
-
-                  <div style={{ marginLeft: 3 }}>
-                    <img
-                      src={group.members[1].profile_picture}
-                      alt=""
-                      style={{ width: 30, height: 30, borderRadius: 25 }}
-                    />
-                  </div>
-                  <div className={`${feedStyles.dot} text-center`}>+{restOfPeople}</div>
-
-                  <p
+                <Skeleton style={{ borderRadius: 15, position: 'relative', width: 310, left: 5 }} isLoaded={!loading}>
+                  <div
+                    className={feedStyles.sidebarcontent}
                     style={{
-                      fontWeight: groupSelected === group.id ? 'bold' : 'normal',
-                      fontFamily: 'Lato',
-                      color: groupSelected === group.id ? '#fff' : '#000',
-                      position: 'relative',
-                      bottom: 85,
-                      left: 65,
+                      backgroundColor: groupSelected === group.id ? '#8ab6d6' : darkMode ? '#fff' : '#6588de1a',
+                      boxShadow: groupSelected === group.id ? '0px 8px 40px rgba(0, 72, 251, 0.3)' : '',
                     }}
+                    key={group.id}
+                    onClick={() => (window.location.href = `/chat/${group.id}`)}
                   >
-                    {group.name}
-                  </p>
-                </div>
+                    <div style={{ marginTop: '5%', marginLeft: '6%', paddingTop: '3%' }}>
+                      <img
+                        src={group.members[0].profile_picture}
+                        alt=""
+                        style={{ width: 30, height: 30, borderRadius: 25, position: 'relative', top: 3 }}
+                      />
+                    </div>
+
+                    <div style={{ marginLeft: 3 }}>
+                      <img
+                        src={group.members[1].profile_picture}
+                        alt=""
+                        style={{ width: 30, height: 30, borderRadius: 25 }}
+                      />
+                    </div>
+                    <div className={`${feedStyles.dot} text-center`}>+{restOfPeople}</div>
+
+                    <p
+                      style={{
+                        fontWeight: groupSelected === group.id ? 'bold' : 'normal',
+                        fontFamily: 'Lato',
+                        color: groupSelected === group.id ? '#fff' : '#000',
+                        position: 'relative',
+                        bottom: 85,
+                        left: 65,
+                      }}
+                    >
+                      {group.name}
+                    </p>
+                  </div>
+                </Skeleton>
               );
             }
           })}

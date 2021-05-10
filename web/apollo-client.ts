@@ -7,6 +7,7 @@ const wsLink = process.browser
   ? new WebSocketLink({
       // if you instantiate in the server, the error will be thrown
       uri: `wss://chatpad-server.herokuapp.com/subscriptions`,
+      // uri: 'ws://localhost:4000/subscriptions',
       options: {
         reconnect: true,
       },
@@ -15,6 +16,7 @@ const wsLink = process.browser
 
 const httplink = new HttpLink({
   uri: 'https://chatpad-server.herokuapp.com/graphql',
+  // uri: 'http://localhost:4000/graphql',
   credentials: 'same-origin',
 });
 
