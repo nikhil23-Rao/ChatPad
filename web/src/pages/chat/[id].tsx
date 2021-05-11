@@ -6,23 +6,14 @@ import client from '@/../apollo-client';
 import { GET_CHAT_PATHS, GET_GROUPS, GET_GROUP_NAME, GET_INITIAL_MESSAGES, GET_USER_ID } from '../../apollo/Queries';
 import { Search } from '../../components/Search';
 import { useMutation, useQuery, useSubscription } from '@apollo/client';
-import { SEND_MESSAGE, START_SUBSCRIPTION, SWITCH_ONLINE, TOGGLE_THEME, UPDATE_TIME } from '@/apollo/Mutations';
+import { SEND_MESSAGE, SWITCH_ONLINE, TOGGLE_THEME, UPDATE_TIME } from '@/apollo/Mutations';
 import { generateId } from '@/utils/GenerateId';
 import Head from 'next/head';
 import { GET_ALL_MESSAGES } from '@/apollo/Subscriptions';
 import { Picker } from 'emoji-mart';
 import { useRouter } from 'next/dist/client/router';
 import { animateScroll } from 'react-scroll';
-import {
-  Input,
-  InputGroup,
-  InputRightElement,
-  Skeleton,
-  SkeletonCircle,
-  Switch,
-  Textarea,
-  useToast,
-} from '@chakra-ui/react';
+import { Input, InputGroup, InputRightElement, Skeleton, SkeletonCircle, useToast } from '@chakra-ui/react';
 import EmojiEmotionsIcon from '@material-ui/icons/EmojiEmotions';
 import InsertPhotoIcon from '@material-ui/icons/InsertPhoto';
 import LoadingBar from 'react-top-loading-bar';
@@ -161,13 +152,9 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
     }
     console.log('HELLO pt2', messages);
     console.log(realtimeData);
-
-    (document.body.style as any) = 'overflow: hidden';
     setGroupSelected(currId);
+    (document.body.style as any) = 'overflow: hidden;';
     GetUser();
-    if (window.screen.availHeight < 863 || window.screen.availWidth < 1800) {
-      document.body.style.zoom = '80%';
-    }
   }, [session, groupSelected, messageData, realtimeData, user?.dark_theme]);
 
   useEffect(() => {
@@ -323,31 +310,27 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                         : 50,
                   }}
                 >
-                  {realtimeData && realtimeData.GetAllMessages[realtimeData.GetAllMessages.length - 1].time === 0
-                    ? 'Currently active'
-                    : messageData && !realtimeData
-                    ? messageData.GetInitialMessages[messageData.GetInitialMessages.length - 1].time === 0
-                      ? 'Currently active'
-                      : messageData.GetInitialMessages[messageData.GetInitialMessages.length - 1].time > 0 &&
-                        messageData.GetInitialMessages[messageData.GetInitialMessages.length - 1].time < 60
-                      ? `Last active ${
-                          messageData.GetInitialMessages[messageData.GetInitialMessages.length - 1].time
-                        } mins ago`
-                      : messageData.GetInitialMessages[messageData.GetInitialMessages.length - 1].time > 60 &&
-                        messageData.GetInitialMessages[messageData.GetInitialMessages.length - 1].time < 1440
-                      ? `Last active at ${
-                          messageData.GetInitialMessages[messageData.GetInitialMessages.length - 1].date[1]
-                        }`
-                      : messageData.GetInitialMessages[messageData.GetInitialMessages.length - 1].time >= 1440
-                      ? `Last active on ${
-                          messageData.GetInitialMessages[messageData.GetInitialMessages.length - 1].date[0]
-                        } at ${messageData.GetInitialMessages[messageData.GetInitialMessages.length - 1].date[1]}`
-                      : realtimeData.GetAllMessages[realtimeData.GetAllMessages.length - 1].time === 0
-                      ? 'Currently active'
-                      : `Last active ${
-                          realtimeData.GetAllMessages[realtimeData.GetAllMessages.length - 1].time
-                        } mins ago`
-                    : null}
+                  {messages === []
+                    ? ''
+                    : Math.round((Date.now() - messages[messages.length - 1].time) / 60000) >= 1 &&
+                      Math.round((Date.now() - messages[messages.length - 1].time) / 60000) < 2
+                    ? 'Last active ' +
+                      Math.round((Date.now() - messages[messages.length - 1].time) / 60000) +
+                      ' minute ago'
+                    : Math.round((Date.now() - messages[messages.length - 1].time) / 60000) > 0 &&
+                      Math.round((Date.now() - messages[messages.length - 1].time) / 60000) < 60
+                    ? 'Last active ' +
+                      Math.round((Date.now() - messages[messages.length - 1].time) / 60000) +
+                      ' minutes ago'
+                    : Math.round((Date.now() - messages[messages.length - 1].time) / 60000) > 60 &&
+                      Math.round((Date.now() - messages[messages.length - 1].time) / 60000) < 1440
+                    ? 'Last active today at ' + messages[messages.length - 1].date[1]
+                    : Math.round((Date.now() - messages[messages.length - 1].time) / 60000) > 1440
+                    ? 'Last active on ' +
+                      messages[messages.length - 1].date[1] +
+                      ' at ' +
+                      messages[messages.length - 1].date[0]
+                    : ' Currently active'}
                 </p>
               )}
             </span>
@@ -410,16 +393,18 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                         }}
                       >
                         {message.author.username} •{' '}
-                        {message.time === 0
-                          ? ''
-                          : message.time > 0 && message.time < 1440
-                          ? message.time
-                          : message.time >= 1440
-                          ? message.date[0] + ' ' + message.date[1]
-                          : message.time >= 60 && message.time < 1440
+                        {Math.round((Date.now() - message.time) / 60000) >= 1 &&
+                        Math.round((Date.now() - message.time) / 60000) < 2
+                          ? Math.round((Date.now() - message.time) / 60000) + ' minute ago'
+                          : Math.round((Date.now() - message.time) / 60000) > 0 &&
+                            Math.round((Date.now() - message.time) / 60000) < 60
+                          ? Math.round((Date.now() - message.time) / 60000) + ' minutes ago'
+                          : Math.round((Date.now() - message.time) / 60000) > 60 &&
+                            Math.round((Date.now() - message.time) / 60000) < 1440
                           ? message.date[1]
-                          : null}{' '}
-                        {message.time === 0 ? 'Now' : message.time > 0 && message.time < 60 ? 'mins' : null}
+                          : Math.round((Date.now() - message.time) / 60000) > 1440
+                          ? message.date[1] + ' ' + message.date[0]
+                          : ' Now'}
                       </p>
                     ) : (
                       <p
@@ -428,28 +413,32 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                           position: 'relative',
                           fontFamily: 'Lato',
                           left:
-                            message.time < 10
-                              ? 1625
-                              : message.time >= 10 && message.time < 60
-                              ? 1617
-                              : message.time >= 60 && message.time < 1440
-                              ? 1610
-                              : 1545,
+                            Math.round((Date.now() - message.time) / 60000) > 0 &&
+                            Math.round((Date.now() - message.time) / 60000) < 60
+                              ? 1575
+                              : Math.round((Date.now() - message.time) / 60000) > 60 &&
+                                Math.round((Date.now() - message.time) / 60000) < 1440
+                              ? 1500
+                              : Math.round((Date.now() - message.time) / 60000) > 1440
+                              ? 1435
+                              : 1625,
                           top: 10,
                           fontSize: 14,
                         }}
                       >
                         You •{' '}
-                        {message.time === 0
-                          ? ''
-                          : message.time > 0 && message.time < 60
-                          ? message.time
-                          : message.time >= 1440
-                          ? message.date[0] + ' ' + message.date[1]
-                          : message.time >= 60 && message.time < 1440
+                        {Math.round((Date.now() - message.time) / 60000) >= 1 &&
+                        Math.round((Date.now() - message.time) / 60000) < 2
+                          ? Math.round((Date.now() - message.time) / 60000) + ' minute ago'
+                          : Math.round((Date.now() - message.time) / 60000) > 0 &&
+                            Math.round((Date.now() - message.time) / 60000) < 60
+                          ? Math.round((Date.now() - message.time) / 60000) + ' minutes ago'
+                          : Math.round((Date.now() - message.time) / 60000) > 60 &&
+                            Math.round((Date.now() - message.time) / 60000) < 1440
                           ? message.date[1]
-                          : null}{' '}
-                        {message.time === 0 ? 'Now' : message.time > 0 && message.time < 60 ? 'mins' : null}
+                          : Math.round((Date.now() - message.time) / 60000) > 1440
+                          ? message.date[1] + ' ' + message.date[0]
+                          : ' Now'}
                       </p>
                     )}
                     <div
@@ -484,7 +473,14 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                           {message.body}
                         </p>
                       ) : (
-                        <p style={{ marginLeft: 5, marginTop: 10, fontSize: 20 }} className={feedStyles.text}>
+                        <p
+                          style={{
+                            marginLeft: 5,
+                            marginTop: 10,
+                            fontSize: 20,
+                          }}
+                          className={feedStyles.text}
+                        >
                           {message.body}
                         </p>
                       )}
@@ -493,129 +489,6 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                 </>
               );
             })}
-          {/* {realtimeData &&
-            realtimeData.GetAllMessages &&
-            user &&
-            realtimeData.GetAllMessages.map((message) => {
-              return (
-                <>
-                  <div
-                    style={{
-                      position: 'relative',
-                      left: 372,
-                      top: 75,
-                    }}
-                  >
-                    {message.author.id !== user.id ? (
-                      <img
-                        style={{
-                          width: 50,
-                          height: 50,
-                          borderRadius: 100,
-                          left: 4,
-                          top: -4,
-                          position: 'relative',
-                        }}
-                        src={message.author.profile_picture}
-                        alt=""
-                      />
-                    ) : null}
-                  </div>
-
-                  {message.author.id !== user.id ? (
-                    <p
-                      style={{
-                        color: darkMode ? '#ebeef0' : '#000',
-                        position: 'relative',
-                        left: 445,
-                        fontSize: 14,
-                        fontFamily: 'Lato',
-                      }}
-                    >
-                      {message.author.username} •{' '}
-                      {message.time === 0
-                        ? ''
-                        : message.time > 0 && message.time < 1440
-                        ? message.time
-                        : message.time >= 1440
-                        ? message.date[0] + ' ' + message.date[1]
-                        : message.time >= 60 && message.time < 1440
-                        ? message.date[1]
-                        : null}{' '}
-                      {message.time === 0 ? 'Now' : message.time > 0 && message.time < 60 ? 'mins' : null}
-                    </p>
-                  ) : (
-                    <p
-                      style={{
-                        color: darkMode ? '#ebeef0' : '#000',
-                        position: 'relative',
-                        fontFamily: 'Lato',
-                        left:
-                          message.time < 10
-                            ? 1625
-                            : message.time >= 10 && message.time < 60
-                            ? 1617
-                            : message.time >= 60 && message.time < 1440
-                            ? 1610
-                            : 1560,
-                        top: 10,
-                        fontSize: 14,
-                      }}
-                    >
-                      You •{' '}
-                      {message.time === 0
-                        ? ''
-                        : message.time > 0 && message.time < 60
-                        ? message.time
-                        : message.time >= 1440
-                        ? message.date[0] + ' ' + message.date[1]
-                        : message.time >= 60 && message.time < 1440
-                        ? message.date[1]
-                        : null}{' '}
-                      {message.time === 0 ? 'Now' : message.time > 0 && message.time < 60 ? 'mins' : null}
-                    </p>
-                  )}
-
-                  <div
-                    className={message.author.id === user.id ? feedStyles.yourmessage : feedStyles.message}
-                    style={{ marginBottom: message.author.id !== user.id ? -40 : -4 }}
-                  >
-                    {message.image ? (
-                      <img
-                        style={{
-                          marginLeft: 5,
-                          marginTop: 10,
-                          fontSize: 20,
-                          width: 900,
-                          borderRadius: 50,
-                          height: '100%',
-                        }}
-                        src={message.body}
-                        className={feedStyles.text}
-                      />
-                    ) : message.body.includes('https://') ? (
-                      <p
-                        style={{
-                          marginLeft: 5,
-                          marginTop: 10,
-                          fontSize: 20,
-                          cursor: 'pointer',
-                          textDecoration: 'underline',
-                        }}
-                        onClick={() => window.open(message.body)}
-                        className={feedStyles.text}
-                      >
-                        {message.body}
-                      </p>
-                    ) : (
-                      <p style={{ marginLeft: 5, marginTop: 10, fontSize: 20 }} className={feedStyles.text}>
-                        {message.body}
-                      </p>
-                    )}
-                  </div>
-                </>
-              );
-            })} */}
         </div>
 
         <div style={{ top: -10, right: 80, position: 'absolute' }}>
@@ -666,7 +539,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                   <div
                     className={feedStyles.sidebarcontent}
                     style={{
-                      backgroundColor: groupSelected === group.id ? '#8ab6d6' : darkMode ? '#fff' : '#6588de1a',
+                      backgroundColor: groupSelected === group.id ? '#8ab6d6' : darkMode ? '#EFF3FC' : '#6588de1a',
                       boxShadow: groupSelected === group.id ? '0px 8px 40px rgba(0, 72, 251, 0.3)' : '',
                     }}
                     key={group.id}
@@ -713,7 +586,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                   <div
                     className={feedStyles.sidebarcontent}
                     style={{
-                      backgroundColor: groupSelected === group.id ? '#8ab6d6' : darkMode ? '#fff' : '#6588de1a',
+                      backgroundColor: groupSelected === group.id ? '#8ab6d6' : darkMode ? '#EFF3FC' : '#6588de1a',
                       boxShadow: groupSelected === group.id ? '0px 8px 40px rgba(0, 72, 251, 0.3)' : '',
                     }}
                     key={group.id}
