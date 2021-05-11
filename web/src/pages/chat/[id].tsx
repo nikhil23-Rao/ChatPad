@@ -125,13 +125,15 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   useEffect(() => {
     if (messageData) {
       setMessages([...messageData.GetInitialMessages]);
-      console.log('HELLO', messages);
     }
   }, [messageData]);
 
   useEffect(() => {
     if (user && user.dark_theme === 'true') {
       (document.body.style as any) = 'background: #1A202C';
+    }
+    if (window.screen.availHeight < 863 || window.screen.availWidth < 1800) {
+      document.body.style.zoom = '80%';
     }
     setTimeout(() => {
       animateScroll.scrollToBottom({
@@ -148,29 +150,14 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
       realtimeData.GetAllMessages[realtimeData.GetAllMessages.length - 1].groupid === groupSelected
     ) {
       setMessages([...messages, realtimeData.GetAllMessages[realtimeData.GetAllMessages.length - 1]]);
-      console.log('setting state');
     }
-    console.log('HELLO pt2', messages);
-    console.log(realtimeData);
     setGroupSelected(currId);
-    (document.body.style as any) = 'overflow: hidden;';
+    (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
+    (typeof window !== 'undefined' && window.screen.availWidth) < 1800
+      ? ((document.body.style as any) = 'overflow: hidden; zoom: 0.8;')
+      : 'overflow: hidden; zoom: 1;';
     GetUser();
   }, [session, groupSelected, messageData, realtimeData, user?.dark_theme]);
-
-  useEffect(() => {
-    document.addEventListener('visibilitychange', function () {
-      if (document.visibilityState === 'hidden' && realtimeData && user) {
-        for (const message in realtimeData.GetAllMessages) {
-          if (
-            realtimeData.GetAllMessages[message].author.id !== user.id &&
-            realtimeData.GetAllMessages[message].time === 0
-          ) {
-            playSound();
-          }
-        }
-      }
-    });
-  }, [realtimeData]);
 
   useEffect(() => {
     const clear = setInterval(() => {
@@ -195,7 +182,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   if (loading || router.isFallback)
     return (
       <div style={{ backgroundColor: user?.dark_theme === 'true' ? '#1A202C' : '', height: '100vh' }}>
-        <LoadingBar color="red" progress={100} loaderSpeed={2000} height={4} />
+        <LoadingBar color="red" progress={100} loaderSpeed={2000} />
       </div>
     );
 
@@ -310,27 +297,27 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                         : 50,
                   }}
                 >
-                  {messages === []
-                    ? ''
-                    : Math.round((Date.now() - messages[messages.length - 1].time) / 60000) >= 1 &&
+                  {messages && messages[messages.length - 1] && messages[messages.length - 1].time
+                    ? Math.round((Date.now() - messages[messages.length - 1].time) / 60000) >= 1 &&
                       Math.round((Date.now() - messages[messages.length - 1].time) / 60000) < 2
-                    ? 'Last active ' +
-                      Math.round((Date.now() - messages[messages.length - 1].time) / 60000) +
-                      ' minute ago'
-                    : Math.round((Date.now() - messages[messages.length - 1].time) / 60000) > 0 &&
-                      Math.round((Date.now() - messages[messages.length - 1].time) / 60000) < 60
-                    ? 'Last active ' +
-                      Math.round((Date.now() - messages[messages.length - 1].time) / 60000) +
-                      ' minutes ago'
-                    : Math.round((Date.now() - messages[messages.length - 1].time) / 60000) > 60 &&
-                      Math.round((Date.now() - messages[messages.length - 1].time) / 60000) < 1440
-                    ? 'Last active today at ' + messages[messages.length - 1].date[1]
-                    : Math.round((Date.now() - messages[messages.length - 1].time) / 60000) > 1440
-                    ? 'Last active on ' +
-                      messages[messages.length - 1].date[1] +
-                      ' at ' +
-                      messages[messages.length - 1].date[0]
-                    : ' Currently active'}
+                      ? 'Last active ' +
+                        Math.round((Date.now() - messages[messages.length - 1].time) / 60000) +
+                        ' minute ago'
+                      : Math.round((Date.now() - messages[messages.length - 1].time) / 60000) > 0 &&
+                        Math.round((Date.now() - messages[messages.length - 1].time) / 60000) < 60
+                      ? 'Last active ' +
+                        Math.round((Date.now() - messages[messages.length - 1].time) / 60000) +
+                        ' minutes ago'
+                      : Math.round((Date.now() - messages[messages.length - 1].time) / 60000) > 60 &&
+                        Math.round((Date.now() - messages[messages.length - 1].time) / 60000) < 1440
+                      ? 'Last active today at ' + messages[messages.length - 1].date[1]
+                      : Math.round((Date.now() - messages[messages.length - 1].time) / 60000) > 1440
+                      ? 'Last active on ' +
+                        messages[messages.length - 1].date[1] +
+                        ' at ' +
+                        messages[messages.length - 1].date[0]
+                      : ' Currently active'
+                    : null}
                 </p>
               )}
             </span>

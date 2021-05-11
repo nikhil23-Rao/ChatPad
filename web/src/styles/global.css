@@ -8,22 +8,6 @@
   box-sizing: border-box;
 }
 
-@media (max-width: 2000px) {
-  body {
-    zoom: 0.8;
-  }
-}
-
-@media (max-width: 4000px) {
-  body {
-    zoom: 1;
-  }
-}
-
-body {
-  zoom: 0.8;
-}
-
 /* width */
 *::-webkit-scrollbar {
   width: 0px;

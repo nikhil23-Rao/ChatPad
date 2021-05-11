@@ -79,7 +79,6 @@ export const Search = () => {
   const GetMembers = () => {
     const members = [];
     for (const item in selectedItems) {
-      console.log(selectedItems[item]);
       members.push({
         username: (selectedItems[item] as any).username,
         id: (selectedItems[item] as any).id,
@@ -131,7 +130,6 @@ export const Search = () => {
   };
 
   useEffect(() => {
-    console.log('SELECTED ITEMS', selectedItems);
     if (selectedItems.length > 0) {
       setError(false);
     }
