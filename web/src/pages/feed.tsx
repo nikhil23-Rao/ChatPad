@@ -11,6 +11,7 @@ import Head from 'next/head';
 import { GET_ALL_MESSAGES } from '@/apollo/Subscriptions';
 import { useRouter } from 'next/dist/client/router';
 import LoadingBar from 'react-top-loading-bar';
+import { Spinner } from '@chakra-ui/react';
 
 interface FeedProps {}
 
@@ -121,8 +122,8 @@ const Feed: React.FC<FeedProps> = ({}) => {
 
   if (loading)
     return (
-      <div style={{ backgroundColor: user?.dark_theme === 'true' ? '#1A202C' : '', height: '100vh' }}>
-        <LoadingBar color="red" progress={100} loaderSpeed={2000} height={4} />
+      <div className={feedStyles.centered}>
+        <Spinner thickness="4px" speed="0.65s" emptyColor="gray.200" color="blue.500" size="xl" />
       </div>
     );
 

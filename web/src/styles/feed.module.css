@@ -102,6 +102,10 @@
 .message {
   position: relative;
   width: 506px;
+  animation-iteration-count: 1;
+  animation-duration: 0.7s;
+  animation-fill-mode: forwards;
+  animation-name: msg2;
   bottom: 0px;
   left: 440px;
   margin-bottom: 10px;
@@ -116,6 +120,10 @@
   width: 506px;
   left: 1200px;
   margin-bottom: 10px;
+  animation-iteration-count: 1;
+  animation-duration: 0.7s;
+  animation-fill-mode: forwards;
+  animation-name: msg1;
   display: block;
   background-attachment: fixed;
   background-image: linear-gradient(#0993f6 0%, rgb(146, 0, 255) 50%, rgb(255, 46, 25) 100%);
@@ -125,8 +133,7 @@
 
 .text {
   padding: 10px 20px;
-  font-family: 'Lato', sans-serif;
-  font-family: 'Libre Franklin', sans-serif;
+  font-family: Helvetica 'Neue', Helvetica, Arial, sans-serif;
 }
 
 .darkcolor {
@@ -144,8 +151,133 @@
   border-radius: 100px;
 }
 
+.centered {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
 .icon_gradient {
   background: -webkit-linear-gradient(#0993f6 0%, rgb(146, 0, 255) 50%, rgb(255, 46, 25) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+}
+
+@keyframes msg1 {
+  0% {
+    left: 1000px;
+    transform: scale(0.8);
+  }
+  5% {
+    top: calc(var(--msg-content-height) - var(--msg1-height));
+    transform: scale(1);
+  }
+  12% {
+    top: calc(var(--msg-content-height) - var(--msg1-height));
+  }
+  17% {
+    top: calc(var(--msg-content-height) - var(--msg1-height) - var(--msg-spacing) - var(--msg2-height));
+  }
+  30% {
+    top: calc(var(--msg-content-height) - var(--msg1-height) - var(--msg-spacing) - var(--msg2-height));
+  }
+  35% {
+    top: calc(
+      var(--msg-content-height) - var(--msg1-height) - var(--msg-spacing) - var(--msg2-height) - var(--msg-spacing) -
+        var(--msg3-height)
+    );
+  }
+  49% {
+    top: calc(
+      var(--msg-content-height) - var(--msg1-height) - var(--msg-spacing) - var(--msg2-height) - var(--msg-spacing) -
+        var(--msg3-height)
+    );
+  }
+  54% {
+    top: calc(
+      var(--msg-content-height) - var(--msg1-height) - var(--msg-spacing) - var(--msg2-height) - var(--msg-spacing) -
+        var(--msg3-height) - var(--msg-spacing) - var(--msg4-height)
+    );
+  }
+  70% {
+    top: calc(
+      var(--msg-content-height) - var(--msg1-height) - var(--msg-spacing) - var(--msg2-height) - var(--msg-spacing) -
+        var(--msg3-height) - var(--msg-spacing) - var(--msg4-height)
+    );
+  }
+  75% {
+    top: calc(
+      var(--msg-content-height) - var(--msg1-height) - var(--msg-spacing) - var(--msg2-height) - var(--msg-spacing) -
+        var(--msg3-height) - var(--msg-spacing) - var(--msg4-height) - var(--msg-spacing) - var(--msg5-height)
+    );
+  }
+  95% {
+    top: calc(
+      var(--msg-content-height) - var(--msg1-height) - var(--msg-spacing) - var(--msg2-height) - var(--msg-spacing) -
+        var(--msg3-height) - var(--msg-spacing) - var(--msg4-height) - var(--msg-spacing) - var(--msg5-height)
+    );
+  }
+  100% {
+    left: 1200px;
+  }
+}
+
+@keyframes msg2 {
+  0% {
+    left: 400px;
+    transform: scale(0.8);
+  }
+  5% {
+    top: calc(var(--msg-content-height) - var(--msg1-height));
+    transform: scale(1);
+  }
+  12% {
+    top: calc(var(--msg-content-height) - var(--msg1-height));
+  }
+  17% {
+    top: calc(var(--msg-content-height) - var(--msg1-height) - var(--msg-spacing) - var(--msg2-height));
+  }
+  30% {
+    top: calc(var(--msg-content-height) - var(--msg1-height) - var(--msg-spacing) - var(--msg2-height));
+  }
+  35% {
+    top: calc(
+      var(--msg-content-height) - var(--msg1-height) - var(--msg-spacing) - var(--msg2-height) - var(--msg-spacing) -
+        var(--msg3-height)
+    );
+  }
+  49% {
+    top: calc(
+      var(--msg-content-height) - var(--msg1-height) - var(--msg-spacing) - var(--msg2-height) - var(--msg-spacing) -
+        var(--msg3-height)
+    );
+  }
+  54% {
+    top: calc(
+      var(--msg-content-height) - var(--msg1-height) - var(--msg-spacing) - var(--msg2-height) - var(--msg-spacing) -
+        var(--msg3-height) - var(--msg-spacing) - var(--msg4-height)
+    );
+  }
+  70% {
+    top: calc(
+      var(--msg-content-height) - var(--msg1-height) - var(--msg-spacing) - var(--msg2-height) - var(--msg-spacing) -
+        var(--msg3-height) - var(--msg-spacing) - var(--msg4-height)
+    );
+  }
+  75% {
+    top: calc(
+      var(--msg-content-height) - var(--msg1-height) - var(--msg-spacing) - var(--msg2-height) - var(--msg-spacing) -
+        var(--msg3-height) - var(--msg-spacing) - var(--msg4-height) - var(--msg-spacing) - var(--msg5-height)
+    );
+  }
+  95% {
+    top: calc(
+      var(--msg-content-height) - var(--msg1-height) - var(--msg-spacing) - var(--msg2-height) - var(--msg-spacing) -
+        var(--msg3-height) - var(--msg-spacing) - var(--msg4-height) - var(--msg-spacing) - var(--msg5-height)
+    );
+  }
+  100% {
+    left: 440px;
+  }
 }

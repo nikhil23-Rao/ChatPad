@@ -19,7 +19,7 @@ export default function LandingPage() {
     if (session || token) {
       router.push('/feed');
     }
-    (document.body.style as any) = 'zoom:1';
+    (document.body.style as any) = 'overflow: scroll';
   }, [session]);
   return (
     <Page>

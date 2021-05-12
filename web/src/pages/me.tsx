@@ -8,8 +8,9 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { useMutation } from '@apollo/client';
 import { SWITCH_ONLINE, TOGGLE_THEME, UPDATE_TIME } from '@/apollo/Mutations';
 import LoadingBar from 'react-top-loading-bar';
-import { Button } from '@chakra-ui/react';
+import { Button, Spinner } from '@chakra-ui/react';
 import Link from 'next/link';
+import feedStyles from '../styles/feed.module.css';
 
 interface MeProps {}
 
@@ -77,7 +78,12 @@ const Me: React.FC<MeProps> = ({}) => {
       SwitchOnline({ variables: { authorid: user?.id, value: true } });
     }
   }, [user, closed, session]);
-  if (!user) return <LoadingBar color="red" progress={100} loaderSpeed={2000} height={4} />;
+  if (!user)
+    return (
+      <div className={feedStyles.centered}>
+        <Spinner thickness="4px" speed="0.65s" emptyColor="gray.200" color="blue.500" size="xl" />
+      </div>
+    );
 
   return (
     <div

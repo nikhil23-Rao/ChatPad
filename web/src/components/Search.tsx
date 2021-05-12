@@ -229,6 +229,9 @@ export const Search = () => {
               if (nameVal.length == 0) {
                 return setNameError(true);
               }
+              if (!nameVal.replace(/\s/g, '').length) {
+                return;
+              }
               if (selectedItems.length === 0) {
                 return setError(true);
               }

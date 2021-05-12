@@ -13,7 +13,7 @@ import { GET_ALL_MESSAGES } from '@/apollo/Subscriptions';
 import { Picker } from 'emoji-mart';
 import { useRouter } from 'next/dist/client/router';
 import { animateScroll } from 'react-scroll';
-import { Input, InputGroup, InputRightElement, Skeleton, SkeletonCircle, useToast } from '@chakra-ui/react';
+import { Input, InputGroup, InputRightElement, Skeleton, SkeletonCircle, useToast, Spinner } from '@chakra-ui/react';
 import EmojiEmotionsIcon from '@material-ui/icons/EmojiEmotions';
 import InsertPhotoIcon from '@material-ui/icons/InsertPhoto';
 import LoadingBar from 'react-top-loading-bar';
@@ -181,8 +181,8 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
 
   if (loading || router.isFallback)
     return (
-      <div style={{ backgroundColor: user?.dark_theme === 'true' ? '#1A202C' : '', height: '100vh' }}>
-        <LoadingBar color="red" progress={100} loaderSpeed={2000} />
+      <div className={feedStyles.centered}>
+        <Spinner thickness="4px" speed="0.65s" emptyColor="gray.200" color="blue.500" size="xl" />
       </div>
     );
 
@@ -360,7 +360,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                             height: 50,
                             borderRadius: 100,
                             left: 4,
-                            top: 3.3,
+                            top: -5,
                             position: 'relative',
                           }}
                           src={message.author.profile_picture}
@@ -405,9 +405,9 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                               ? 1575
                               : Math.round((Date.now() - message.time) / 60000) > 60 &&
                                 Math.round((Date.now() - message.time) / 60000) < 1440
-                              ? 1500
+                              ? 1610
                               : Math.round((Date.now() - message.time) / 60000) > 1440
-                              ? 1435
+                              ? 1535
                               : 1625,
                           top: 10,
                           fontSize: 14,
