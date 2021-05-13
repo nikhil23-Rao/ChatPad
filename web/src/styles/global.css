@@ -31,10 +31,11 @@
 :root {
   --btn-width-100: 100px;
 }
+
 body {
   margin: 0;
   padding: 0;
-  overflow-y: hidden;
+  overflow: hidden;
 }
 nav {
   margin: 0;
@@ -775,8 +776,8 @@ a.socialIcon:hover,
 }
 
 .onlinedot {
-  height: 18px;
-  width: 18px;
+  height: 15px;
+  width: 15px;
   background-color: lightgreen;
   border-radius: 50%;
   display: inline-block;

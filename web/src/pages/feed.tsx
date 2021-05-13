@@ -11,12 +11,14 @@ import Head from 'next/head';
 import { GET_ALL_MESSAGES } from '@/apollo/Subscriptions';
 import { useRouter } from 'next/dist/client/router';
 import LoadingBar from 'react-top-loading-bar';
-import { Spinner } from '@chakra-ui/react';
+import { Skeleton, Spinner, Input } from '@chakra-ui/react';
+import { tw } from 'twind';
 
 interface FeedProps {}
 
 const Feed: React.FC<FeedProps> = ({}) => {
   const [groupSelected, setGroupSelected] = useState('');
+  const [visible, setVisible] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
   const [closed, setClosed] = useState(false);
   const [session] = useSession();
@@ -140,7 +142,7 @@ const Feed: React.FC<FeedProps> = ({}) => {
             (typeof window !== 'undefined' && window.screen.availWidth) < 1800
               ? '150vh'
               : '100vh',
-          backgroundColor: darkMode ? '#1A202C' : '',
+          backgroundColor: darkMode ? '#1c1c1c' : '',
         }}
       ></div>
       <div>
@@ -150,31 +152,45 @@ const Feed: React.FC<FeedProps> = ({}) => {
               style={{
                 position: 'fixed',
                 top: '46%',
-                left: '50%',
+                left: '55%',
               }}
             >
               <i className="fa fa-paper-plane fa-5x" style={{ color: darkMode ? '#fff' : '#000' }}></i>
             </div>
-            <p style={{ top: '62%', position: 'fixed', left: '39%', color: darkMode ? '#fff' : '#000' }}>
+            <p style={{ top: '62%', position: 'fixed', left: '44%', color: darkMode ? '#fff' : '#000' }}>
               To start, select a group on the left hand side or create a new group.
             </p>
           </>
         )}
-        <div style={{ top: -10, right: 80, position: 'absolute' }}>
+        <div
+          style={{
+            position: 'absolute',
+            bottom: visible
+              ? (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
+                (typeof window !== 'undefined' && window.screen.availWidth < 1800)
+                ? 1010
+                : 854
+              : '',
+            left: visible ? 350 : '',
+            top: !visible ? -10 : '',
+            right: !visible ? 80 : '',
+          }}
+        >
           <div className="outer-menu">
-            <input className="checkbox-toggle" type="checkbox" />
-            <div
-              className="hamburger rainbow-box"
-              style={{ borderRadius: 50, backgroundColor: darkMode ? '#1A202C' : '' }}
-            >
+            <input className="checkbox-toggle" type="checkbox" onChange={() => setVisible(!visible)} />
+            <div className="hamburger rainbow-box" style={{ borderRadius: 50, backgroundColor: 'transparent' }}>
               <div>
-                <i className="fa fa-plus  fa-2x" style={{ color: darkMode ? '#fff' : '#000' }}></i>
+                <i
+                  className={`fa fa-${visible ? 'user-plus' : 'plus'} fa-2x`}
+                  style={{ color: darkMode ? '#fff' : '' }}
+                ></i>
               </div>
             </div>
+
             <div className="menu">
-              <div style={{ marginRight: '22%', backgroundColor: darkMode ? '#1A202C' : '' }}>
+              <div style={{ marginRight: '22%', backgroundColor: darkMode ? '#1C1C1C' : '' }}>
                 <div>
-                  <div className="mt-1" style={{ width: '300%' }}>
+                  <div className="mt-1" style={{ width: '300%', color: darkMode ? '#fff' : '#000' }}>
                     <Search />
                   </div>
                 </div>
@@ -183,107 +199,120 @@ const Feed: React.FC<FeedProps> = ({}) => {
           </div>
         </div>
         <div
+          style={{
+            position: 'absolute',
+          }}
+        ></div>
+        <div
           className={feedStyles.leftsidebar}
-          style={{ backgroundColor: darkMode ? '#1A202C' : '#fff', borderRightColor: darkMode ? '#fff' : '' }}
+          style={{ backgroundColor: darkMode ? '#1c1c1c' : '#EDEDED', borderRightColor: darkMode ? '#4E4F51' : '' }}
         >
           <h1
             style={{
               fontSize: 24,
               marginRight: 35,
               marginTop: 15,
-              fontFamily: 'Lato',
               color: darkMode ? '#fff' : '#000',
             }}
+            className={tw('text-3xl text-primary-100')}
           >
-            Groups
+            Chats
           </h1>
+          <Input
+            placeholder="Search for chats..."
+            style={{
+              width: '80%',
+              left: 45,
+              position: 'relative',
+              borderRadius: 100,
+              borderColor: darkMode ? '#fff' : '#000',
+              color: darkMode ? '#fff' : '#000',
+              top: 7,
+            }}
+          />
           {data.GetGroups.map((group) => {
             if (group.members.length === 2) {
               return (
-                <div
-                  className={feedStyles.sidebarcontent}
-                  style={{
-                    backgroundColor: groupSelected === group.id ? '#8ab6d6' : darkMode ? '#fff' : '#6588de1a',
-                    boxShadow: groupSelected === group.id ? '0px 8px 40px rgba(0, 72, 251, 0.3)' : '',
-                  }}
-                  key={group.id}
-                  onClick={() => (window.location.href = `/chat/${group.id}`)}
-                >
-                  {group.members[0].id === user?.id ? (
-                    <div style={{ marginTop: '5%', marginLeft: '3%', paddingTop: '3%' }}>
-                      <img
-                        src={group.members[1].profile_picture}
-                        alt=""
-                        style={{ width: 54, height: 54, borderRadius: 125 }}
-                      />
-                    </div>
-                  ) : (
-                    <div style={{ marginTop: '5%', marginLeft: '3%', paddingTop: '3%' }}>
-                      <img
-                        src={group.members[0].profile_picture}
-                        alt=""
-                        style={{ width: 54, height: 54, borderRadius: 125 }}
-                      />
-                    </div>
-                  )}
-
-                  <p
-                    style={{
-                      fontWeight: groupSelected === group.id ? 'bold' : 'normal',
-                      fontFamily: 'Lato',
-                      color: groupSelected === group.id ? '#fff' : '#000',
-                      position: 'relative',
-                      bottom: 50,
-                      left: 75,
-                    }}
-                    className={feedStyles.groupName}
+                <Skeleton style={{ borderRadius: 15, position: 'relative', width: 310, left: 5 }} isLoaded={!loading}>
+                  <div
+                    className={darkMode ? feedStyles.sidebarcontent : feedStyles.sidebarcontentlight}
+                    key={group.id}
+                    onClick={() => (window.location.href = `/chat/${group.id}`)}
                   >
-                    {group.name}
-                  </p>
-                </div>
+                    {group.members[0].id === user?.id ? (
+                      <div style={{ marginTop: '3%', marginLeft: '3%', paddingTop: '3%' }}>
+                        <img
+                          src={group.members[1].profile_picture}
+                          alt=""
+                          style={{ width: 54, height: 54, borderRadius: 125 }}
+                        />
+                      </div>
+                    ) : (
+                      <div style={{ marginTop: '3%', marginLeft: '3%', paddingTop: '3%' }}>
+                        <img
+                          src={group.members[0].profile_picture}
+                          alt=""
+                          style={{ width: 54, height: 54, borderRadius: 125 }}
+                        />
+                      </div>
+                    )}
+
+                    <p
+                      style={{
+                        fontWeight: groupSelected === group.id ? 'bold' : 'normal',
+                        fontFamily: 'Lato',
+                        color: darkMode ? '#fff' : '#000',
+                        position: 'relative',
+                        bottom: 50,
+                        left: 75,
+                      }}
+                      className={feedStyles.groupName}
+                    >
+                      {group.name}
+                    </p>
+                  </div>
+                </Skeleton>
               );
             } else if (group.members.length > 2) {
               const restOfPeople = group.members.length - 2;
               return (
-                <div
-                  className={feedStyles.sidebarcontent}
-                  style={{
-                    backgroundColor: groupSelected === group.id ? '#8ab6d6' : darkMode ? '#fff' : '#6588de1a',
-                    boxShadow: groupSelected === group.id ? '0px 8px 40px rgba(0, 72, 251, 0.3)' : '',
-                  }}
-                  key={group.id}
-                  onClick={() => (window.location.href = `/chat/${group.id}`)}
-                >
-                  <div style={{ marginTop: '5%', marginLeft: '6%', paddingTop: '3%' }}>
-                    <img
-                      src={group.members[0].profile_picture}
-                      alt=""
-                      style={{ width: 30, height: 30, borderRadius: 25, position: 'relative', top: 3 }}
-                    />
-                  </div>
-
-                  <div style={{ marginLeft: 3 }}>
-                    <img
-                      src={group.members[1].profile_picture}
-                      alt=""
-                      style={{ width: 30, height: 30, borderRadius: 25 }}
-                    />
-                  </div>
-                  <div className={`${feedStyles.dot} text-center`}>+{restOfPeople}</div>
-
-                  <p
-                    style={{
-                      fontWeight: groupSelected === group.id ? 'bold' : 'normal',
-                      fontFamily: 'Lato',
-                      color: groupSelected === group.id ? '#fff' : '#000',
-                      position: 'relative',
-                      bottom: 85,
-                      left: 65,
-                    }}
+                <Skeleton style={{ borderRadius: 15, position: 'relative', width: 310, left: 5 }} isLoaded={!loading}>
+                  <div
+                    className={darkMode ? feedStyles.sidebarcontent : feedStyles.sidebarcontentlight}
+                    key={group.id}
+                    onClick={() => (window.location.href = `/chat/${group.id}`)}
                   >
-                    {group.name}
-                  </p>
-                </div>
+                    <div style={{ marginTop: '3%', marginLeft: '6%', paddingTop: '3%' }}>
+                      <img
+                        src={group.members[0].profile_picture}
+                        alt=""
+                        style={{ width: 30, height: 30, borderRadius: 25, position: 'relative', top: 3 }}
+                      />
+                    </div>
+
+                    <div style={{ marginLeft: 3 }}>
+                      <img
+                        src={group.members[1].profile_picture}
+                        alt=""
+                        style={{ width: 30, height: 30, borderRadius: 25 }}
+                      />
+                    </div>
+                    <div className={`${feedStyles.dot} text-center`}>+{restOfPeople}</div>
+
+                    <p
+                      style={{
+                        fontWeight: groupSelected === group.id ? 'bold' : 'normal',
+                        fontFamily: 'Lato',
+                        color: darkMode ? '#fff' : '#000',
+                        position: 'relative',
+                        bottom: 85,
+                        left: 65,
+                      }}
+                    >
+                      {group.name}
+                    </p>
+                  </div>
+                </Skeleton>
               );
             }
           })}
@@ -291,40 +320,57 @@ const Feed: React.FC<FeedProps> = ({}) => {
         <div
           className={feedStyles.profile}
           style={{
-            backgroundColor: darkMode ? '#1A202C' : '#fff',
-            borderRightColor: darkMode ? '#fff' : '',
-            cursor: 'pointer',
+            backgroundColor: darkMode ? '#1c1c1c' : '#EDEDED',
+            borderRightColor: darkMode ? '#4E4F51' : '',
+            borderBottomColor: !darkMode ? '#ccc' : '#4E4F51',
           }}
-          onClick={() => (window.location.href = '/me')}
         >
-          <div style={{ position: 'absolute', left: 60, top: 63 }} className="onlinedot"></div>
-          <img
-            src={user! && (user.profile_picture as string | undefined)}
-            alt=""
-            style={{ width: 70, height: 70, borderRadius: 35, marginTop: '3%', marginLeft: '3%' }}
-          />
-          <p
-            style={{
-              color: darkMode ? '#EDEDEE' : '#000',
-              position: 'relative',
-              bottom: 55,
-              left: 89,
-              fontFamily: 'Lato',
-            }}
-          >
-            {user && user.username}
-          </p>{' '}
-          <p
-            style={{
-              fontFamily: 'Lato',
-              color: darkMode ? '#FDFDFD' : '#6E6969',
-              position: 'relative',
-              bottom: 55,
-              left: 89,
-            }}
-          >
-            {user && user.email}
-          </p>
+          <div style={{ position: 'fixed', zIndex: 1, left: 74, top: 70 }} className="onlinedot"></div>
+
+          <div>
+            <h1
+              className={tw('text-primary-100 font-bold')}
+              style={{
+                color: darkMode ? '#fff' : '#000',
+                fontSize: 22,
+                bottom: -5,
+                left: -60,
+                fontFamily: 'Lato',
+                position: 'relative',
+                marginTop: 19,
+              }}
+            >
+              {user && user.username}
+            </h1>
+            <h1
+              style={{
+                fontSize: 18,
+                bottom: -5,
+                left: -15,
+                fontFamily: 'Lato',
+                position: 'relative',
+                color: darkMode ? '#fff' : '#000',
+              }}
+            >
+              {user && user.email}
+            </h1>
+          </div>
+          <div style={{ cursor: 'pointer' }}>
+            <img
+              src={user! && (user.profile_picture as string | undefined)}
+              onClick={() => (window.location.href = '/me')}
+              alt=""
+              style={{
+                width: 75,
+                height: 75,
+                borderRadius: 35,
+                top: 10,
+                marginLeft: '5%',
+                position: 'absolute',
+                zIndex: -1,
+              }}
+            />
+          </div>
         </div>
       </div>
     </>
