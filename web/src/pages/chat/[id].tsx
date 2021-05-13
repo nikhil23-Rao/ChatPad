@@ -730,6 +730,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                   onKeyPress={async (e) => {
                     if (e.shiftKey) return;
                     if (e.key === 'Enter') {
+                      setMessageVal('');
                       e.preventDefault();
                       // Check If Text Is Empty Before Submitting
                       if (!messageVal.trim()) {
@@ -750,7 +751,6 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                           time: formatAMPM(new Date()),
                         },
                       });
-                      setMessageVal('');
                     }
                   }}
                   onChange={(e) => setMessageVal(e.currentTarget.value)}
