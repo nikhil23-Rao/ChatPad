@@ -368,7 +368,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                             width: 50,
                             height: 50,
                             borderRadius: 100,
-                            left: 120,
+                            left: 129,
                             top: -5,
                             position: 'relative',
                           }}
