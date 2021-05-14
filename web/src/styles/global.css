@@ -791,7 +791,7 @@ a.socialIcon:hover,
 .search-box {
   position: absolute;
   top: 9%;
-  left: 210px;
+  left: 220px;
   transform: translate(-50%, -50%);
   background: #2f3640;
   height: 60px;
@@ -823,11 +823,11 @@ a.socialIcon:hover,
   line-height: 40px;
   width: 0px;
 }
-.search-box:hover > .search-txt {
+.search-box > .search-txt {
   width: 350px;
   padding: 0 6px;
 }
-.search-box:hover > .search-btn {
+.search-box > .search-btn {
   left: 310px;
   bottom: 40px;
   position: relative;

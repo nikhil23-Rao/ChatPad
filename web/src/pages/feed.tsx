@@ -169,15 +169,8 @@ const Feed: React.FC<FeedProps> = ({}) => {
         <div
           style={{
             position: 'absolute',
-            bottom: visible
-              ? (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
-                (typeof window !== 'undefined' && window.screen.availWidth < 1800)
-                ? 1010
-                : 854
-              : '',
-            left: visible ? 350 : '',
-            top: !visible ? -10 : '',
-            right: !visible ? 80 : '',
+            top: -8,
+            right: 100,
           }}
         >
           <div className="outer-menu">
@@ -222,23 +215,33 @@ const Feed: React.FC<FeedProps> = ({}) => {
           >
             Chats
           </h1>
-          <div className="search-box">
+          <div className="search-box" style={{ backgroundColor: !darkMode ? '#fff' : '' }}>
             <input
               className="search-txt"
               type="text"
               name=""
               placeholder="Search for chats..."
               value={query}
+              style={{ color: !darkMode ? '#000' : '', paddingRight: 40 }}
               onChange={(e) => setQuery(e.currentTarget.value)}
             />
-            <a className="search-btn">
+            <a className="search-btn" style={{ backgroundColor: !darkMode ? 'transparent' : '' }}>
               <i className="fa fa-search" style={{ color: '#4097ff' }}></i>
             </a>
           </div>
           <br />
           <br />
           <br />
-          {searchLoading && <h1>L:OADING</h1>}
+          {searchLoading && (
+            <Spinner
+              thickness="4px"
+              speed="0.65s"
+              emptyColor="gray.200"
+              color="blue.500"
+              size="xl"
+              style={{ left: 190, position: 'relative', top: 30 }}
+            />
+          )}
           {searchData &&
             searchData.SearchGroups.map((group) => {
               if (group.members.length === 2) {

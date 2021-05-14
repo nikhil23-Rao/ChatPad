@@ -151,6 +151,16 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   }, [messageData]);
 
   useEffect(() => {
+    setTimeout(() => {
+      animateScroll.scrollToBottom({
+        containerId: 'chatDiv',
+        smooth: false,
+        duration: 0,
+      });
+    }, 500); // Load time
+  }, []);
+
+  useEffect(() => {
     (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
     (typeof window !== 'undefined' && window.screen.availWidth) < 1800
       ? ((document.body.style as any) = 'overflow: hidden; zoom: 0.8;')
@@ -169,7 +179,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
         smooth: false,
         duration: 0,
       });
-    }, 180); // Load time
+    }, 1); // Load time
 
     if (realtimeData && messages.includes(realtimeData.GetAllMessages[realtimeData.GetAllMessages.length - 1])) return;
     if (
@@ -234,7 +244,10 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
               height: 100,
             }}
           >
-            <span className="navbar-brand mb-0 h1" style={{ marginLeft: 500, display: 'inline' }}>
+            <span
+              className="navbar-brand mb-0 h1"
+              style={{ marginLeft: GroupNameData.GetGroupName.members.length === 2 ? 640 : 550, display: 'inline' }}
+            >
               {GroupNameData.GetGroupName.members.length === 2 ? (
                 <>
                   {GroupNameData.GetGroupName.members[0].id === user?.id ? (
@@ -517,15 +530,8 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
         <div
           style={{
             position: 'absolute',
-            bottom: visible
-              ? (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
-                (typeof window !== 'undefined' && window.screen.availWidth < 1800)
-                ? 898
-                : 920
-              : '',
-            left: visible ? 350 : '',
-            top: !visible ? -10 : '',
-            right: !visible ? 80 : '',
+            top: -8,
+            right: 100,
           }}
         >
           <div className="outer-menu">
@@ -568,22 +574,33 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
           >
             Chats
           </h1>
-          <div className="search-box">
+          <div className="search-box" style={{ backgroundColor: !darkMode ? '#fff' : '' }}>
             <input
               className="search-txt"
               type="text"
               name=""
               placeholder="Search for chats..."
               value={query}
+              style={{ color: !darkMode ? '#000' : '', paddingRight: 40 }}
               onChange={(e) => setQuery(e.currentTarget.value)}
             />
-            <a className="search-btn">
-              <i className="fa fa-search"></i>
+            <a className="search-btn" style={{ backgroundColor: !darkMode ? 'transparent' : '' }}>
+              <i className="fa fa-search" style={{ color: '#4097ff' }}></i>
             </a>
           </div>
           <br />
           <br />
           <br />
+          {searchLoading && (
+            <Spinner
+              thickness="4px"
+              speed="0.65s"
+              emptyColor="gray.200"
+              color="blue.500"
+              size="xl"
+              style={{ left: 190, position: 'relative', top: 30 }}
+            />
+          )}
           {searchData &&
             searchData.SearchGroups.map((group) => {
               if (group.members.length === 2) {
@@ -765,6 +782,15 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                   value={messageVal}
                   _placeholder={{ color: darkMode ? '#fff' : '#7c7c82' }}
                   onKeyPress={async (e) => {
+                    var today: any = new Date();
+                    var dd = String(today.getDate()).padStart(2, '0');
+                    var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+                    var yyyy = today.getFullYear();
+                    var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+                    var day = days[new Date().getDay()];
+
+                    today = mm + '/' + dd + '/' + yyyy;
                     if (e.shiftKey) return;
                     if (e.key === 'Enter') {
                       setMessageVal('');
@@ -786,6 +812,8 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                           image: false,
                           messageid: generateId(24),
                           time: formatAMPM(new Date()),
+                          date: today,
+                          day,
                         },
                       });
                     }

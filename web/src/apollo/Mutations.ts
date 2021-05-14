@@ -40,8 +40,19 @@ export const SEND_MESSAGE = gql`
     $messageid: String
     $image: Boolean
     $time: String
+    $date: String
+    $day: String
   ) {
-    SendMessage(groupid: $groupid, body: $body, author: $author, messageid: $messageid, image: $image, time: $time)
+    SendMessage(
+      groupid: $groupid
+      body: $body
+      author: $author
+      messageid: $messageid
+      image: $image
+      time: $time
+      day: $day
+      date: $date
+    )
   }
 `;
 
