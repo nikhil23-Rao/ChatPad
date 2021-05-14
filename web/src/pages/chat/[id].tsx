@@ -179,7 +179,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
         smooth: false,
         duration: 0,
       });
-    }, 1); // Load time
+    }, 5); // Load time
 
     if (realtimeData && messages.includes(realtimeData.GetAllMessages[realtimeData.GetAllMessages.length - 1])) return;
     if (
