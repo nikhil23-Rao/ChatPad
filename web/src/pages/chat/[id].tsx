@@ -151,6 +151,16 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   }, [messageData]);
 
   useEffect(() => {
+    setTimeout(() => {
+      animateScroll.scrollToBottom({
+        containerId: 'chatDiv',
+        smooth: false,
+        duration: 0,
+      });
+    }, 500); // Load time
+  }, []);
+
+  useEffect(() => {
     (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
     (typeof window !== 'undefined' && window.screen.availWidth) < 1800
       ? ((document.body.style as any) = 'overflow: hidden; zoom: 0.8;')
@@ -169,7 +179,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
         smooth: false,
         duration: 0,
       });
-    }, 180); // Load time
+    }, 1); // Load time
 
     if (realtimeData && messages.includes(realtimeData.GetAllMessages[realtimeData.GetAllMessages.length - 1])) return;
     if (
