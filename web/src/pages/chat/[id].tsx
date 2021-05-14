@@ -177,8 +177,9 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
       realtimeData &&
       realtimeData.GetAllMessages[realtimeData.GetAllMessages.length - 1].author.id !== user?.id &&
       !messages.includes(realtimeData.GetAllMessages[realtimeData.GetAllMessages.length - 1])
-    )
+    ) {
       playSound();
+    }
     if (realtimeData && realtimeData.GetAllMessages[realtimeData.GetAllMessages.length - 1].groupid === groupSelected) {
       setMessages([...messages, realtimeData.GetAllMessages[realtimeData.GetAllMessages.length - 1]]);
     }
