@@ -3,7 +3,14 @@ import jwtDecode from 'jwt-decode';
 import { useSession } from 'next-auth/client';
 import feedStyles from '../../styles/feed.module.css';
 import client from '@/../apollo-client';
-import { GET_CHAT_PATHS, GET_GROUPS, GET_GROUP_NAME, GET_INITIAL_MESSAGES, GET_USER_ID } from '../../apollo/Queries';
+import {
+  GET_CHAT_PATHS,
+  GET_GROUPS,
+  GET_GROUP_NAME,
+  GET_INITIAL_MESSAGES,
+  GET_USER_ID,
+  SEARCH_GROUPS,
+} from '../../apollo/Queries';
 import { Search } from '../../components/Search';
 import { useMutation, useQuery, useSubscription } from '@apollo/client';
 import { SEND_MESSAGE, SWITCH_ONLINE, TOGGLE_THEME, UPDATE_TIME } from '@/apollo/Mutations';
@@ -59,6 +66,7 @@ export const getStaticProps = async (context) => {
 
 const Chat: React.FC<ChatProps> = ({ currId }) => {
   const [groupSelected, setGroupSelected] = useState('');
+  const [query, setQuery] = useState('');
   const [messages, setMessages] = useState<any[]>([]);
   const [showEmoji, setShowEmoji] = useState(false);
   const router = useRouter();
@@ -118,6 +126,9 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   const { data: messageData, loading: messageLoading, refetch } = useQuery(GET_INITIAL_MESSAGES, {
     variables: { groupid: groupSelected },
   });
+  const { data: searchData, loading: searchLoading } = useQuery(SEARCH_GROUPS, {
+    variables: { query, authorid: user?.id },
+  });
   const [SendMessage] = useMutation(SEND_MESSAGE);
   const [UpdateTime] = useMutation(UPDATE_TIME);
   const { data: realtimeData } = useSubscription(GET_ALL_MESSAGES);
@@ -161,6 +172,13 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
     }, 180); // Load time
 
     if (realtimeData && messages.includes(realtimeData.GetAllMessages[realtimeData.GetAllMessages.length - 1])) return;
+    if (
+      document.visibilityState === 'hidden' &&
+      realtimeData &&
+      realtimeData.GetAllMessages[realtimeData.GetAllMessages.length - 1].author.id !== user?.id &&
+      !messages.includes(realtimeData.GetAllMessages[realtimeData.GetAllMessages.length - 1])
+    )
+      playSound();
     if (realtimeData && realtimeData.GetAllMessages[realtimeData.GetAllMessages.length - 1].groupid === groupSelected) {
       setMessages([...messages, realtimeData.GetAllMessages[realtimeData.GetAllMessages.length - 1]]);
     }
@@ -320,12 +338,17 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                         ' minutes ago'
                       : Math.round((Date.now() - messages[messages.length - 1].time) / 60000) > 60 &&
                         Math.round((Date.now() - messages[messages.length - 1].time) / 60000) < 1440
-                      ? 'Last active today at ' + messages[messages.length - 1].date[1]
-                      : Math.round((Date.now() - messages[messages.length - 1].time) / 60000) > 1440
+                      ? 'Last active at ' + messages[messages.length - 1].date[1]
+                      : Math.round((Date.now() - messages[messages.length - 1].time) / 60000) > 1440 &&
+                        Math.round((Date.now() - messages[messages.length - 1].time) / 60000) < 10080
                       ? 'Last active on ' +
-                        messages[messages.length - 1].date[1] +
+                        messages[messages.length - 1].date[2] +
                         ' at ' +
-                        messages[messages.length - 1].date[0]
+                        messages[messages.length - 1].date[1]
+                      : Math.round((Date.now() - messages[messages.length - 1].time) / 60000) >= 10080
+                      ? `Last active on ${messages[messages.length - 1].date[0]} at ${
+                          messages[messages.length - 1].date[1]
+                        }`
                       : ' Currently active'
                     : null}
                 </p>
@@ -543,106 +566,117 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
           >
             Chats
           </h1>
-          <Input
-            placeholder="Search for chats..."
-            style={{
-              width: '80%',
-              left: 45,
-              position: 'relative',
-              borderRadius: 100,
-              borderColor: darkMode ? '#fff' : '#000',
-              color: darkMode ? '#fff' : '#000',
-              top: 7,
-            }}
-          />
-          {data.GetGroups.map((group) => {
-            if (group.members.length === 2) {
-              return (
-                <Skeleton style={{ borderRadius: 15, position: 'relative', width: 310, left: 5 }} isLoaded={!loading}>
-                  <div
-                    style={{ backgroundColor: group.id === groupSelected ? (!darkMode ? '#c5e2ed' : '#144e80') : '' }}
-                    className={darkMode ? feedStyles.sidebarcontent : feedStyles.sidebarcontentlight}
-                    key={group.id}
-                    onClick={() => (window.location.href = `/chat/${group.id}`)}
+          <div className="search-box">
+            <input
+              className="search-txt"
+              type="text"
+              name=""
+              placeholder="Search for chats..."
+              value={query}
+              onChange={(e) => setQuery(e.currentTarget.value)}
+            />
+            <a className="search-btn">
+              <i className="fa fa-search"></i>
+            </a>
+          </div>
+          <br />
+          <br />
+          <br />
+          {searchData &&
+            searchData.SearchGroups.map((group) => {
+              if (group.members.length === 2) {
+                return (
+                  <Skeleton
+                    style={{ borderRadius: 15, position: 'relative', width: 310, left: 5 }}
+                    isLoaded={!searchLoading}
                   >
-                    {group.members[0].id === user?.id ? (
-                      <div style={{ marginTop: '3%', marginLeft: '3%', paddingTop: '3%' }}>
-                        <img
-                          src={group.members[1].profile_picture}
-                          alt=""
-                          style={{ width: 54, height: 54, borderRadius: 125 }}
-                        />
-                      </div>
-                    ) : (
-                      <div style={{ marginTop: '3%', marginLeft: '3%', paddingTop: '3%' }}>
+                    <div
+                      style={{ backgroundColor: group.id === groupSelected ? (!darkMode ? '#c5e2ed' : '#144e80') : '' }}
+                      className={darkMode ? feedStyles.sidebarcontent : feedStyles.sidebarcontentlight}
+                      key={group.id}
+                      onClick={() => (window.location.href = `/chat/${group.id}`)}
+                    >
+                      {group.members[0].id === user?.id ? (
+                        <div style={{ marginTop: '3%', marginLeft: '3%', paddingTop: '3%' }}>
+                          <img
+                            src={group.members[1].profile_picture}
+                            alt=""
+                            style={{ width: 54, height: 54, borderRadius: 125 }}
+                          />
+                        </div>
+                      ) : (
+                        <div style={{ marginTop: '3%', marginLeft: '3%', paddingTop: '3%' }}>
+                          <img
+                            src={group.members[0].profile_picture}
+                            alt=""
+                            style={{ width: 54, height: 54, borderRadius: 125 }}
+                          />
+                        </div>
+                      )}
+
+                      <p
+                        style={{
+                          fontWeight: groupSelected === group.id ? 'bold' : 'normal',
+                          fontFamily: 'Lato',
+                          color: darkMode ? '#fff' : '#000',
+                          position: 'relative',
+                          bottom: 50,
+                          left: 75,
+                        }}
+                        className={feedStyles.groupName}
+                      >
+                        {group.name}
+                      </p>
+                    </div>
+                  </Skeleton>
+                );
+              } else if (group.members.length > 2) {
+                const restOfPeople = group.members.length - 2;
+                return (
+                  <Skeleton
+                    style={{ borderRadius: 15, position: 'relative', width: 310, left: 5 }}
+                    isLoaded={!searchLoading}
+                  >
+                    <div
+                      style={{ backgroundColor: group.id === groupSelected ? (!darkMode ? '#c5e2ed' : '#144e80') : '' }}
+                      className={darkMode ? feedStyles.sidebarcontent : feedStyles.sidebarcontentlight}
+                      key={group.id}
+                      onClick={() => (window.location.href = `/chat/${group.id}`)}
+                    >
+                      <div style={{ marginTop: '3%', marginLeft: '6%', paddingTop: '3%' }}>
                         <img
                           src={group.members[0].profile_picture}
                           alt=""
-                          style={{ width: 54, height: 54, borderRadius: 125 }}
+                          style={{ width: 30, height: 30, borderRadius: 25, position: 'relative', top: 3 }}
                         />
                       </div>
-                    )}
 
-                    <p
-                      style={{
-                        fontWeight: groupSelected === group.id ? 'bold' : 'normal',
-                        fontFamily: 'Lato',
-                        color: darkMode ? '#fff' : '#000',
-                        position: 'relative',
-                        bottom: 50,
-                        left: 75,
-                      }}
-                      className={feedStyles.groupName}
-                    >
-                      {group.name}
-                    </p>
-                  </div>
-                </Skeleton>
-              );
-            } else if (group.members.length > 2) {
-              const restOfPeople = group.members.length - 2;
-              return (
-                <Skeleton style={{ borderRadius: 15, position: 'relative', width: 310, left: 5 }} isLoaded={!loading}>
-                  <div
-                    style={{ backgroundColor: group.id === groupSelected ? (!darkMode ? '#c5e2ed' : '#144e80') : '' }}
-                    className={darkMode ? feedStyles.sidebarcontent : feedStyles.sidebarcontentlight}
-                    key={group.id}
-                    onClick={() => (window.location.href = `/chat/${group.id}`)}
-                  >
-                    <div style={{ marginTop: '3%', marginLeft: '6%', paddingTop: '3%' }}>
-                      <img
-                        src={group.members[0].profile_picture}
-                        alt=""
-                        style={{ width: 30, height: 30, borderRadius: 25, position: 'relative', top: 3 }}
-                      />
+                      <div style={{ marginLeft: 3 }}>
+                        <img
+                          src={group.members[1].profile_picture}
+                          alt=""
+                          style={{ width: 30, height: 30, borderRadius: 25 }}
+                        />
+                      </div>
+                      <div className={`${feedStyles.dot} text-center`}>+{restOfPeople}</div>
+
+                      <p
+                        style={{
+                          fontWeight: groupSelected === group.id ? 'bold' : 'normal',
+                          fontFamily: 'Lato',
+                          color: darkMode ? '#fff' : '#000',
+                          position: 'relative',
+                          bottom: 85,
+                          left: 65,
+                        }}
+                      >
+                        {group.name}
+                      </p>
                     </div>
-
-                    <div style={{ marginLeft: 3 }}>
-                      <img
-                        src={group.members[1].profile_picture}
-                        alt=""
-                        style={{ width: 30, height: 30, borderRadius: 25 }}
-                      />
-                    </div>
-                    <div className={`${feedStyles.dot} text-center`}>+{restOfPeople}</div>
-
-                    <p
-                      style={{
-                        fontWeight: groupSelected === group.id ? 'bold' : 'normal',
-                        fontFamily: 'Lato',
-                        color: darkMode ? '#fff' : '#000',
-                        position: 'relative',
-                        bottom: 85,
-                        left: 65,
-                      }}
-                    >
-                      {group.name}
-                    </p>
-                  </div>
-                </Skeleton>
-              );
-            }
-          })}
+                  </Skeleton>
+                );
+              }
+            })}
         </div>
         <div
           className={feedStyles.profile}
@@ -673,7 +707,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
               style={{
                 fontSize: 18,
                 bottom: -5,
-                left: -15,
+                left: user && user!.email!.length >= 24 ? -10 : -15,
                 fontFamily: 'Lato',
                 position: 'relative',
                 color: darkMode ? '#fff' : '#000',
@@ -716,15 +750,16 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
             >
               <InputGroup size="lg" style={{ width: '50%', top: -100, height: 60, left: 610 }}>
                 <Textarea
-                  placeholder="Type a message..."
+                  placeholder="Send a message..."
                   style={{
                     color: darkMode ? '#fff' : '#000',
                     borderRadius: 100,
                     paddingRight: 100,
                     backgroundColor: darkMode ? '#2c2c2c' : '#F4F4F4',
                     minHeight: 10,
-                    lineHeight: 1.6,
+                    lineHeight: 1.8,
                   }}
+                  resize="none"
                   value={messageVal}
                   _placeholder={{ color: darkMode ? '#fff' : '#7c7c82' }}
                   onKeyPress={async (e) => {

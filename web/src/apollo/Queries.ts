@@ -73,3 +73,19 @@ export const GET_GROUP_NAME = gql`
     }
   }
 `;
+
+export const SEARCH_GROUPS = gql`
+  query SearchGroups($query: String, $authorid: String) {
+    SearchGroups(query: $query, authorid: $authorid) {
+      members {
+        username
+        profile_picture
+        email
+        id
+        online
+      }
+      name
+      id
+    }
+  }
+`;

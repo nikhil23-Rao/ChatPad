@@ -3,7 +3,7 @@ import jwtDecode from 'jwt-decode';
 import { useSession } from 'next-auth/client';
 import feedStyles from '../styles/feed.module.css';
 import client from '@/../apollo-client';
-import { GET_CHAT_PATHS, GET_GROUPS, GET_INITIAL_MESSAGES, GET_USER_ID } from '../apollo/Queries';
+import { GET_CHAT_PATHS, GET_GROUPS, GET_INITIAL_MESSAGES, GET_USER_ID, SEARCH_GROUPS } from '../apollo/Queries';
 import { Search } from '../components/Search';
 import { useMutation, useQuery, useSubscription } from '@apollo/client';
 import { SWITCH_ONLINE, UPDATE_TIME } from '@/apollo/Mutations';
@@ -18,6 +18,7 @@ interface FeedProps {}
 
 const Feed: React.FC<FeedProps> = ({}) => {
   const [groupSelected, setGroupSelected] = useState('');
+  const [query, setQuery] = useState('');
   const [visible, setVisible] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
   const [closed, setClosed] = useState(false);
@@ -81,6 +82,9 @@ const Feed: React.FC<FeedProps> = ({}) => {
   };
 
   const { data, loading } = useQuery(GET_GROUPS, { variables: { authorid: user?.id } });
+  const { data: searchData, loading: searchLoading } = useQuery(SEARCH_GROUPS, {
+    variables: { query, authorid: user?.id },
+  });
   const { data: messageData, loading: messageLoading } = useQuery(GET_INITIAL_MESSAGES, {
     variables: { groupid: groupSelected },
   });
@@ -218,104 +222,116 @@ const Feed: React.FC<FeedProps> = ({}) => {
           >
             Chats
           </h1>
-          <Input
-            placeholder="Search for chats..."
-            style={{
-              width: '80%',
-              left: 45,
-              position: 'relative',
-              borderRadius: 100,
-              borderColor: darkMode ? '#fff' : '#000',
-              color: darkMode ? '#fff' : '#000',
-              top: 7,
-            }}
-          />
-          {data.GetGroups.map((group) => {
-            if (group.members.length === 2) {
-              return (
-                <Skeleton style={{ borderRadius: 15, position: 'relative', width: 310, left: 5 }} isLoaded={!loading}>
-                  <div
-                    className={darkMode ? feedStyles.sidebarcontent : feedStyles.sidebarcontentlight}
-                    key={group.id}
-                    onClick={() => (window.location.href = `/chat/${group.id}`)}
+          <div className="search-box">
+            <input
+              className="search-txt"
+              type="text"
+              name=""
+              placeholder="Search for chats..."
+              value={query}
+              onChange={(e) => setQuery(e.currentTarget.value)}
+            />
+            <a className="search-btn">
+              <i className="fa fa-search" style={{ color: '#4097ff' }}></i>
+            </a>
+          </div>
+          <br />
+          <br />
+          <br />
+          {searchLoading && <h1>L:OADING</h1>}
+          {searchData &&
+            searchData.SearchGroups.map((group) => {
+              if (group.members.length === 2) {
+                return (
+                  <Skeleton
+                    style={{ borderRadius: 15, position: 'relative', width: 310, left: 5 }}
+                    isLoaded={!searchLoading}
                   >
-                    {group.members[0].id === user?.id ? (
-                      <div style={{ marginTop: '3%', marginLeft: '3%', paddingTop: '3%' }}>
-                        <img
-                          src={group.members[1].profile_picture}
-                          alt=""
-                          style={{ width: 54, height: 54, borderRadius: 125 }}
-                        />
-                      </div>
-                    ) : (
-                      <div style={{ marginTop: '3%', marginLeft: '3%', paddingTop: '3%' }}>
+                    <div
+                      className={darkMode ? feedStyles.sidebarcontent : feedStyles.sidebarcontentlight}
+                      key={group.id}
+                      onClick={() => (window.location.href = `/chat/${group.id}`)}
+                    >
+                      {group.members[0].id === user?.id ? (
+                        <div style={{ marginTop: '3%', marginLeft: '3%', paddingTop: '3%' }}>
+                          <img
+                            src={group.members[1].profile_picture}
+                            alt=""
+                            style={{ width: 54, height: 54, borderRadius: 125 }}
+                          />
+                        </div>
+                      ) : (
+                        <div style={{ marginTop: '3%', marginLeft: '3%', paddingTop: '3%' }}>
+                          <img
+                            src={group.members[0].profile_picture}
+                            alt=""
+                            style={{ width: 54, height: 54, borderRadius: 125 }}
+                          />
+                        </div>
+                      )}
+
+                      <p
+                        style={{
+                          fontWeight: groupSelected === group.id ? 'bold' : 'normal',
+                          fontFamily: 'Lato',
+                          color: darkMode ? '#fff' : '#000',
+                          position: 'relative',
+                          bottom: 50,
+                          left: 75,
+                        }}
+                        className={feedStyles.groupName}
+                      >
+                        {group.name}
+                      </p>
+                    </div>
+                  </Skeleton>
+                );
+              } else if (group.members.length > 2) {
+                const restOfPeople = group.members.length - 2;
+                return (
+                  <Skeleton
+                    style={{ borderRadius: 15, position: 'relative', width: 310, left: 5 }}
+                    isLoaded={!searchLoading}
+                  >
+                    <div
+                      className={darkMode ? feedStyles.sidebarcontent : feedStyles.sidebarcontentlight}
+                      key={group.id}
+                      onClick={() => (window.location.href = `/chat/${group.id}`)}
+                    >
+                      <div style={{ marginTop: '3%', marginLeft: '6%', paddingTop: '3%' }}>
                         <img
                           src={group.members[0].profile_picture}
                           alt=""
-                          style={{ width: 54, height: 54, borderRadius: 125 }}
+                          style={{ width: 30, height: 30, borderRadius: 25, position: 'relative', top: 3 }}
                         />
                       </div>
-                    )}
 
-                    <p
-                      style={{
-                        fontWeight: groupSelected === group.id ? 'bold' : 'normal',
-                        fontFamily: 'Lato',
-                        color: darkMode ? '#fff' : '#000',
-                        position: 'relative',
-                        bottom: 50,
-                        left: 75,
-                      }}
-                      className={feedStyles.groupName}
-                    >
-                      {group.name}
-                    </p>
-                  </div>
-                </Skeleton>
-              );
-            } else if (group.members.length > 2) {
-              const restOfPeople = group.members.length - 2;
-              return (
-                <Skeleton style={{ borderRadius: 15, position: 'relative', width: 310, left: 5 }} isLoaded={!loading}>
-                  <div
-                    className={darkMode ? feedStyles.sidebarcontent : feedStyles.sidebarcontentlight}
-                    key={group.id}
-                    onClick={() => (window.location.href = `/chat/${group.id}`)}
-                  >
-                    <div style={{ marginTop: '3%', marginLeft: '6%', paddingTop: '3%' }}>
-                      <img
-                        src={group.members[0].profile_picture}
-                        alt=""
-                        style={{ width: 30, height: 30, borderRadius: 25, position: 'relative', top: 3 }}
-                      />
+                      <div style={{ marginLeft: 3 }}>
+                        <img
+                          src={group.members[1].profile_picture}
+                          alt=""
+                          style={{ width: 30, height: 30, borderRadius: 25 }}
+                        />
+                      </div>
+                      <div className={`${feedStyles.dot} text-center`}>+{restOfPeople}</div>
+
+                      <p
+                        style={{
+                          fontWeight: groupSelected === group.id ? 'bold' : 'normal',
+                          fontFamily: 'Lato',
+                          color: darkMode ? '#fff' : '#000',
+                          position: 'relative',
+                          bottom: 85,
+                          left: 65,
+                        }}
+                      >
+                        {group.name}
+                      </p>
                     </div>
-
-                    <div style={{ marginLeft: 3 }}>
-                      <img
-                        src={group.members[1].profile_picture}
-                        alt=""
-                        style={{ width: 30, height: 30, borderRadius: 25 }}
-                      />
-                    </div>
-                    <div className={`${feedStyles.dot} text-center`}>+{restOfPeople}</div>
-
-                    <p
-                      style={{
-                        fontWeight: groupSelected === group.id ? 'bold' : 'normal',
-                        fontFamily: 'Lato',
-                        color: darkMode ? '#fff' : '#000',
-                        position: 'relative',
-                        bottom: 85,
-                        left: 65,
-                      }}
-                    >
-                      {group.name}
-                    </p>
-                  </div>
-                </Skeleton>
-              );
-            }
-          })}
+                  </Skeleton>
+                );
+              }
+            })}
         </div>
         <div
           className={feedStyles.profile}
