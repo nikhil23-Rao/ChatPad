@@ -339,7 +339,8 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                         ' minutes ago'
                       : Math.round((Date.now() - messages[messages.length - 1].time) / 60000) > 60 &&
                         Math.round((Date.now() - messages[messages.length - 1].time) / 60000) < 1440
-                      ? 'Last active at ' + messages[messages.length - 1].date[1]
+                      ? `Last active on ${messages[messages.length - 1].date[2]} at ` +
+                        messages[messages.length - 1].date[1]
                       : Math.round((Date.now() - messages[messages.length - 1].time) / 60000) > 1440 &&
                         Math.round((Date.now() - messages[messages.length - 1].time) / 60000) < 10080
                       ? 'Last active on ' +
