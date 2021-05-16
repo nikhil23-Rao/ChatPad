@@ -53,6 +53,18 @@ const Feed: React.FC<FeedProps> = ({}) => {
       };
       setDarkMode(currentUser.dark_theme === 'true' ? true : false);
       setUser(currentUser);
+      await SwitchOnline({ variables: { authorid: currentUser.id, value: true } });
+      await SetChatOn({ variables: { authorid: currentUser.id, groupid: '' } });
+      window.addEventListener('beforeunload', function (e) {
+        SwitchOnline({ variables: { authorid: currentUser.id, value: false } });
+        var start = Date.now(),
+          now = start;
+        var delay = 100; // msec
+        while (now - start < delay) {
+          now = Date.now();
+        }
+        delete e['returnValue'];
+      });
     }
     if (token) {
       const currentUser: {
@@ -104,15 +116,6 @@ const Feed: React.FC<FeedProps> = ({}) => {
   }, [session, groupSelected, messageData, realtimeData, user?.dark_theme]);
   const [UpdateTime] = useMutation(UPDATE_TIME);
 
-  useEffect(() => {
-    if (user) {
-      SwitchOnline({ variables: { authorid: user?.id, value: true } });
-      window.onbeforeunload = () => {
-        SwitchOnline({ variables: { authorid: user?.id, value: false } });
-        SetChatOn({ variables: { authorid: user?.id, groupid: '' } });
-      };
-    }
-  }, [session, user, closed]);
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!session && !token) {

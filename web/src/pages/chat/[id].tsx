@@ -177,7 +177,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
         smooth: false,
         duration: 0,
       });
-    }, 500); // Load time
+    }, 1000); // Load time
   }, []);
 
   useEffect(() => {
