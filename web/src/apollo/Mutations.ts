@@ -75,8 +75,8 @@ export const UPDATE_TIME = gql`
 `;
 
 export const SWITCH_ONLINE = gql`
-  mutation SwitchOnline($authorid: String, $value: Boolean) {
-    SwitchOnline(authorid: $authorid, value: $value)
+  mutation SwitchOnline($authorid: String, $value: Boolean, $groupid: String) {
+    SwitchOnline(authorid: $authorid, value: $value, groupid: $groupid)
   }
 `;
 

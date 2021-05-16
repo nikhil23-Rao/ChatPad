@@ -106,6 +106,18 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
       };
       setDarkMode(currentUser.dark_theme === 'true' ? true : false);
       setUser(currentUser);
+      await SwitchOnline({ variables: { authorid: currentUser.id, value: true } });
+      await SetChatOn({ variables: { authorid: currentUser.id, groupid: groupSelected } });
+      window.addEventListener('beforeunload', function (e) {
+        SwitchOnline({ variables: { authorid: currentUser.id, value: false } });
+        var start = Date.now(),
+          now = start;
+        var delay = 100; // msec
+        while (now - start < delay) {
+          now = Date.now();
+        }
+        delete e['returnValue'];
+      });
     }
   };
 
@@ -119,7 +131,6 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
     variables: { query, authorid: user?.id },
   });
   const [SendMessage] = useMutation(SEND_MESSAGE);
-  const [UpdateTime] = useMutation(UPDATE_TIME);
   const { data: realtimeData } = useSubscription(GET_ALL_MESSAGES);
   const { data: GroupNameData, loading: GroupNameLoading } = useQuery(GET_GROUP_NAME, {
     variables: { groupid: groupSelected },
@@ -148,6 +159,16 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   const refetchOnline = async () => {
     await onlineRefetch({ groupid: groupSelected });
   };
+
+  const onTabClose = async () => {
+    if (user) {
+      console.log('REQUEST');
+    }
+  };
+
+  useEffect(() => {
+    onTabClose();
+  }, [user, session]);
 
   useEffect(() => {
     setTimeout(() => {
@@ -211,19 +232,6 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   var day = days[new Date().getDay()];
 
   today = mm + '/' + dd + '/' + yyyy;
-
-  useEffect(() => {
-    setTimeout(() => {
-      if (user) {
-        SwitchOnline({ variables: { authorid: user?.id, value: true } });
-        SetChatOn({ variables: { authorid: user?.id, groupid: groupSelected } });
-        window.onbeforeunload = () => {
-          SwitchOnline({ variables: { authorid: user?.id, value: false } });
-          SetChatOn({ variables: { authorid: user?.id, groupid: '' } });
-        };
-      }
-    }, 2000);
-  }, [session, user, closed]);
 
   if (loading || router.isFallback || onlineLoading)
     return (
