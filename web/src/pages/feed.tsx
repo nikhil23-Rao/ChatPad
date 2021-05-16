@@ -6,7 +6,7 @@ import client from '@/../apollo-client';
 import { GET_CHAT_PATHS, GET_GROUPS, GET_INITIAL_MESSAGES, GET_USER_ID, SEARCH_GROUPS } from '../apollo/Queries';
 import { Search } from '../components/Search';
 import { useMutation, useQuery, useSubscription } from '@apollo/client';
-import { SWITCH_ONLINE, UPDATE_TIME } from '@/apollo/Mutations';
+import { SET_CHAT_ON, SWITCH_ONLINE, UPDATE_TIME } from '@/apollo/Mutations';
 import Head from 'next/head';
 import { GET_ALL_MESSAGES } from '@/apollo/Subscriptions';
 import { useRouter } from 'next/dist/client/router';
@@ -90,6 +90,7 @@ const Feed: React.FC<FeedProps> = ({}) => {
   });
   const { data: realtimeData } = useSubscription(GET_ALL_MESSAGES);
   const [SwitchOnline] = useMutation(SWITCH_ONLINE);
+  const [SetChatOn] = useMutation(SET_CHAT_ON);
 
   useEffect(() => {
     if (user && user.dark_theme === 'true') {
@@ -102,22 +103,15 @@ const Feed: React.FC<FeedProps> = ({}) => {
     }
   }, [session, groupSelected, messageData, realtimeData, user?.dark_theme]);
   const [UpdateTime] = useMutation(UPDATE_TIME);
+
   useEffect(() => {
-    const clear = setInterval(() => {
-      UpdateTime();
-    }, 60000);
-
     if (user) {
-      window.addEventListener('beforeunload', (ev) => {
-        setClosed(true);
-      });
-      if (closed === true) {
-        SwitchOnline({ variables: { authorid: user?.id, value: false } });
-      }
       SwitchOnline({ variables: { authorid: user?.id, value: true } });
+      window.onbeforeunload = () => {
+        SwitchOnline({ variables: { authorid: user?.id, value: false } });
+        SetChatOn({ variables: { authorid: user?.id, groupid: '' } });
+      };
     }
-
-    return () => clearInterval(clear);
   }, [session, user, closed]);
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -262,6 +256,11 @@ const Feed: React.FC<FeedProps> = ({}) => {
                             alt=""
                             style={{ width: 54, height: 54, borderRadius: 125 }}
                           />
+                          {group.members[1].online ? (
+                            <div className="onlinedot" style={{ position: 'absolute', bottom: 19, left: 48 }} />
+                          ) : (
+                            ''
+                          )}
                         </div>
                       ) : (
                         <div style={{ marginTop: '3%', marginLeft: '3%', paddingTop: '3%' }}>
@@ -270,6 +269,11 @@ const Feed: React.FC<FeedProps> = ({}) => {
                             alt=""
                             style={{ width: 54, height: 54, borderRadius: 125 }}
                           />
+                          {group.members[0].online ? (
+                            <div className="onlinedot" style={{ position: 'absolute', bottom: 19, left: 48 }} />
+                          ) : (
+                            ''
+                          )}
                         </div>
                       )}
 

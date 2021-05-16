@@ -10,8 +10,6 @@ import client from '@/../apollo-client';
 import { useRouter } from 'next/dist/client/router';
 import { useSession } from 'next-auth/client';
 import { GET_USER_ID } from '@/apollo/Queries';
-import jwtDecode from 'jwt-decode';
-import LoadingBar from 'react-top-loading-bar';
 
 export const Search = () => {
   const [session] = useSession();
@@ -26,6 +24,8 @@ export const Search = () => {
     profile_picture: string | null | undefined;
     dark_theme: string;
     iat?: string | null | undefined;
+    online: boolean | string | undefined;
+    chaton: string | null | undefined | any;
   } | null>(null);
   const toast = useToast();
   const [loading, setLoading] = useState(false);
@@ -85,6 +85,7 @@ export const Search = () => {
         email: (selectedItems[item] as any).email,
         profile_picture: (selectedItems[item] as any).profile_picture,
         online: (selectedItems[item] as any).online,
+        chaton: (selectedItems[item] as any).chaton,
       } as never);
     }
     members.push({
@@ -92,6 +93,8 @@ export const Search = () => {
       id: user?.id,
       email: user?.email,
       profile_picture: user?.profile_picture,
+      online: true,
+      chaton: user?.chaton,
     } as never);
     return members;
   };
@@ -100,36 +103,30 @@ export const Search = () => {
     const token = localStorage.getItem('token');
     if (session && !token) {
       const result = await client.query({ query: GET_USER_ID, variables: { email: session.user.email } });
+      console.log('RES', user);
       const currentUser: {
         username: string;
         email: string;
         id: string;
         profile_picture: string;
         dark_theme: string;
+        online: boolean;
+        chaton: string | any;
       } = {
         username: session.user.name!,
         email: session.user.email!,
         id: result.data.GetUserId[0],
         dark_theme: result.data.GetUserId[1],
+        online: true,
         profile_picture: session.user.image!,
+        chaton: result.data.GetUserId[3],
       };
-      setUser(currentUser);
-    }
-    if (token) {
-      const currentUser: {
-        username: string;
-        email: string;
-        id: string;
-        profile_picture: string;
-        iat: string;
-        oauth: boolean;
-        dark_theme: string;
-      } = jwtDecode(token!);
       setUser(currentUser);
     }
   };
 
   useEffect(() => {
+    console.log('ITEMS', selectedItems);
     if (selectedItems.length > 0) {
       setError(false);
     }
@@ -137,6 +134,7 @@ export const Search = () => {
       setNameError(false);
     }
     GetUser();
+    console.log('ROUTER', router);
   }, [selectedItems, error, nameError, session]);
 
   return (

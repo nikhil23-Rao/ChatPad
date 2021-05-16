@@ -8,12 +8,13 @@ import {
   GET_GROUPS,
   GET_GROUP_NAME,
   GET_INITIAL_MESSAGES,
+  GET_MEMBERS,
   GET_USER_ID,
   SEARCH_GROUPS,
 } from '../../apollo/Queries';
 import { Search } from '../../components/Search';
 import { useMutation, useQuery, useSubscription } from '@apollo/client';
-import { SEND_MESSAGE, SWITCH_ONLINE, TOGGLE_THEME, UPDATE_TIME } from '@/apollo/Mutations';
+import { SEND_MESSAGE, SET_CHAT_ON, SWITCH_ONLINE, TOGGLE_THEME, UPDATE_TIME } from '@/apollo/Mutations';
 import { generateId } from '@/utils/GenerateId';
 import Head from 'next/head';
 import { GET_ALL_MESSAGES } from '@/apollo/Subscriptions';
@@ -86,8 +87,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   } | null>(null);
 
   const GetUser = async () => {
-    const token = localStorage.getItem('token');
-    if (session && !token) {
+    if (session) {
       const result = await client.query({ query: GET_USER_ID, variables: { email: session.user.email } });
       const currentUser: {
         username: string;
@@ -95,26 +95,15 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
         id: string;
         profile_picture: string;
         dark_theme: string;
+        online: boolean;
       } = {
         username: session.user.name!,
         email: session.user.email!,
         id: result.data.GetUserId[0],
         dark_theme: result.data.GetUserId[1],
+        online: true,
         profile_picture: session.user.image!,
       };
-      setDarkMode(currentUser.dark_theme === 'true' ? true : false);
-      setUser(currentUser);
-    }
-    if (token) {
-      const currentUser: {
-        username: string;
-        email: string;
-        id: string;
-        profile_picture: string;
-        iat: string;
-        oauth: boolean;
-        dark_theme: string;
-      } = jwtDecode(token!);
       setDarkMode(currentUser.dark_theme === 'true' ? true : false);
       setUser(currentUser);
     }
@@ -126,7 +115,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   const { data: messageData, loading: messageLoading, refetch } = useQuery(GET_INITIAL_MESSAGES, {
     variables: { groupid: groupSelected },
   });
-  const { data: searchData, loading: searchLoading } = useQuery(SEARCH_GROUPS, {
+  const { data: searchData, loading: searchLoading, refetch: searchDataRefetch } = useQuery(SEARCH_GROUPS, {
     variables: { query, authorid: user?.id },
   });
   const [SendMessage] = useMutation(SEND_MESSAGE);
@@ -135,7 +124,13 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   const { data: GroupNameData, loading: GroupNameLoading } = useQuery(GET_GROUP_NAME, {
     variables: { groupid: groupSelected },
   });
+  const { data: onlineData, loading: onlineLoading, refetch: onlineRefetch } = useQuery(GET_MEMBERS, {
+    variables: {
+      groupid: groupSelected,
+    },
+  });
   const [SwitchOnline] = useMutation(SWITCH_ONLINE);
+  const [SetChatOn] = useMutation(SET_CHAT_ON);
 
   const playSound = () => {
     const audio: any = document.getElementById('sound');
@@ -149,6 +144,10 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
       setMessages([...messageData.GetInitialMessages]);
     }
   }, [messageData]);
+
+  const refetchOnline = async () => {
+    await onlineRefetch({ groupid: groupSelected });
+  };
 
   useEffect(() => {
     setTimeout(() => {
@@ -173,13 +172,18 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
       document.body.style.zoom = '80%';
     }
 
-    setTimeout(() => {
-      animateScroll.scrollToBottom({
-        containerId: 'chatDiv',
-        smooth: false,
-        duration: 0,
-      });
-    }, 1); // Load time
+    refetchOnline();
+
+    const el = document.getElementById('chatDiv');
+    if (el && el.scrollHeight - el.scrollTop - el.clientHeight < 1) {
+      setTimeout(() => {
+        animateScroll.scrollToBottom({
+          containerId: 'chatDiv',
+          smooth: false,
+          duration: 0,
+        });
+      }, 1); // Load time
+    }
 
     if (realtimeData && messages.includes(realtimeData.GetAllMessages[realtimeData.GetAllMessages.length - 1])) return;
     if (
@@ -198,27 +202,30 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
     GetUser();
   }, [session, groupSelected, messageData, realtimeData, user?.dark_theme]);
 
+  var today: any = new Date();
+  var dd = String(today.getDate()).padStart(2, '0');
+  var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+  var yyyy = today.getFullYear();
+  var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+  var day = days[new Date().getDay()];
+
+  today = mm + '/' + dd + '/' + yyyy;
+
   useEffect(() => {
-    const clear = setInterval(() => {
-      UpdateTime();
-    }, 60000);
-
-    if (user) {
-      window.addEventListener('beforeunload', (ev) => {
-        setClosed(true);
-      });
-
-      SwitchOnline({ variables: { authorid: user?.id, value: true } });
-    }
-
-    if (closed === true) {
-      SwitchOnline({ variables: { authorid: user?.id, value: false } });
-    }
-
-    return () => clearInterval(clear);
+    setTimeout(() => {
+      if (user) {
+        SwitchOnline({ variables: { authorid: user?.id, value: true } });
+        SetChatOn({ variables: { authorid: user?.id, groupid: groupSelected } });
+        window.onbeforeunload = () => {
+          SwitchOnline({ variables: { authorid: user?.id, value: false } });
+          SetChatOn({ variables: { authorid: user?.id, groupid: '' } });
+        };
+      }
+    }, 2000);
   }, [session, user, closed]);
 
-  if (loading || router.isFallback)
+  if (loading || router.isFallback || onlineLoading)
     return (
       <div className={feedStyles.centered}>
         <Spinner thickness="4px" speed="0.65s" emptyColor="gray.200" color="blue.500" size="xl" />
@@ -352,8 +359,11 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                         ' minutes ago'
                       : Math.round((Date.now() - messages[messages.length - 1].time) / 60000) > 60 &&
                         Math.round((Date.now() - messages[messages.length - 1].time) / 60000) < 1440
-                      ? `Last active on ${messages[messages.length - 1].date[2]} at ` +
-                        messages[messages.length - 1].date[1]
+                      ? `Last active ${
+                          day === messages[messages.length - 1].date[2]
+                            ? 'today'
+                            : `on ${messages[messages.length - 1].date[2]}`
+                        } at ` + messages[messages.length - 1].date[1]
                       : Math.round((Date.now() - messages[messages.length - 1].time) / 60000) > 1440 &&
                         Math.round((Date.now() - messages[messages.length - 1].time) / 60000) < 10080
                       ? 'Last active on ' +
@@ -391,7 +401,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
             user &&
             messages.map((message) => {
               return (
-                <>
+                <React.Fragment key={message.messageid}>
                   <div>
                     <div
                       style={{
@@ -522,7 +532,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                       )}
                     </div>
                   </div>
-                </>
+                </React.Fragment>
               );
             })}
         </div>
@@ -608,6 +618,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                   <Skeleton
                     style={{ borderRadius: 15, position: 'relative', width: 310, left: 5 }}
                     isLoaded={!searchLoading}
+                    key={group.id}
                   >
                     <div
                       style={{ backgroundColor: group.id === groupSelected ? (!darkMode ? '#c5e2ed' : '#144e80') : '' }}
@@ -622,6 +633,11 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                             alt=""
                             style={{ width: 54, height: 54, borderRadius: 125 }}
                           />
+                          {group.members[1].online ? (
+                            <div className="onlinedot" style={{ position: 'absolute', bottom: 19, left: 48 }} />
+                          ) : (
+                            ''
+                          )}
                         </div>
                       ) : (
                         <div style={{ marginTop: '3%', marginLeft: '3%', paddingTop: '3%' }}>
@@ -630,6 +646,11 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                             alt=""
                             style={{ width: 54, height: 54, borderRadius: 125 }}
                           />
+                          {group.members[0].online ? (
+                            <div className="onlinedot" style={{ position: 'absolute', bottom: 19, left: 48 }} />
+                          ) : (
+                            ''
+                          )}
                         </div>
                       )}
 
@@ -655,6 +676,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                   <Skeleton
                     style={{ borderRadius: 15, position: 'relative', width: 310, left: 5 }}
                     isLoaded={!searchLoading}
+                    key={group.id}
                   >
                     <div
                       style={{ backgroundColor: group.id === groupSelected ? (!darkMode ? '#c5e2ed' : '#144e80') : '' }}
@@ -752,7 +774,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
             />
           </div>
         </div>
-        <div style={{ height: '20vh', backgroundColor: darkMode ? '#1c1c1c' : '#fff' }}></div>
+        <div style={{ height: '20vh', backgroundColor: darkMode ? '#1c1c1c' : '#fff', overflow: 'hidden' }}></div>
 
         {groupSelected !== '' && user ? (
           <div
@@ -767,7 +789,28 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                 position: 'relative',
               }}
             >
-              <InputGroup size="lg" style={{ width: '50%', top: -100, height: 60, left: 610 }}>
+              <InputGroup size="lg" style={{ width: '50%', top: -78, height: 60, left: 610 }}>
+                {onlineData &&
+                  onlineData.GetMembers.map((member) => {
+                    if (member.id !== user.id) {
+                      return (
+                        <div>
+                          <img
+                            src={member.profile_picture}
+                            style={{
+                              borderRadius: 100,
+                              width: 43,
+                              position: 'relative',
+                              bottom: 45,
+                              left: onlineData.GetMembers.length > 2 ? '220%' : '150%',
+                              opacity: member.online && member.chaton === groupSelected ? 1 : 0.5,
+                            }}
+                            alt=""
+                          />
+                        </div>
+                      );
+                    }
+                  })}
                 <Textarea
                   placeholder="Send a message..."
                   style={{
@@ -782,15 +825,6 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                   value={messageVal}
                   _placeholder={{ color: darkMode ? '#fff' : '#7c7c82' }}
                   onKeyPress={async (e) => {
-                    var today: any = new Date();
-                    var dd = String(today.getDate()).padStart(2, '0');
-                    var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
-                    var yyyy = today.getFullYear();
-                    var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-
-                    var day = days[new Date().getDay()];
-
-                    today = mm + '/' + dd + '/' + yyyy;
                     if (e.shiftKey) return;
                     if (e.key === 'Enter') {
                       setMessageVal('');
@@ -818,7 +852,9 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                       });
                     }
                   }}
-                  onChange={(e) => setMessageVal(e.currentTarget.value)}
+                  onChange={(e) => {
+                    setMessageVal(e.currentTarget.value);
+                  }}
                   onClick={() => showEmoji && setShowEmoji(false)}
                 />
                 <InputRightElement

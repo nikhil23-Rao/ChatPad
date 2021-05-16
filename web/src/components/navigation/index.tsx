@@ -18,10 +18,6 @@ const secondaryLinks = [
     label: `Login`,
     href: `/login`,
   },
-  {
-    label: `Register`,
-    href: `/register`,
-  },
 ];
 
 const MenuButton = ({ toggleMenu, showMenu }: IMenuButton) => (

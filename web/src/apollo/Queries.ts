@@ -14,6 +14,7 @@ export const GET_ALL_USERS = gql`
       profile_picture
       id
       online
+      chaton
     }
   }
 `;
@@ -27,6 +28,7 @@ export const GET_GROUPS = gql`
         profile_picture
         id
         online
+        chaton
       }
       id
       name
@@ -67,6 +69,7 @@ export const GET_GROUP_NAME = gql`
         email
         id
         online
+        chaton
       }
       name
       id
@@ -83,9 +86,23 @@ export const SEARCH_GROUPS = gql`
         email
         id
         online
+        chaton
       }
       name
       id
+    }
+  }
+`;
+
+export const GET_MEMBERS = gql`
+  query GetMembers($groupid: String) {
+    GetMembers(groupid: $groupid) {
+      username
+      email
+      profile_picture
+      id
+      online
+      chaton
     }
   }
 `;
