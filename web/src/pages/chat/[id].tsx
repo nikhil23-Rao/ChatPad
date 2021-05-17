@@ -193,10 +193,23 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
       document.body.style.zoom = '80%';
     }
 
-    refetchOnline();
+    setInterval(() => {
+      if (document.visibilityState === 'hidden' && user) {
+        SetChatOn({ variables: { authorid: user.id, groupid: '' } });
+      }
+    }, 15000);
+    setInterval(() => {
+      if (document.visibilityState === 'visible' && user) {
+        SetChatOn({ variables: { authorid: user.id, groupid: groupSelected } });
+      }
+    }, 15000);
+
+    setInterval(() => {
+      refetchOnline();
+    }, 15000);
 
     const el = document.getElementById('chatDiv');
-    if (el && el.scrollHeight - el.scrollTop - el.clientHeight < 1) {
+    if (el && el.scrollHeight - el.scrollTop - el.clientHeight === 0) {
       setTimeout(() => {
         animateScroll.scrollToBottom({
           containerId: 'chatDiv',
@@ -221,7 +234,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
     setGroupSelected(currId);
 
     GetUser();
-  }, [session, groupSelected, messageData, realtimeData, user?.dark_theme]);
+  }, [session, groupSelected, messageData, realtimeData, user?.dark_theme, messageVal]);
 
   var today: any = new Date();
   var dd = String(today.getDate()).padStart(2, '0');
@@ -233,7 +246,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
 
   today = mm + '/' + dd + '/' + yyyy;
 
-  if (loading || router.isFallback || onlineLoading)
+  if (loading || router.isFallback)
     return (
       <div className={feedStyles.centered}>
         <Spinner thickness="4px" speed="0.65s" emptyColor="gray.200" color="blue.500" size="xl" />
@@ -396,8 +409,12 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
             height:
               (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
               (typeof window !== 'undefined' && window.screen.availWidth) < 1800
-                ? '90vh'
-                : '69vh', // Screen size monitor different height from laptop
+                ? messageVal.length <= 88
+                  ? '90vh'
+                  : '77vh'
+                : messageVal.length <= 88
+                ? '69vh'
+                : '63vh', // Screen size monitor different height from laptop
             overflowX: 'hidden',
             backgroundColor: darkMode ? '#1c1c1c' : '#fff',
           }}
@@ -782,7 +799,19 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
             />
           </div>
         </div>
-        <div style={{ height: '20vh', backgroundColor: darkMode ? '#1c1c1c' : '#fff', overflow: 'hidden' }}></div>
+        <div
+          style={{
+            height:
+              messageVal.length <= 88
+                ? '20vh'
+                : (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
+                  (typeof window !== 'undefined' && window.screen.availWidth) < 1800
+                ? '32.9vh'
+                : '25vh',
+            backgroundColor: darkMode ? '#1c1c1c' : '#fff',
+            overflow: 'hidden',
+          }}
+        ></div>
 
         {groupSelected !== '' && user ? (
           <div
@@ -807,9 +836,9 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                             src={member.profile_picture}
                             style={{
                               borderRadius: 100,
-                              width: 43,
+                              width: messageVal.length <= 88 ? 43 : 76,
                               position: 'relative',
-                              bottom: 45,
+                              bottom: messageVal.length <= 88 ? 45 : 128,
                               left: onlineData.GetMembers.length > 2 ? '220%' : '150%',
                               opacity: member.online && member.chaton === groupSelected ? 1 : 0.5,
                             }}
@@ -823,10 +852,12 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                   placeholder="Send a message..."
                   style={{
                     color: darkMode ? '#fff' : '#000',
-                    borderRadius: 100,
+                    borderRadius: 10,
                     paddingRight: 100,
+                    width: messageVal.length >= 88 ? 1500 : '',
                     backgroundColor: darkMode ? '#2c2c2c' : '#F4F4F4',
-                    minHeight: 10,
+                    minHeight: messageVal.length <= 88 ? 10 : 150,
+                    bottom: messageVal.length >= 88 ? 80 : 0,
                     lineHeight: 1.8,
                   }}
                   resize="none"
@@ -881,6 +912,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                         fontSize="large"
                         style={{
                           color: darkMode ? '#fff' : 'gray',
+                          marginBottom: messageVal.length >= 88 ? 50 : '',
                         }}
                       />
 
@@ -889,6 +921,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                         fontSize="large"
                         style={{
                           color: darkMode ? '#fff' : 'gray',
+                          marginBottom: messageVal.length >= 88 ? 50 : '',
                         }}
                       />
                     </>
