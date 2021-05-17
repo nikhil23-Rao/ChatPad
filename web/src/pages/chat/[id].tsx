@@ -234,7 +234,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
     setGroupSelected(currId);
 
     GetUser();
-  }, [session, groupSelected, messageData, realtimeData, user?.dark_theme, messageVal]);
+  }, [session, groupSelected, messageData, realtimeData, user?.dark_theme]);
 
   var today: any = new Date();
   var dd = String(today.getDate()).padStart(2, '0');
