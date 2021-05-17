@@ -208,16 +208,13 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
       refetchOnline();
     }, 15000);
 
-    const el = document.getElementById('chatDiv');
-    if (el && el.scrollHeight - el.scrollTop - el.clientHeight < 1) {
-      setTimeout(() => {
-        animateScroll.scrollToBottom({
-          containerId: 'chatDiv',
-          smooth: false,
-          duration: 0,
-        });
-      }, 1); // Load time
-    }
+    setTimeout(() => {
+      animateScroll.scrollToBottom({
+        containerId: 'chatDiv',
+        smooth: false,
+        duration: 0,
+      });
+    }, 1); // Load time
 
     if (realtimeData && messages.includes(realtimeData.GetAllMessages[realtimeData.GetAllMessages.length - 1])) return;
     if (
