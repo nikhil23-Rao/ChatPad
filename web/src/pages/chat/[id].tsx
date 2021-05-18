@@ -211,15 +211,15 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
     }, 15000);
 
     const el = document.getElementById('chatDiv');
-    if (el && el.scrollTop === el.scrollHeight - el.offsetHeight) {
-      setTimeout(() => {
-        animateScroll.scrollToBottom({
-          containerId: 'chatDiv',
-          smooth: false,
-          duration: 0,
-        });
-      }, 1); // Load time
-    }
+    // if (el && el.scrollTop === el.scrollHeight - el.offsetHeight) {
+    setTimeout(() => {
+      animateScroll.scrollToBottom({
+        containerId: 'chatDiv',
+        smooth: false,
+        duration: 0,
+      });
+    }, 1); // Load time
+    // }
 
     if (realtimeData && messages.includes(realtimeData.GetAllMessages[realtimeData.GetAllMessages.length - 1])) return;
     if (
