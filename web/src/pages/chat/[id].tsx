@@ -870,9 +870,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                   _placeholder={{ color: darkMode ? '#fff' : '#7c7c82' }}
                   onKeyPress={async (e) => {
                     if (e.shiftKey) {
-                      return setMessageVal(
-                        '                                                                                                                                                                                                              ',
-                      );
+                      return;
                     }
                     if (e.key === 'Enter') {
                       setMessageVal('');
