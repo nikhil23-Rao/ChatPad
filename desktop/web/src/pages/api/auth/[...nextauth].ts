@@ -1,7 +1,7 @@
 import client from '@/../apollo-client';
 import { LOGIN, REGISTER } from '@/apollo/Mutations';
 import { GetGithubEmail } from '@/auth/GetGithubEmail';
-import { generateId } from '@/utils/GenerateId';
+import { generateId } from '@/../utils/GenerateId';
 import { useToast } from '@chakra-ui/toast';
 import NextAuth from 'next-auth';
 import Providers from 'next-auth/providers';
@@ -23,11 +23,11 @@ export default NextAuth({
   pages: {
     signIn: '/auth/signin',
     signOut: '/auth/signout',
-    error: '/register-error',
     verifyRequest: '/auth/verify-request',
     newUser: null,
   },
 
+  debug: true,
   callbacks: {
     signIn: async (profile, account): Promise<any> => {
       await GetGithubEmail(profile, account);
@@ -43,6 +43,7 @@ export default NextAuth({
             oauth: true,
           },
         });
+        return true;
       } catch (err) {
         console.log(err);
         if (!err.message.includes('Account')) {
@@ -52,6 +53,7 @@ export default NextAuth({
               email: profile.email,
             },
           });
+          return true;
         }
       }
     },

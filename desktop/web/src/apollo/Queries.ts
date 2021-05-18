@@ -13,6 +13,8 @@ export const GET_ALL_USERS = gql`
       email
       profile_picture
       id
+      online
+      chaton
     }
   }
 `;
@@ -25,6 +27,8 @@ export const GET_GROUPS = gql`
         email
         profile_picture
         id
+        online
+        chaton
       }
       id
       name
@@ -43,6 +47,9 @@ export const GET_INITIAL_MESSAGES = gql`
         profile_picture
         id
       }
+      image
+      time
+      date
     }
   }
 `;
@@ -61,9 +68,41 @@ export const GET_GROUP_NAME = gql`
         profile_picture
         email
         id
+        online
+        chaton
       }
       name
       id
+    }
+  }
+`;
+
+export const SEARCH_GROUPS = gql`
+  query SearchGroups($query: String, $authorid: String) {
+    SearchGroups(query: $query, authorid: $authorid) {
+      members {
+        username
+        profile_picture
+        email
+        id
+        online
+        chaton
+      }
+      name
+      id
+    }
+  }
+`;
+
+export const GET_MEMBERS = gql`
+  query GetMembers($groupid: String) {
+    GetMembers(groupid: $groupid) {
+      username
+      email
+      profile_picture
+      id
+      online
+      chaton
     }
   }
 `;

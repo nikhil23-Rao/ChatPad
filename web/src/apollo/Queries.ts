@@ -37,8 +37,8 @@ export const GET_GROUPS = gql`
 `;
 
 export const GET_INITIAL_MESSAGES = gql`
-  query GetInitialMessages($groupid: String) {
-    GetInitialMessages(groupid: $groupid) {
+  query GetInitialMessages($groupid: String, $limit: Int, $offset: Int) {
+    GetInitialMessages(groupid: $groupid, limit: $limit, offset: $offset) {
       body
       messageid
       author {

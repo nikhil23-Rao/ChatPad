@@ -5,7 +5,7 @@ import { Button, Input, useToast } from '@chakra-ui/react';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 import { Avatar, Chip } from '@material-ui/core';
 import { CREATE_GROUP } from '@/apollo/Mutations';
-import { generateId } from '@/utils/GenerateId';
+import { generateId } from '@/../utils/GenerateId';
 import client from '@/../apollo-client';
 import { useRouter } from 'next/dist/client/router';
 import { useSession } from 'next-auth/client';

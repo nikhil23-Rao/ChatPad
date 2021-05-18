@@ -1,7 +1,7 @@
 import client from '@/../apollo-client';
 import { LOGIN, REGISTER } from '@/apollo/Mutations';
 import { GetGithubEmail } from '@/auth/GetGithubEmail';
-import { generateId } from '@/utils/GenerateId';
+import { generateId } from '@/../utils/GenerateId';
 import { useToast } from '@chakra-ui/toast';
 import NextAuth from 'next-auth';
 import Providers from 'next-auth/providers';

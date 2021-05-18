@@ -59,7 +59,7 @@ const Feed: React.FC<FeedProps> = ({}) => {
         SwitchOnline({ variables: { authorid: currentUser.id, value: false } });
         var start = Date.now(),
           now = start;
-        var delay = 100; // msec
+        var delay = 60; // msec
         while (now - start < delay) {
           now = Date.now();
         }
@@ -353,14 +353,15 @@ const Feed: React.FC<FeedProps> = ({}) => {
         >
           <div style={{ position: 'fixed', zIndex: 1, left: 74, top: 70 }} className="onlinedot"></div>
 
-          <div>
+          <div style={{ marginLeft: 120, marginTop: 17 }}>
             <h1
               className={tw('text-primary-100 font-bold')}
               style={{
+                textAlign: 'left',
+                display: 'inline',
                 color: darkMode ? '#fff' : '#000',
                 fontSize: 22,
                 bottom: -5,
-                left: -60,
                 fontFamily: 'Lato',
                 position: 'relative',
                 marginTop: 19,
@@ -368,18 +369,20 @@ const Feed: React.FC<FeedProps> = ({}) => {
             >
               {user && user.username}
             </h1>
-            <h1
-              style={{
-                fontSize: 18,
-                bottom: -5,
-                left: -15,
-                fontFamily: 'Lato',
-                position: 'relative',
-                color: darkMode ? '#fff' : '#000',
-              }}
-            >
-              {user && user.email}
-            </h1>
+            <div>
+              <h1
+                style={{
+                  fontSize: 18,
+                  bottom: -3,
+                  display: 'inline-block',
+                  fontFamily: 'Lato',
+                  position: 'relative',
+                  color: darkMode ? '#fff' : '#000',
+                }}
+              >
+                {user && user.email}
+              </h1>
+            </div>
           </div>
           <div style={{ cursor: 'pointer' }}>
             <img

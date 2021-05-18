@@ -11,7 +11,10 @@ export const GET_ALL_MESSAGES = gql`
         profile_picture
         id
       }
+      image
       groupid
+      time
+      date
     }
   }
 `;

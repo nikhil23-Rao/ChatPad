@@ -18,10 +18,6 @@ const secondaryLinks = [
     label: `Login`,
     href: `/login`,
   },
-  {
-    label: `Register`,
-    href: `/register`,
-  },
 ];
 
 const MenuButton = ({ toggleMenu, showMenu }: IMenuButton) => (
@@ -98,11 +94,8 @@ const Navigation = () => {
           </div>
           <div className={tw(`hidden md:block`)}>
             <div className={tw(`ml-4 flex items-center md:ml-6`)}>
-              <Button modifier="border-0 mr-2" onClick={() => router.push('/login')}>
-                Login
-              </Button>
-              <Button primary onClick={() => router.push('/register')}>
-                Register
+              <Button primary onClick={() => router.push('/login')}>
+                Get Started
               </Button>
             </div>
           </div>

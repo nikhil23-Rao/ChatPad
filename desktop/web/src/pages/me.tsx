@@ -1,20 +1,26 @@
 import client from '@/../apollo-client';
+import { Theme } from '@/../context/theme';
 import { GET_USER_ID } from '@/apollo/Queries';
-import jwtDecode from 'jwt-decode';
-import { useSession } from 'next-auth/client';
+import { signOut, useSession } from 'next-auth/client';
 import React, { useContext, useEffect, useState } from 'react';
-import meStyles from '../styles/me.module.css';
 import { Accordion, AccordionDetails, AccordionSummary } from '@material-ui/core';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { useMutation } from '@apollo/client';
-import { TOGGLE_THEME } from '@/apollo/Mutations';
+import { SWITCH_ONLINE, TOGGLE_THEME, UPDATE_TIME } from '@/apollo/Mutations';
+import LoadingBar from 'react-top-loading-bar';
+import { Button, Spinner } from '@chakra-ui/react';
+import Link from 'next/link';
+import feedStyles from '../styles/feed.module.css';
 
 interface MeProps {}
 
 const Me: React.FC<MeProps> = ({}) => {
   const [session] = useSession();
   const [darkModeSelected, setDarkModeSelected] = useState(false);
+  const [closed, setClosed] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
   const [lightModeSelected, setLightModeSelected] = useState(false);
+  const [left, setLeft] = useState<string | number>('28.75rem');
   const [user, setUser] = useState<{
     username: string | null | undefined;
     email: string | null | undefined;
@@ -23,9 +29,9 @@ const Me: React.FC<MeProps> = ({}) => {
     profile_picture: string | null | undefined;
     iat?: string | null | undefined;
   } | null>(null);
+  const theme = useContext(Theme);
   const GetUser = async () => {
-    const token = localStorage.getItem('token');
-    if (session && !token) {
+    if (session) {
       const result = await client.query({ query: GET_USER_ID, variables: { email: session.user.email } });
       const currentUser: {
         username: string;
@@ -41,57 +47,79 @@ const Me: React.FC<MeProps> = ({}) => {
         profile_picture: session.user.image!,
       };
       if (currentUser.dark_theme === 'true') {
+        setDarkMode(true);
         (document.body.style as any) = 'background: #1A202C';
       }
       setUser(currentUser);
-    }
-    if (token) {
-      const currentUser: {
-        username: string;
-        email: string;
-        id: string;
-        profile_picture: string;
-        iat: string;
-        oauth: boolean;
-        dark_theme: string;
-      } = jwtDecode(token!);
-      setUser(currentUser);
-      if (currentUser.dark_theme === 'true') {
-        (document.body.style as any) = 'background: #1A202C';
-      }
     }
   };
   const [ToggleTheme] = useMutation(TOGGLE_THEME);
+  const [UpdateTime] = useMutation(UPDATE_TIME);
+  const [SwitchOnline] = useMutation(SWITCH_ONLINE);
   useEffect(() => {
     GetUser();
-    console.log(user);
     if (user && user.dark_theme == 'true') {
       setDarkModeSelected(!darkModeSelected);
     } else {
       setLightModeSelected(!lightModeSelected);
     }
   }, [session]);
+  useEffect(() => {
+    setInterval(() => {
+      UpdateTime();
+    }, 60000);
+    if (user) {
+      window.addEventListener('beforeunload', (ev) => {
+        setClosed(true);
+      });
+      if (closed === true) {
+        SwitchOnline({ variables: { authorid: user?.id, value: false } });
+      }
+      SwitchOnline({ variables: { authorid: user?.id, value: true } });
+    }
+  }, [user, closed, session]);
+  if (!user)
+    return (
+      <div className={feedStyles.centered}>
+        <Spinner thickness="4px" speed="0.65s" emptyColor="gray.200" color="blue.500" size="xl" />
+      </div>
+    );
+
   return (
     <div
       className="site"
       style={{ position: 'relative', backgroundColor: user && user.dark_theme === 'true' ? '#1A202C' : '' }}
     >
+      <div>
+        <Link href="/feed">
+          <a>
+            <i
+              className="fa fa-paper-plane fa-4x"
+              style={{
+                color: user?.dark_theme === 'true' ? '#fff' : '',
+                cursor: 'pointer',
+                position: 'absolute',
+                top: 28,
+                left: 36,
+              }}
+            ></i>
+          </a>
+        </Link>
+      </div>
       <div style={{ position: 'relative' }}>
         <img
           src="https://source.unsplash.com/random"
           style={{
             maxWidth: '100%',
-            width: 880,
+            width: 980,
+            position: 'absolute',
+            height: 255,
             left:
               (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
               (typeof window !== 'undefined' && window.screen.availWidth) < 1800
-                ? 220
-                : 460,
-            position: 'absolute',
-            marginLeft: 'auto',
-            marginRight: 'auto',
-            borderRadius: 8,
-            height: 255,
+                ? '12.9%'
+                : '22.8%',
+            borderRadius: '8px 8px 0px 0px',
             objectFit: 'cover',
           }}
           alt=""
@@ -101,12 +129,14 @@ const Me: React.FC<MeProps> = ({}) => {
         <div className="pc-user">
           <div className="pc-user-image">
             <img
-              src="https://lh3.googleusercontent.com/ogw/ADGmqu8Ioh_ZvFt07Br1iOqhn39V9n0ndZ3Y2nrXiUtw=s83-c-mo"
+              src={user && (user.profile_picture as any)}
               alt=""
               style={{
+                position: 'relative',
+                left: '166%',
+                bottom: '20%',
                 width: 200,
                 borderRadius: 100,
-                marginLeft: '180%',
                 boxShadow: '0px 5px 50px 0px rgb(146, 0, 255), 0px 0px 0px 7px rgba(107, 74, 255, 0.5)',
               }}
             />
@@ -123,18 +153,44 @@ const Me: React.FC<MeProps> = ({}) => {
               position: 'absolute',
             }}
           >
-            <h3 style={{ top: 190, left: 22, position: 'relative', fontFamily: 'Lato' }}>
-              <p>Nikhil Rao</p>
+            <h3
+              style={{
+                top: 160,
+                left:
+                  (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
+                  (typeof window !== 'undefined' && window.screen.availWidth) < 1800
+                    ? '-100%'
+                    : '-95%',
+                position: 'relative',
+                fontFamily: 'Lato',
+                color: '#000',
+              }}
+            >
+              <p>You</p>
             </h3>
-            <h3 style={{ top: 190, left: 22, position: 'relative', fontFamily: 'Lato', color: 'gray' }}>
-              <p>nikhil23.rao@gmail.com</p>
-            </h3>
+            <div
+              style={{
+                position: 'relative',
+                top: 180,
+                right: 80,
+              }}
+            >
+              <Button
+                style={{ right: 10 }}
+                onClick={() => {
+                  signOut({ callbackUrl: '/login' });
+                }}
+                colorScheme="red"
+              >
+                Logout
+              </Button>
+            </div>
           </div>
         </div>
       </div>
       <Accordion
         style={{
-          width: 880,
+          width: 980,
           marginLeft: 'auto',
           marginRight: 'auto',
           marginTop: 5,
@@ -155,13 +211,13 @@ const Me: React.FC<MeProps> = ({}) => {
                   authorid: user && user.id,
                 },
               });
-              window.location.reload();
+              window.location.reload(false);
             }}
           >
             <img
               style={{
                 marginLeft: 150,
-                border: lightModeSelected ? '5px solid #0993f6' : '',
+                border: user?.dark_theme === 'false' ? '5px solid #0993f6' : '',
               }}
               alt=""
               className="d-block border-bottom mb-2 width-full"
@@ -180,13 +236,13 @@ const Me: React.FC<MeProps> = ({}) => {
                   authorid: user && user.id,
                 },
               });
-              window.location.reload();
+              window.location.reload(false);
             }}
           >
             <img
               alt=""
               className="d-block border-bottom mb-2 width-full"
-              style={{ marginLeft: 100, border: darkModeSelected ? '5px solid #0993f6' : '' }}
+              style={{ marginLeft: 100, border: user?.dark_theme === 'true' ? '5px solid #0993f6' : '' }}
               src="https://github.githubassets.com/images/modules/settings/color_modes/dark_preview.svg"
             ></img>
             <p style={{ marginLeft: 170, fontFamily: 'Lato' }}>Dark Theme</p>

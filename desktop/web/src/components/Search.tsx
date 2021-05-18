@@ -5,15 +5,28 @@ import { Button, Input, useToast } from '@chakra-ui/react';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 import { Avatar, Chip } from '@material-ui/core';
 import { CREATE_GROUP } from '@/apollo/Mutations';
-import { generateId } from '@/utils/GenerateId';
+import { generateId } from '@/../utils/GenerateId';
 import client from '@/../apollo-client';
 import { useRouter } from 'next/dist/client/router';
+import { useSession } from 'next-auth/client';
+import { GET_USER_ID } from '@/apollo/Queries';
 
 export const Search = () => {
+  const [session] = useSession();
   const [inputValue, setInputValue] = useState<any>('');
   const [error, setError] = useState(false);
   const [nameError, setNameError] = useState(false);
   const [nameVal, setNameVal] = useState('');
+  const [user, setUser] = useState<{
+    username: string | null | undefined;
+    email: string | null | undefined;
+    id: string | null | undefined;
+    profile_picture: string | null | undefined;
+    dark_theme: string;
+    iat?: string | null | undefined;
+    online: boolean | string | undefined;
+    chaton: string | null | undefined | any;
+  } | null>(null);
   const toast = useToast();
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -27,7 +40,9 @@ export const Search = () => {
   const getFilteredItems = (items) =>
     items.filter(
       (item) =>
-        selectedItems.indexOf(item as never) < 0 && item.email.toLowerCase().startsWith(inputValue.toLowerCase()),
+        selectedItems.indexOf(item as never) < 0 &&
+        item.email.toLowerCase().startsWith(inputValue.toLowerCase()) &&
+        item.id !== user?.id,
     );
   const {
     isOpen,
@@ -61,31 +76,66 @@ export const Search = () => {
     },
   });
 
-  const members = [];
-
   const GetMembers = () => {
+    const members = [];
     for (const item in selectedItems) {
-      console.log(selectedItems[item]);
       members.push({
         username: (selectedItems[item] as any).username,
         id: (selectedItems[item] as any).id,
         email: (selectedItems[item] as any).email,
         profile_picture: (selectedItems[item] as any).profile_picture,
+        online: (selectedItems[item] as any).online,
+        chaton: (selectedItems[item] as any).chaton,
       } as never);
-      console.log(members);
+    }
+    members.push({
+      username: user?.username,
+      id: user?.id,
+      email: user?.email,
+      profile_picture: user?.profile_picture,
+      online: true,
+      chaton: user?.chaton,
+    } as never);
+    return members;
+  };
+
+  const GetUser = async () => {
+    const token = localStorage.getItem('token');
+    if (session && !token) {
+      const result = await client.query({ query: GET_USER_ID, variables: { email: session.user.email } });
+      console.log('RES', user);
+      const currentUser: {
+        username: string;
+        email: string;
+        id: string;
+        profile_picture: string;
+        dark_theme: string;
+        online: boolean;
+        chaton: string | any;
+      } = {
+        username: session.user.name!,
+        email: session.user.email!,
+        id: result.data.GetUserId[0],
+        dark_theme: result.data.GetUserId[1],
+        online: true,
+        profile_picture: session.user.image!,
+        chaton: result.data.GetUserId[3],
+      };
+      setUser(currentUser);
     }
   };
 
   useEffect(() => {
-    console.log('SELECTED ITEMS', selectedItems);
+    console.log('ITEMS', selectedItems);
     if (selectedItems.length > 0) {
       setError(false);
     }
     if (nameVal.length > 0) {
       setNameError(false);
     }
-    GetMembers();
-  }, [selectedItems, error, nameError]);
+    GetUser();
+    console.log('ROUTER', router);
+  }, [selectedItems, error, nameError, session]);
 
   return (
     <div>
@@ -94,6 +144,7 @@ export const Search = () => {
           <div className="mb-3 ml-5">
             <Input
               isInvalid={nameError}
+              style={{ color: user?.dark_theme === 'true' ? '#fff' : '#000' }}
               placeholder="Group Name..."
               value={nameVal}
               onChange={(e) => setNameVal(e.currentTarget.value)}
@@ -110,7 +161,7 @@ export const Search = () => {
                 <Chip
                   avatar={<Avatar src={(selectedItem as any).profile_picture} />}
                   label={(selectedItem as any).email}
-                  style={{ position: 'relative' }}
+                  style={{ position: 'relative', backgroundColor: user?.dark_theme === 'true' ? '#fff' : '' }}
                   clickable
                   color="default"
                   key={`selected-item-`}
@@ -126,6 +177,7 @@ export const Search = () => {
             {...getInputProps(getDropdownProps({ preventKeyAction: isOpen }))}
             placeholder="Add Members By Email..."
             isInvalid={error}
+            style={{ color: user?.dark_theme === 'true' ? '#fff' : '#000' }}
             size="lg"
             required={true}
             color="gray.900"
@@ -175,18 +227,21 @@ export const Search = () => {
               if (nameVal.length == 0) {
                 return setNameError(true);
               }
+              if (!nameVal.replace(/\s/g, '').length) {
+                return;
+              }
               if (selectedItems.length === 0) {
                 return setError(true);
               }
-              if (members !== []) {
+              if (GetMembers() !== []) {
                 setLoading(true);
                 await client.mutate({
                   mutation: CREATE_GROUP,
-                  variables: { id: generateId(24), members, name: nameVal },
+                  variables: { id: generateId(24), members: GetMembers(), name: nameVal },
                 });
                 setLoading(false);
                 router.reload();
-              } else if (members === []) {
+              } else if (GetMembers() === []) {
                 toast({ status: 'error', title: 'Oops! Something failed.' });
               }
             } catch (err) {

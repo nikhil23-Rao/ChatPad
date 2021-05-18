@@ -15,7 +15,7 @@ import {
 import { Search } from '../../components/Search';
 import { useMutation, useQuery, useSubscription } from '@apollo/client';
 import { SEND_MESSAGE, SET_CHAT_ON, SWITCH_ONLINE, TOGGLE_THEME, UPDATE_TIME } from '@/apollo/Mutations';
-import { generateId } from '@/utils/GenerateId';
+import { generateId } from '@/../utils/GenerateId';
 import Head from 'next/head';
 import { GET_ALL_MESSAGES } from '@/apollo/Subscriptions';
 import { Picker } from 'emoji-mart';
@@ -36,6 +36,8 @@ import InsertPhotoIcon from '@material-ui/icons/InsertPhoto';
 import LoadingBar from 'react-top-loading-bar';
 import { formatAMPM } from '@/../utils/formatTime';
 import { tw } from 'twind';
+import { isUrl } from '@/../utils/isUrl';
+import { urlify } from '@/../utils/urlify';
 interface ChatProps {
   currId: string;
 }
@@ -68,6 +70,8 @@ export const getStaticProps = async (context) => {
 const Chat: React.FC<ChatProps> = ({ currId }) => {
   const [groupSelected, setGroupSelected] = useState('');
   const [query, setQuery] = useState('');
+  const [offset, SetOffset] = useState(0);
+  const [limit, setLimit] = useState(10);
   const [messages, setMessages] = useState<any[]>([]);
   const [showEmoji, setShowEmoji] = useState(false);
   const router = useRouter();
@@ -112,7 +116,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
         SwitchOnline({ variables: { authorid: currentUser.id, value: false } });
         var start = Date.now(),
           now = start;
-        var delay = 100; // msec
+        var delay = 60; // msec
         while (now - start < delay) {
           now = Date.now();
         }
@@ -125,7 +129,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
 
   const { data, loading } = useQuery(GET_GROUPS, { variables: { authorid: user?.id } });
   const { data: messageData, loading: messageLoading, refetch } = useQuery(GET_INITIAL_MESSAGES, {
-    variables: { groupid: groupSelected },
+    variables: { groupid: groupSelected, offset, limit },
   });
   const { data: searchData, loading: searchLoading, refetch: searchDataRefetch } = useQuery(SEARCH_GROUPS, {
     variables: { query, authorid: user?.id },
@@ -208,13 +212,17 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
       refetchOnline();
     }, 15000);
 
-    setTimeout(() => {
-      animateScroll.scrollToBottom({
-        containerId: 'chatDiv',
-        smooth: false,
-        duration: 0,
-      });
-    }, 1); // Load time
+    const el = document.getElementById('chatDiv');
+
+    if (el && el.scrollTop === el.scrollHeight - el.offsetHeight) {
+      setTimeout(() => {
+        animateScroll.scrollToBottom({
+          containerId: 'chatDiv',
+          smooth: false,
+          duration: 0,
+        });
+      }, 1); // Load time
+    }
 
     if (realtimeData && messages.includes(realtimeData.GetAllMessages[realtimeData.GetAllMessages.length - 1])) return;
     if (
@@ -526,7 +534,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                           src={message.body}
                           className={feedStyles.text}
                         />
-                      ) : message.body.includes('https://') ? (
+                      ) : isUrl(message.body) ? (
                         <p
                           style={{
                             marginLeft: 5,
@@ -751,14 +759,15 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
         >
           <div style={{ position: 'fixed', zIndex: 1, left: 74, top: 70 }} className="onlinedot"></div>
 
-          <div>
+          <div style={{ marginLeft: 120, marginTop: 17 }}>
             <h1
               className={tw('text-primary-100 font-bold')}
               style={{
+                textAlign: 'left',
+                display: 'inline',
                 color: darkMode ? '#fff' : '#000',
                 fontSize: 22,
                 bottom: -5,
-                left: -60,
                 fontFamily: 'Lato',
                 position: 'relative',
                 marginTop: 19,
@@ -766,18 +775,20 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
             >
               {user && user.username}
             </h1>
-            <h1
-              style={{
-                fontSize: 18,
-                bottom: -5,
-                left: user && user!.email!.length >= 24 ? -10 : -15,
-                fontFamily: 'Lato',
-                position: 'relative',
-                color: darkMode ? '#fff' : '#000',
-              }}
-            >
-              {user && user.email}
-            </h1>
+            <div>
+              <h1
+                style={{
+                  fontSize: 18,
+                  bottom: -3,
+                  display: 'inline-block',
+                  fontFamily: 'Lato',
+                  position: 'relative',
+                  color: darkMode ? '#fff' : '#000',
+                }}
+              >
+                {user && user.email}
+              </h1>
+            </div>
           </div>
           <div style={{ cursor: 'pointer' }}>
             <img
@@ -861,7 +872,11 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                   value={messageVal}
                   _placeholder={{ color: darkMode ? '#fff' : '#7c7c82' }}
                   onKeyPress={async (e) => {
-                    if (e.shiftKey) return;
+                    if (e.shiftKey) {
+                      return setMessageVal(
+                        '                                                                                                                                                                                                              ',
+                      );
+                    }
                     if (e.key === 'Enter') {
                       setMessageVal('');
                       e.preventDefault();

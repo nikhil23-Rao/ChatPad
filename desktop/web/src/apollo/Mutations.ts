@@ -33,8 +33,26 @@ export const CREATE_GROUP = gql`
 `;
 
 export const SEND_MESSAGE = gql`
-  mutation SendMessage($groupid: String, $body: String, $author: User, $messageid: String) {
-    SendMessage(groupid: $groupid, body: $body, author: $author, messageid: $messageid)
+  mutation SendMessage(
+    $groupid: String
+    $body: String
+    $author: User
+    $messageid: String
+    $image: Boolean
+    $time: String
+    $date: String
+    $day: String
+  ) {
+    SendMessage(
+      groupid: $groupid
+      body: $body
+      author: $author
+      messageid: $messageid
+      image: $image
+      time: $time
+      day: $day
+      date: $date
+    )
   }
 `;
 
@@ -47,5 +65,23 @@ export const START_SUBSCRIPTION = gql`
 export const TOGGLE_THEME = gql`
   mutation ToggleTheme($authorid: String) {
     ToggleTheme(authorid: $authorid)
+  }
+`;
+
+export const UPDATE_TIME = gql`
+  mutation UpdateTime {
+    UpdateTime
+  }
+`;
+
+export const SWITCH_ONLINE = gql`
+  mutation SwitchOnline($authorid: String, $value: Boolean, $groupid: String) {
+    SwitchOnline(authorid: $authorid, value: $value, groupid: $groupid)
+  }
+`;
+
+export const SET_CHAT_ON = gql`
+  mutation SetChatOn($authorid: String, $groupid: String) {
+    SetChatOn(authorid: $authorid, groupid: $groupid)
   }
 `;
