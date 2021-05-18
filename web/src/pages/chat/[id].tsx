@@ -70,8 +70,6 @@ export const getStaticProps = async (context) => {
 const Chat: React.FC<ChatProps> = ({ currId }) => {
   const [groupSelected, setGroupSelected] = useState('');
   const [query, setQuery] = useState('');
-  const [offset, SetOffset] = useState(0);
-  const [limit, setLimit] = useState(10);
   const [messages, setMessages] = useState<any[]>([]);
   const [showEmoji, setShowEmoji] = useState(false);
   const router = useRouter();
@@ -129,7 +127,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
 
   const { data, loading } = useQuery(GET_GROUPS, { variables: { authorid: user?.id } });
   const { data: messageData, loading: messageLoading, refetch } = useQuery(GET_INITIAL_MESSAGES, {
-    variables: { groupid: groupSelected, offset, limit },
+    variables: { groupid: groupSelected },
   });
   const { data: searchData, loading: searchLoading, refetch: searchDataRefetch } = useQuery(SEARCH_GROUPS, {
     variables: { query, authorid: user?.id },
@@ -213,7 +211,6 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
     }, 15000);
 
     const el = document.getElementById('chatDiv');
-
     if (el && el.scrollTop === el.scrollHeight - el.offsetHeight) {
       setTimeout(() => {
         animateScroll.scrollToBottom({
