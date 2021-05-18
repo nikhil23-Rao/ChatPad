@@ -211,7 +211,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
     }, 15000);
 
     const el = document.getElementById('chatDiv');
-    if (el && el.scrollTop === el.scrollHeight - el.offsetHeight) {
+    if (el && el.scrollHeight - el.scrollTop - el.clientHeight < 1) {
       setTimeout(() => {
         animateScroll.scrollToBottom({
           containerId: 'chatDiv',
