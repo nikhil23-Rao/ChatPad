@@ -221,7 +221,11 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
     ) {
       playSound();
     }
-    if (realtimeData && realtimeData.GetAllMessages[realtimeData.GetAllMessages.length - 1].groupid === groupSelected) {
+    if (
+      realtimeData &&
+      realtimeData.GetAllMessages[realtimeData.GetAllMessages.length - 1].groupid === groupSelected &&
+      realtimeData.GetAllMessages[realtimeData.GetAllMessages.length - 1].author.id !== user?.id
+    ) {
       setMessages([...messages, realtimeData.GetAllMessages[realtimeData.GetAllMessages.length - 1]]);
     }
     setGroupSelected(currId);
@@ -918,6 +922,25 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                       return;
                     }
                     if (e.key === 'Enter') {
+                      setMessages([
+                        ...messages,
+                        {
+                          groupid: groupSelected,
+                          body: messageVal,
+                          author: {
+                            username: user.username,
+                            email: user.email,
+                            id: user.id,
+                            profile_picture: user.profile_picture,
+                            image: false,
+                            messageid: generateId(24),
+                            time: formatAMPM(new Date()),
+                            date: today,
+                            day,
+                            local: true,
+                          },
+                        },
+                      ]);
                       setMessageVal('');
                       e.preventDefault();
                       // Check If Text Is Empty Before Submitting
