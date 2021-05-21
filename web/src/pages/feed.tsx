@@ -199,7 +199,17 @@ const Feed: React.FC<FeedProps> = ({}) => {
         ></div>
         <div
           className={feedStyles.leftsidebar}
-          style={{ backgroundColor: darkMode ? '#1c1c1c' : '#EDEDED', borderRightColor: darkMode ? '#4E4F51' : '' }}
+          style={{
+            backgroundColor: darkMode ? '#1c1c1c' : '#EDEDED',
+            borderRightColor: darkMode ? '#4E4F51' : '',
+            overflowY: 'auto',
+            overflowX: 'hidden',
+            height:
+              (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
+              (typeof window !== 'undefined' && window.screen.availWidth) < 1800
+                ? '110vh'
+                : '87vh',
+          }}
         >
           <h1
             style={{
@@ -212,7 +222,7 @@ const Feed: React.FC<FeedProps> = ({}) => {
           >
             Chats
           </h1>
-          <div className="search-box" style={{ backgroundColor: !darkMode ? '#fff' : '' }}>
+          <div className="search-box" style={{ backgroundColor: !darkMode ? '#fff' : '', top: 86 }}>
             <input
               className="search-txt"
               type="text"

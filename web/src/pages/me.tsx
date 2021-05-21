@@ -3,14 +3,12 @@ import { Theme } from '@/../context/theme';
 import { GET_USER_ID } from '@/apollo/Queries';
 import { signOut, useSession } from 'next-auth/client';
 import React, { useContext, useEffect, useState } from 'react';
-import { Accordion, AccordionDetails, AccordionSummary } from '@material-ui/core';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { useMutation } from '@apollo/client';
 import { SWITCH_ONLINE, TOGGLE_THEME, UPDATE_TIME } from '@/apollo/Mutations';
-import LoadingBar from 'react-top-loading-bar';
-import { Button, Spinner } from '@chakra-ui/react';
-import Link from 'next/link';
+import { Spinner } from '@chakra-ui/react';
 import feedStyles from '../styles/feed.module.css';
+import meStyles from '../styles/me.module.css';
+import Link from 'next/link';
 
 interface MeProps {}
 
@@ -19,6 +17,7 @@ const Me: React.FC<MeProps> = ({}) => {
   const [darkModeSelected, setDarkModeSelected] = useState(false);
   const [closed, setClosed] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
+  const [tab, setTab] = useState<'appearence' | 'logout' | 'profile' | ''>('');
   const [lightModeSelected, setLightModeSelected] = useState(false);
   const [left, setLeft] = useState<string | number>('28.75rem');
   const [user, setUser] = useState<{
@@ -48,7 +47,6 @@ const Me: React.FC<MeProps> = ({}) => {
       };
       if (currentUser.dark_theme === 'true') {
         setDarkMode(true);
-        (document.body.style as any) = 'background: #1A202C';
       }
       setUser(currentUser);
     }
@@ -72,6 +70,7 @@ const Me: React.FC<MeProps> = ({}) => {
       window.addEventListener('beforeunload', (ev) => {
         setClosed(true);
       });
+      if (user.dark_theme === 'true') (document.body.style as any) = 'background-color: #0B0E11';
       if (closed === true) {
         SwitchOnline({ variables: { authorid: user?.id, value: false } });
       }
@@ -86,179 +85,130 @@ const Me: React.FC<MeProps> = ({}) => {
     );
 
   return (
-    <div
-      className="site"
-      style={{ position: 'relative', backgroundColor: user && user.dark_theme === 'true' ? '#1A202C' : '' }}
-    >
-      <div>
-        <Link href="/feed">
-          <a>
-            <i
-              className="fa fa-paper-plane fa-4x"
-              style={{
-                color: user?.dark_theme === 'true' ? '#fff' : '',
-                cursor: 'pointer',
-                position: 'absolute',
-                top: 28,
-                left: 36,
-              }}
-            ></i>
-          </a>
-        </Link>
-      </div>
-      <div style={{ position: 'relative' }}>
-        <img
-          src="https://source.unsplash.com/random"
-          style={{
-            maxWidth: '100%',
-            width: 980,
-            position: 'absolute',
-            height: 255,
-            left:
-              (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
-              (typeof window !== 'undefined' && window.screen.availWidth) < 1800
-                ? '12.9%'
-                : '22.8%',
-            borderRadius: '8px 8px 0px 0px',
-            objectFit: 'cover',
-          }}
-          alt=""
-        />
-      </div>
-      <div className="profile-card" style={{ marginLeft: 'auto', marginRight: 'auto' }}>
-        <div className="pc-user">
-          <div className="pc-user-image">
-            <img
-              src={user && (user.profile_picture as any)}
-              alt=""
-              style={{
-                position: 'relative',
-                left: '166%',
-                bottom: '20%',
-                width: 200,
-                borderRadius: 100,
-                boxShadow: '0px 5px 50px 0px rgb(146, 0, 255), 0px 0px 0px 7px rgba(107, 74, 255, 0.5)',
-              }}
-            />
-          </div>
-          <div
-            className="pc-user-info"
-            style={{
-              textAlign: 'center',
-              right:
-                (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
-                (typeof window !== 'undefined' && window.screen.availWidth) < 1800
-                  ? '42.4%'
-                  : '44.45%',
-              position: 'absolute',
-            }}
-          >
-            <h3
-              style={{
-                top: 160,
-                left:
-                  (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
-                  (typeof window !== 'undefined' && window.screen.availWidth) < 1800
-                    ? '-100%'
-                    : '-95%',
-                position: 'relative',
-                fontFamily: 'Lato',
-                color: '#000',
-              }}
-            >
-              <p>You</p>
-            </h3>
-            <div
-              style={{
-                position: 'relative',
-                top: 180,
-                right: 80,
-              }}
-            >
-              <Button
-                style={{ right: 10 }}
-                onClick={() => {
-                  signOut({ callbackUrl: '/login' });
-                }}
-                colorScheme="red"
-              >
-                Logout
-              </Button>
+    <>
+      <div className="profile_container" style={{ backgroundColor: user.dark_theme === 'true' ? '#151A21' : '' }}>
+        <header className={meStyles.header}></header>
+        <main>
+          <div className="row">
+            <div className="left col-lg-4">
+              <div className="photo-left">
+                <img className="photo" src={user && (user.profile_picture as any)} />
+              </div>
+              <h4 className="name" style={{ color: user.dark_theme === 'true' ? '#fff' : '' }}>
+                {user && user.username}
+              </h4>
+              <p className="info" style={{ color: user.dark_theme === 'true' ? '#fff' : '' }}>
+                {user && user.email}
+              </p>
+
+              <p className="desc" style={{ color: user.dark_theme === 'true' ? '#fff' : '' }}>
+                Here is where you can edit your bio.
+              </p>
+            </div>
+            <div className="right col-lg-8">
+              <ul className="nav">
+                <li
+                  onClick={() => (window.location.href = '/feed')}
+                  style={{
+                    textDecoration: tab === '' ? 'underline' : '',
+                    color: user.dark_theme === 'true' ? '#fff' : '',
+                  }}
+                >
+                  <i className="fa fa-home fa-2x"></i>
+                </li>
+                <li
+                  onClick={() => setTab('profile')}
+                  style={{
+                    textDecoration: tab === '' ? 'underline' : '',
+                    color: user.dark_theme === 'true' ? '#fff' : '',
+                  }}
+                >
+                  <i className="fa fa-user-circle fa-2x"></i>
+                </li>
+
+                <li
+                  onClick={() => setTab('appearence')}
+                  style={{
+                    textDecoration: tab === 'appearence' ? 'underline' : '',
+                    color: user.dark_theme === 'true' ? '#fff' : '',
+                  }}
+                >
+                  <i className="fa fa-eye fa-2x"></i>
+                </li>
+                <li
+                  style={{ color: '#F56565', textDecoration: 'none' }}
+                  onClick={() => {
+                    setTab('logout');
+                    signOut({ callbackUrl: '/login' });
+                  }}
+                >
+                  <i className="fa fa-sign-out fa-2x"></i>
+                </li>
+              </ul>
+              {tab === 'appearence' && (
+                <div style={{ display: 'inline' }}>
+                  <img
+                    alt=""
+                    style={{
+                      position: 'relative',
+                      top: 30,
+                      border: user.dark_theme === 'true' ? 'solid 5px dodgerblue' : '',
+                      cursor: 'pointer',
+                    }}
+                    onClick={async () => {
+                      if (user.dark_theme === 'true') return;
+                      await ToggleTheme({ variables: { authorid: user?.id } });
+                      window.location.reload(false);
+                    }}
+                    className="d-block border-bottom mb-2 width-full"
+                    src="https://github.githubassets.com/images/modules/settings/color_modes/dark_preview.svg"
+                  ></img>
+                  <img
+                    style={{
+                      position: 'relative',
+                      top: -97,
+                      left: 300,
+                      border: user.dark_theme === 'false' ? 'solid 5px dodgerblue' : '',
+                      cursor: 'pointer',
+                    }}
+                    onClick={async () => {
+                      if (user.dark_theme === 'false') return;
+                      await ToggleTheme({ variables: { authorid: user?.id } });
+                      window.location.reload(false);
+                    }}
+                    alt=""
+                    className="d-block border-bottom mb-2 width-full"
+                    src="https://github.githubassets.com/images/modules/settings/color_modes/light_preview.svg"
+                  />
+                  <p
+                    style={{
+                      top: -98,
+                      position: 'relative',
+                      left: 363,
+                      fontFamily: 'Lato',
+                      color: user.dark_theme === 'true' ? '#fff' : '',
+                    }}
+                  >
+                    Light Theme
+                  </p>
+                  <p
+                    style={{
+                      top: -120,
+                      position: 'relative',
+                      left: 63,
+                      fontFamily: 'Lato',
+                      color: user.dark_theme === 'true' ? '#fff' : '',
+                    }}
+                  >
+                    Dark Theme
+                  </p>
+                </div>
+              )}
             </div>
           </div>
-        </div>
+        </main>
       </div>
-      <Accordion
-        style={{
-          width: 980,
-          marginLeft: 'auto',
-          marginRight: 'auto',
-          marginTop: 5,
-          backgroundColor: '#f5f5f5',
-          borderRadius: 8,
-        }}
-      >
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>Appearence</AccordionSummary>
-        <AccordionDetails>
-          <div
-            style={{ cursor: 'pointer' }}
-            onClick={() => {
-              if (user && user.dark_theme === 'false') return;
-              setLightModeSelected(true);
-              setDarkModeSelected(false);
-              ToggleTheme({
-                variables: {
-                  authorid: user && user.id,
-                },
-              });
-              window.location.reload(false);
-            }}
-          >
-            <img
-              style={{
-                marginLeft: 150,
-                border: user?.dark_theme === 'false' ? '5px solid #0993f6' : '',
-              }}
-              alt=""
-              className="d-block border-bottom mb-2 width-full"
-              src="https://github.githubassets.com/images/modules/settings/color_modes/light_preview.svg"
-            />
-            <p style={{ marginLeft: 214, fontFamily: 'Lato' }}>Light Theme</p>
-          </div>
-          <div
-            style={{ cursor: 'pointer' }}
-            onClick={() => {
-              if (user && user.dark_theme === 'true') return;
-              setDarkModeSelected(true);
-              setLightModeSelected(false);
-              ToggleTheme({
-                variables: {
-                  authorid: user && user.id,
-                },
-              });
-              window.location.reload(false);
-            }}
-          >
-            <img
-              alt=""
-              className="d-block border-bottom mb-2 width-full"
-              style={{ marginLeft: 100, border: user?.dark_theme === 'true' ? '5px solid #0993f6' : '' }}
-              src="https://github.githubassets.com/images/modules/settings/color_modes/dark_preview.svg"
-            ></img>
-            <p style={{ marginLeft: 170, fontFamily: 'Lato' }}>Dark Theme</p>
-          </div>
-        </AccordionDetails>
-      </Accordion>
-      <div
-        style={{
-          backgroundColor: user && user.dark_theme === 'true' ? '#1A202C' : '',
-          height: '20vh',
-          position: 'relative',
-          width: '100%',
-          top: 100,
-        }}
-      ></div>
-    </div>
+    </>
   );
 };
 

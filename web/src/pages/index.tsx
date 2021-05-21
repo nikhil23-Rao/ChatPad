@@ -47,11 +47,7 @@ export default function LandingPage() {
                   ? 540
                   : 530,
             }}
-          >
-            <h1 className={tw('text-3xl text-primary-100 font-bold')} style={{ color: 'gray', fontSize: 17 }}>
-              Chat With Friends And Family. Anytime, Anywhere.
-            </h1>
-          </div>
+          ></div>
           <Spinner
             thickness="4px"
             style={{ position: 'fixed', top: '70%', left: '49%', transform: 'translate(-50%, -50%)' }}
@@ -60,6 +56,20 @@ export default function LandingPage() {
             color="blue.500"
             size="xl"
           />
+          <p
+            className={tw('text-3xl text-primary-100 font-bold')}
+            style={{
+              color: 'gray',
+              fontSize: 27,
+              marginLeft: 'auto',
+              marginRight: 'auto',
+              top: 530,
+              left: 650,
+              position: 'fixed',
+            }}
+          >
+            Chat With Friends And Family. Anytime, Anywhere.
+          </p>
         </div>
       </>
     );

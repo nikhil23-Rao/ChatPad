@@ -37,8 +37,8 @@ export const GET_GROUPS = gql`
 `;
 
 export const GET_INITIAL_MESSAGES = gql`
-  query GetInitialMessages($groupid: String) {
-    GetInitialMessages(groupid: $groupid) {
+  query GetInitialMessages($groupid: String, $limit: Int, $offset: Int) {
+    GetInitialMessages(groupid: $groupid, limit: $limit, offset: $offset) {
       body
       messageid
       author {
@@ -103,6 +103,24 @@ export const GET_MEMBERS = gql`
       id
       online
       chaton
+    }
+  }
+`;
+
+export const LOAD_MORE = gql`
+  query LoadMore($limit: Int, $offset: Int, $groupid: String) {
+    LoadMore(limit: $limit, offset: $offset, groupid: $groupid) {
+      body
+      messageid
+      author {
+        username
+        email
+        profile_picture
+        id
+      }
+      image
+      time
+      date
     }
   }
 `;

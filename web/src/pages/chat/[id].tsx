@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
-import jwtDecode from 'jwt-decode';
 import { useSession } from 'next-auth/client';
 import feedStyles from '../../styles/feed.module.css';
 import client from '@/../apollo-client';
+import { IconButton } from '@material-ui/core';
 import {
   GET_CHAT_PATHS,
   GET_GROUPS,
@@ -10,34 +10,25 @@ import {
   GET_INITIAL_MESSAGES,
   GET_MEMBERS,
   GET_USER_ID,
+  LOAD_MORE,
   SEARCH_GROUPS,
 } from '../../apollo/Queries';
 import { Search } from '../../components/Search';
 import { useMutation, useQuery, useSubscription } from '@apollo/client';
-import { SEND_MESSAGE, SET_CHAT_ON, SWITCH_ONLINE, TOGGLE_THEME, UPDATE_TIME } from '@/apollo/Mutations';
+import EjectIcon from '@material-ui/icons/Eject';
+import { SEND_MESSAGE, SET_CHAT_ON, SWITCH_ONLINE, TOGGLE_THEME } from '@/apollo/Mutations';
 import { generateId } from '@/../utils/GenerateId';
 import Head from 'next/head';
 import { GET_ALL_MESSAGES } from '@/apollo/Subscriptions';
 import { Picker } from 'emoji-mart';
 import { useRouter } from 'next/dist/client/router';
 import { animateScroll } from 'react-scroll';
-import {
-  Input,
-  InputGroup,
-  InputRightElement,
-  Skeleton,
-  SkeletonCircle,
-  useToast,
-  Spinner,
-  Textarea,
-} from '@chakra-ui/react';
+import { InputGroup, InputRightElement, Skeleton, SkeletonCircle, useToast, Spinner, Textarea } from '@chakra-ui/react';
 import EmojiEmotionsIcon from '@material-ui/icons/EmojiEmotions';
 import InsertPhotoIcon from '@material-ui/icons/InsertPhoto';
-import LoadingBar from 'react-top-loading-bar';
 import { formatAMPM } from '@/../utils/formatTime';
 import { tw } from 'twind';
 import { isUrl } from '@/../utils/isUrl';
-import { urlify } from '@/../utils/urlify';
 interface ChatProps {
   currId: string;
 }
@@ -70,8 +61,11 @@ export const getStaticProps = async (context) => {
 const Chat: React.FC<ChatProps> = ({ currId }) => {
   const [groupSelected, setGroupSelected] = useState('');
   const [query, setQuery] = useState('');
+  const [loader, setLoader] = useState(false);
   const [messages, setMessages] = useState<any[]>([]);
   const [showEmoji, setShowEmoji] = useState(false);
+  const [limit, setLimit] = useState(9);
+  const [offset, setOffset] = useState(10);
   const router = useRouter();
   const [visible, setVisible] = useState(true);
   const [closed, setClosed] = useState(false);
@@ -126,8 +120,15 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   const toast = useToast();
 
   const { data, loading } = useQuery(GET_GROUPS, { variables: { authorid: user?.id } });
-  const { data: messageData, loading: messageLoading, refetch } = useQuery(GET_INITIAL_MESSAGES, {
-    variables: { groupid: groupSelected },
+  const { data: messageData, loading: messageLoading } = useQuery(GET_INITIAL_MESSAGES, {
+    variables: { groupid: groupSelected, limit, offset: 0 },
+  });
+  const { data: loadMoreData, loading: loadMoreLoading } = useQuery(LOAD_MORE, {
+    variables: {
+      limit,
+      offset,
+      groupid: groupSelected,
+    },
   });
   const { data: searchData, loading: searchLoading, refetch: searchDataRefetch } = useQuery(SEARCH_GROUPS, {
     variables: { query, authorid: user?.id },
@@ -142,6 +143,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
       groupid: groupSelected,
     },
   });
+  const [ToggleTheme] = useMutation(TOGGLE_THEME);
   const [SwitchOnline] = useMutation(SWITCH_ONLINE);
   const [SetChatOn] = useMutation(SET_CHAT_ON);
 
@@ -153,24 +155,15 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   };
 
   useEffect(() => {
-    if (messageData) {
-      setMessages([...messageData.GetInitialMessages]);
+    if (typeof messageData !== 'undefined') {
+      const messages = [...messageData.GetInitialMessages];
+      setMessages(messages.reverse());
     }
-  }, [messageData]);
+  }, [typeof messageData]);
 
   const refetchOnline = async () => {
     await onlineRefetch({ groupid: groupSelected });
   };
-
-  const onTabClose = async () => {
-    if (user) {
-      console.log('REQUEST');
-    }
-  };
-
-  useEffect(() => {
-    onTabClose();
-  }, [user, session]);
 
   useEffect(() => {
     setTimeout(() => {
@@ -179,7 +172,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
         smooth: false,
         duration: 0,
       });
-    }, 1000); // Load time
+    }, 800); // Load time
   }, []);
 
   useEffect(() => {
@@ -211,15 +204,13 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
     }, 15000);
 
     const el = document.getElementById('chatDiv');
-    if (el && el.scrollHeight - el.scrollTop - el.clientHeight < 1) {
-      setTimeout(() => {
-        animateScroll.scrollToBottom({
-          containerId: 'chatDiv',
-          smooth: false,
-          duration: 0,
-        });
-      }, 1); // Load time
-    }
+    setTimeout(() => {
+      animateScroll.scrollToBottom({
+        containerId: 'chatDiv',
+        smooth: false,
+        duration: 0,
+      });
+    }, 1); // Load time
 
     if (realtimeData && messages.includes(realtimeData.GetAllMessages[realtimeData.GetAllMessages.length - 1])) return;
     if (
@@ -269,7 +260,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
           <nav
             className="navbar navbar-light"
             style={{
-              background: darkMode ? '#1c1c1c' : 'transparent',
+              background: darkMode ? '#1c1c1c' : '#fff',
               position: 'relative',
               height: 100,
             }}
@@ -423,6 +414,33 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
           id="chatDiv"
           ref={chatRef as any}
         >
+          {messages.length !== 0 && loadMoreData && loadMoreData.LoadMore.length !== 0 && (
+            <IconButton
+              onClick={() => {
+                if (!loadMoreData || loadMoreLoading) return setLoader(true);
+                setOffset(offset + 10);
+                const dataLoadMore = [...loadMoreData.LoadMore];
+                console.log('LOADMORE', dataLoadMore);
+                setMessages([...dataLoadMore.reverse(), ...messages]);
+                setLoader(false);
+              }}
+              style={{ color: '#fff', left: 1000 }}
+              className={feedStyles.loadmorebtn}
+              children={<EjectIcon style={{ width: '4vh', height: '4vh' }} />}
+            ></IconButton>
+          )}
+          {loader && (
+            <div style={{ backgroundColor: darkMode ? '#1c1c1c' : '#fff' }}>
+              <Spinner
+                thickness="4px"
+                speed="0.65s"
+                emptyColor="gray.200"
+                color="blue.500"
+                size="xl"
+                style={{ left: 1000, position: 'relative', top: 10 }}
+              />
+            </div>
+          )}
           {groupSelected !== '' &&
             messageData &&
             user &&
@@ -473,6 +491,9 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                           : Math.round((Date.now() - message.time) / 60000) > 60 &&
                             Math.round((Date.now() - message.time) / 60000) < 1440
                           ? message.date[1]
+                          : Math.round((Date.now() - message.time) / 60000) > 1440 &&
+                            Math.round((Date.now() - message.time) / 60000) < 10080
+                          ? message.date[2] + ', ' + message.date[1]
                           : Math.round((Date.now() - message.time) / 60000) > 1440
                           ? message.date[1] + ' ' + message.date[0]
                           : ' Now'}
@@ -507,6 +528,9 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                           : Math.round((Date.now() - message.time) / 60000) > 60 &&
                             Math.round((Date.now() - message.time) / 60000) < 1440
                           ? message.date[1]
+                          : Math.round((Date.now() - message.time) / 60000) > 1440 &&
+                            Math.round((Date.now() - message.time) / 60000) < 10080
+                          ? message.date[2] + ', ' + message.date[1]
                           : Math.round((Date.now() - message.time) / 60000) > 1440
                           ? message.date[1] + ' ' + message.date[0]
                           : ' Now'}
@@ -598,6 +622,13 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
           style={{
             backgroundColor: darkMode ? '#1c1c1c' : '#EDEDED',
             borderRightColor: darkMode ? '#4E4F51' : '',
+            overflowY: 'auto',
+            overflowX: 'hidden',
+            height:
+              (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
+              (typeof window !== 'undefined' && window.screen.availWidth) < 1800
+                ? '110vh'
+                : '87vh',
           }}
         >
           <h1
@@ -611,7 +642,8 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
           >
             Chats
           </h1>
-          <div className="search-box" style={{ backgroundColor: !darkMode ? '#fff' : '' }}>
+
+          <div className="search-box" style={{ backgroundColor: !darkMode ? '#fff' : '', top: 86 }}>
             <input
               className="search-txt"
               type="text"
@@ -648,7 +680,9 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                     key={group.id}
                   >
                     <div
-                      style={{ backgroundColor: group.id === groupSelected ? (!darkMode ? '#c5e2ed' : '#144e80') : '' }}
+                      style={{
+                        backgroundColor: group.id === groupSelected ? (!darkMode ? '#c5e2ed' : '#144e80') : '',
+                      }}
                       className={darkMode ? feedStyles.sidebarcontent : feedStyles.sidebarcontentlight}
                       key={group.id}
                       onClick={() => (window.location.href = `/chat/${group.id}`)}
@@ -844,7 +878,18 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                               width: messageVal.length <= 88 ? 43 : 76,
                               position: 'relative',
                               bottom: messageVal.length <= 88 ? 45 : 128,
-                              left: onlineData.GetMembers.length > 2 ? '220%' : '150%',
+                              left:
+                                onlineData.GetMembers.length === 3
+                                  ? '220%'
+                                  : onlineData.GetMembers.length === 2
+                                  ? '150%'
+                                  : onlineData.GetMembers.length === 4
+                                  ? '300%'
+                                  : onlineData.GetMembers.length === 5
+                                  ? '390%'
+                                  : onlineData.GetMembers.length === 6
+                                  ? '510%'
+                                  : '',
                               opacity: member.online && member.chaton === groupSelected ? 1 : 0.5,
                             }}
                             alt=""
@@ -947,15 +992,18 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                           await SendMessage({
                             variables: {
                               groupid: groupSelected,
-                              body: reader.result,
+                              body: messageVal,
                               author: {
                                 username: user.username,
                                 email: user.email,
                                 id: user.id,
                                 profile_picture: user.profile_picture,
                               },
-                              image: true,
+                              image: false,
                               messageid: generateId(24),
+                              time: formatAMPM(new Date()),
+                              date: today,
+                              day,
                             },
                           });
                         } catch (err) {

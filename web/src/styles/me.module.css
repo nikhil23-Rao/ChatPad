@@ -8,3 +8,166 @@
   height: 55.8px;
   border-radius: 100px;
 }
+
+.body {
+  margin: 0 auto;
+  font-family: 'Roboto', sans-serif;
+}
+
+.container {
+  text-align: center;
+  margin: -8px;
+  font-family: 'Roboto', sans-serif;
+  height: auto;
+}
+
+.container-head {
+  background-size: cover;
+  background-repeat: no-repeat;
+  padding-top: 130px;
+  padding-bottom: 80px;
+  padding-left: 10px;
+  background: rgb(2, 0, 36);
+  background: linear-gradient(
+    90deg,
+    rgba(2, 0, 36, 1) 0%,
+    rgba(12, 12, 29, 0.6306897759103641) 38%,
+    rgba(0, 212, 255, 1) 100%
+  );
+}
+
+.menu {
+  margin-top: -130px;
+  text-align: left;
+  color: white;
+  line-height: 8px;
+  cursor: pointer;
+}
+
+.profile-picture img {
+  border-radius: 100%;
+  margin-top: -60px;
+  border: solid;
+  border-width: 4px;
+  border-color: white;
+}
+
+.container-body {
+  padding-left: 20px;
+}
+
+.name {
+  text-transform: uppercase;
+}
+
+.header {
+  background: #eee;
+  background-image: url('https://source.unsplash.com/random');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  height: 250px;
+}
+
+.location {
+  color: gray;
+  margin: -10px;
+}
+
+.bio p {
+  padding: 10px;
+}
+
+.stats {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stats p {
+  color: gray;
+  font-size: 12px;
+  margin-bottom: -15px;
+  text-transform: uppercase;
+}
+
+.followers {
+  padding-right: 60px;
+}
+
+.following {
+  padding-right: 60px;
+}
+
+.topics {
+  padding-right: 60px;
+}
+
+.buttons {
+  display: flex;
+  width: 80%;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 30px 30px 50px;
+}
+
+.message-me {
+  width: 50%;
+  position: relative;
+  padding: 18px 10px 18px 10px;
+  margin-top: 20px;
+  margin-right: 5px;
+  border: solid #ff2d55 1px;
+  border-radius: 50px;
+  background-color: #ff2d55;
+  text-transform: uppercase;
+  letter-spacing: 5px;
+  cursor: pointer;
+  color: white;
+  font-size: 12px;
+}
+.follow-me {
+  width: 50%;
+  position: relative;
+  padding: 18px 10px 18px 10px;
+  margin-top: 20px;
+  border: solid gray 1px;
+  border-radius: 50px;
+  background-color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 5px;
+  cursor: pointer;
+  color: rgb(49, 49, 49);
+  font-size: 12px;
+  margin-left: 5px;
+}
+
+.message-me:hover {
+  background-color: #ffffff;
+  color: rgb(54, 54, 54);
+}
+.follow-me:hover {
+  background-color: #408afa;
+  color: rgb(255, 255, 255);
+  border-color: #408afa;
+}
+
+@media (min-width: 600px) {
+  .container {
+    width: 60%;
+    border-radius: 2px;
+    position: absolute;
+    margin: 0px 0px 30px 200px;
+    box-shadow: 0 2.8px 2.2px rgba(0, 0, 0, 0.02), 0 6.7px 5.3px rgba(0, 0, 0, 0.028),
+      0 12.5px 10px rgba(0, 0, 0, 0.035), 0 22.3px 17.9px rgba(0, 0, 0, 0.042), 0 41.8px 33.4px rgba(0, 0, 0, 0.05),
+      0 100px 80px rgba(0, 0, 0, 0.07);
+  }
+
+  .container-head {
+    border-radius: 2px;
+  }
+
+  .buttons {
+    margin-bottom: 40px;
+  }
+}
