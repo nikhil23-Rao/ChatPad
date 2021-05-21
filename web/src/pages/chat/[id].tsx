@@ -930,7 +930,6 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                           },
                           image: false,
                           messageid: generateId(24),
-                          time: formatAMPM(new Date()),
                           date: today,
                           time: Date.now(),
                           day,
