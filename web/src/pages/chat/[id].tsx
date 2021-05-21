@@ -917,6 +917,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                       return;
                     }
                     if (e.key === 'Enter') {
+                      const el = document.getElementById('chatDiv');
                       setMessages([
                         ...messages,
                         {
@@ -958,6 +959,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                           day,
                         },
                       });
+                      if (el) el.scrollTop = el.scrollHeight - el.clientHeight;
                     }
                   }}
                   onChange={(e) => {
