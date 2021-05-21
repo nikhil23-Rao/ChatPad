@@ -64,7 +64,11 @@ export default function LandingPage() {
               marginLeft: 'auto',
               marginRight: 'auto',
               top: 530,
-              left: 650,
+              left:
+                (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
+                (typeof window !== 'undefined' && window.screen.availWidth) < 1800
+                  ? 430
+                  : 650,
               position: 'fixed',
             }}
           >

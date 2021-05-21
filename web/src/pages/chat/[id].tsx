@@ -167,11 +167,10 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
 
   useEffect(() => {
     setTimeout(() => {
-      animateScroll.scrollToBottom({
-        containerId: 'chatDiv',
-        smooth: false,
-        duration: 0,
-      });
+      const el = document.getElementById('chatDiv');
+      if (el) {
+        el.scrollTop = el.scrollHeight - el.clientHeight;
+      }
     }, 800); // Load time
   }, []);
 
@@ -204,13 +203,9 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
     }, 15000);
 
     const el = document.getElementById('chatDiv');
-    setTimeout(() => {
-      animateScroll.scrollToBottom({
-        containerId: 'chatDiv',
-        smooth: false,
-        duration: 0,
-      });
-    }, 1); // Load time
+    if (el) {
+      el.scrollTop = el.scrollHeight - el.clientHeight;
+    }
 
     if (realtimeData && messages.includes(realtimeData.GetAllMessages[realtimeData.GetAllMessages.length - 1])) return;
     if (
@@ -932,13 +927,12 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                             email: user.email,
                             id: user.id,
                             profile_picture: user.profile_picture,
-                            image: false,
-                            messageid: generateId(24),
-                            time: formatAMPM(new Date()),
-                            date: today,
-                            day,
-                            local: true,
                           },
+                          image: false,
+                          messageid: generateId(24),
+                          time: formatAMPM(new Date()),
+                          date: today,
+                          day,
                         },
                       ]);
                       setMessageVal('');
