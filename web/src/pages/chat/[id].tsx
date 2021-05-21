@@ -932,6 +932,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                           messageid: generateId(24),
                           time: formatAMPM(new Date()),
                           date: today,
+                          time: Date.now(),
                           day,
                         },
                       ]);
