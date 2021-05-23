@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useCombobox, useMultipleSelection } from 'downshift';
 import { items, comboboxStyles, comboboxWrapperStyles } from './shared';
-import { Button, Input, useToast } from '@chakra-ui/react';
+import { Alert, AlertDescription, AlertIcon, AlertTitle, Button, Input, useToast } from '@chakra-ui/react';
+import { useQuery } from '@apollo/client';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 import { Avatar, Chip } from '@material-ui/core';
 import { CREATE_GROUP } from '@/apollo/Mutations';
@@ -9,12 +10,13 @@ import { generateId } from '@/../utils/GenerateId';
 import client from '@/../apollo-client';
 import { useRouter } from 'next/dist/client/router';
 import { useSession } from 'next-auth/client';
-import { GET_USER_ID } from '@/apollo/Queries';
+import { GET_GROUPS, GET_USER_ID } from '@/apollo/Queries';
 
 export const Search = () => {
   const [session] = useSession();
   const [inputValue, setInputValue] = useState<any>('');
   const [error, setError] = useState(false);
+  const [duplicate, setDuplicate] = useState(false);
   const [nameError, setNameError] = useState(false);
   const [nameVal, setNameVal] = useState('');
   const [user, setUser] = useState<{
@@ -76,6 +78,8 @@ export const Search = () => {
     },
   });
 
+  const { data: groupData, loading: groupLoading } = useQuery(GET_GROUPS, { variables: { authorid: user?.id } });
+
   const GetMembers = () => {
     const members = [];
     for (const item in selectedItems) {
@@ -126,6 +130,8 @@ export const Search = () => {
   };
 
   useEffect(() => {
+    if (groupLoading) console.log('Loading');
+    if (groupData) console.log(groupData);
     console.log('ITEMS', selectedItems);
     if (selectedItems.length > 0) {
       setError(false);
@@ -135,123 +141,147 @@ export const Search = () => {
     }
     GetUser();
     console.log('ROUTER', router);
-  }, [selectedItems, error, nameError, session]);
+  }, [selectedItems, error, nameError, session, groupData]);
 
   return (
-    <div>
-      <div style={comboboxWrapperStyles as any}>
-        <div style={comboboxStyles} {...getComboboxProps()}>
-          <div className="mb-3 ml-5">
-            <Input
-              isInvalid={nameError}
-              style={{ color: user?.dark_theme === 'true' ? '#fff' : '#000' }}
-              placeholder="Group Name..."
-              value={nameVal}
-              onChange={(e) => setNameVal(e.currentTarget.value)}
-              size="lg"
-              color="gray.800"
-              required={true}
-            />
+    <>
+      <div>
+        <div style={comboboxWrapperStyles as any}>
+          <div style={comboboxStyles} {...getComboboxProps()}>
+            <div className="mb-3 ml-5">
+              <Input
+                disabled={selectedItems.length <= 1 ? true : false}
+                isInvalid={nameError}
+                style={{ color: user?.dark_theme === 'true' ? '#fff' : '#000' }}
+                placeholder="Group Name..."
+                value={nameVal}
+                onChange={(e) => setNameVal(e.currentTarget.value)}
+                size="lg"
+                color="gray.800"
+                required={true}
+              />
 
-            {nameError ? <p style={{ color: '#E53E3E' }}>Please Provide A Group Name</p> : null}
-          </div>
-          {selectedItems.map((selectedItem, index) => (
-            <React.Fragment key={(selectedItem as any).id}>
-              <div style={{ position: 'relative' }}>
-                <Chip
-                  avatar={<Avatar src={(selectedItem as any).profile_picture} />}
-                  label={(selectedItem as any).email}
-                  style={{ position: 'relative', backgroundColor: user?.dark_theme === 'true' ? '#fff' : '' }}
-                  clickable
-                  color="default"
-                  key={`selected-item-`}
-                  {...getSelectedItemProps({ selectedItem, index })}
-                  onDelete={() => removeSelectedItem(selectedItem)}
-                  deleteIcon={<HighlightOffIcon />}
-                  variant="outlined"
-                />
-              </div>
-            </React.Fragment>
-          ))}
-          <Input
-            {...getInputProps(getDropdownProps({ preventKeyAction: isOpen }))}
-            placeholder="Add Members By Email..."
-            isInvalid={error}
-            style={{ color: user?.dark_theme === 'true' ? '#fff' : '#000' }}
-            size="lg"
-            required={true}
-            color="gray.900"
-          />
-          {error ? <p style={{ color: '#E53E3E' }}>To Create A Group Please Add Members</p> : null}
-        </div>
-      </div>
-      <ul {...getMenuProps()}>
-        {isOpen &&
-          getFilteredItems(items)
-            .slice(0, 5)
-            .map((item, index) => (
-              <li
-                key={`${index}`}
-                className="mx-auto"
-                style={{
-                  fontFamily: 'Arial',
-                  textAlign: 'left',
-                  border: '1px solid #d4d4d4',
-                  color: '#000',
-                  padding: 20,
-                  backgroundColor: highlightedIndex === index ? '#E3E3E3' : 'white',
-                  fontWeight: 'bold',
-                  width: '100%',
-                  height: 70,
-                  cursor: 'pointer',
-                }}
-                {...getItemProps({ item, index })}
-              >
-                <div>
-                  <img
-                    src={item.profile_picture}
-                    style={{ width: 40, height: 40, borderRadius: 20, float: 'left', marginRight: 10 }}
-                    alt=""
+              {nameError ? <p style={{ color: '#E53E3E' }}>Please Provide A Group Name</p> : null}
+            </div>
+            {selectedItems.map((selectedItem, index) => (
+              <React.Fragment key={(selectedItem as any).id}>
+                <div style={{ position: 'relative' }}>
+                  <Chip
+                    avatar={<Avatar src={(selectedItem as any).profile_picture} />}
+                    label={(selectedItem as any).email}
+                    style={{ position: 'relative', backgroundColor: user?.dark_theme === 'true' ? '#fff' : '' }}
+                    clickable
+                    color="default"
+                    key={`selected-item-`}
+                    {...getSelectedItemProps({ selectedItem, index })}
+                    onDelete={() => removeSelectedItem(selectedItem)}
+                    deleteIcon={<HighlightOffIcon />}
+                    variant="outlined"
                   />
                 </div>
-                <div style={{ marginTop: 8, fontWeight: 'bold' }}>{item.email}</div>
-              </li>
+              </React.Fragment>
             ))}
-      </ul>
-      <div className="mt-4" style={{ marginLeft: '36%' }}>
-        <Button
-          colorScheme="green"
-          isLoading={loading}
-          onClick={async () => {
-            try {
-              if (nameVal.length == 0) {
-                return setNameError(true);
+            <Input
+              {...getInputProps(getDropdownProps({ preventKeyAction: isOpen }))}
+              placeholder="Add Members By Email..."
+              isInvalid={error}
+              style={{ color: user?.dark_theme === 'true' ? '#fff' : '#000' }}
+              size="lg"
+              required={true}
+              color="gray.900"
+            />
+            {error ? <p style={{ color: '#E53E3E' }}>To Create A Group Please Add Members</p> : null}
+          </div>
+        </div>
+        <ul {...getMenuProps()}>
+          {isOpen &&
+            getFilteredItems(items)
+              .slice(0, 5)
+              .map((item, index) => (
+                <li
+                  key={`${index}`}
+                  className="mx-auto"
+                  style={{
+                    fontFamily: 'Arial',
+                    textAlign: 'left',
+                    border: '1px solid #d4d4d4',
+                    color: '#000',
+                    padding: 20,
+                    backgroundColor: highlightedIndex === index ? '#E3E3E3' : 'white',
+                    fontWeight: 'bold',
+                    width: '100%',
+                    height: 70,
+                    cursor: 'pointer',
+                  }}
+                  {...getItemProps({ item, index })}
+                >
+                  <div>
+                    <img
+                      src={item.profile_picture}
+                      style={{ width: 40, height: 40, borderRadius: 20, float: 'left', marginRight: 10 }}
+                      alt=""
+                    />
+                  </div>
+                  <div style={{ marginTop: 8, fontWeight: 'bold' }}>{item.username}</div>
+                </li>
+              ))}
+        </ul>
+        <div className="mt-4" style={{ marginLeft: '36%' }}>
+          <Button
+            colorScheme="green"
+            isLoading={loading}
+            onClick={async () => {
+              try {
+                if (groupLoading) setLoading(true);
+                if (groupData) {
+                  for (const group of groupData.GetGroups) {
+                    if (group.members.length === 2 && selectedItems.length === 1) {
+                      if (group.members[0].id.includes((selectedItems[0] as any).id))
+                        return toast({
+                          status: 'error',
+                          title: 'You already have a DM with this person',
+                          position: 'top-left',
+                          isClosable: true,
+                        });
+                      if (group.members[1].id.includes((selectedItems[0] as any).id))
+                        return toast({
+                          status: 'error',
+                          title: 'You already have a DM with this person',
+                          position: 'top-left',
+                          isClosable: true,
+                        });
+                    }
+                  }
+                }
+                if (nameVal.length == 0 && selectedItems.length > 1) {
+                  return setNameError(true);
+                }
+                if (!nameVal.replace(/\s/g, '').length && selectedItems.length > 1) {
+                  return;
+                }
+                if (selectedItems.length === 0) {
+                  return setError(true);
+                }
+                if (GetMembers() !== [] || selectedItems.length === 1) {
+                  setLoading(true);
+                  await client.mutate({
+                    mutation: CREATE_GROUP,
+                    variables: { id: generateId(24), members: GetMembers(), name: nameVal },
+                  });
+                  setLoading(false);
+                  router.reload();
+                } else if (GetMembers() === []) {
+                  toast({ status: 'error', title: 'Oops! Something failed.' });
+                }
+              } catch (err) {
+                console.log(err);
               }
-              if (!nameVal.replace(/\s/g, '').length) {
-                return;
-              }
-              if (selectedItems.length === 0) {
-                return setError(true);
-              }
-              if (GetMembers() !== []) {
-                setLoading(true);
-                await client.mutate({
-                  mutation: CREATE_GROUP,
-                  variables: { id: generateId(24), members: GetMembers(), name: nameVal },
-                });
-                setLoading(false);
-                router.reload();
-              } else if (GetMembers() === []) {
-                toast({ status: 'error', title: 'Oops! Something failed.' });
-              }
-            } catch (err) {
-              console.log(err);
-            }
-          }}
-        >
-          Create Group
-        </Button>
+            }}
+          >
+            Create Group
+          </Button>
+        </div>
       </div>
-    </div>
+    </>
   );
 };

@@ -155,6 +155,11 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   };
 
   useEffect(() => {
+    const el = document.getElementById('chatDiv');
+    if (el) el.scrollTop = el.scrollHeight;
+  }, [messages, realtimeData, messageData]);
+
+  useEffect(() => {
     if (typeof messageData !== 'undefined') {
       const messages = [...messageData.GetInitialMessages];
       setMessages(messages.reverse());
@@ -218,8 +223,8 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
     }
     if (
       realtimeData &&
-      realtimeData.GetAllMessages[realtimeData.GetAllMessages.length - 1].groupid === groupSelected &&
-      realtimeData.GetAllMessages[realtimeData.GetAllMessages.length - 1].author.id !== user?.id
+      realtimeData.GetAllMessages[realtimeData.GetAllMessages.length - 1].author.id !== user?.id &&
+      realtimeData.GetAllMessages[realtimeData.GetAllMessages.length - 1].groupid === groupSelected
     ) {
       setMessages([...messages, realtimeData.GetAllMessages[realtimeData.GetAllMessages.length - 1]]);
     }
@@ -329,18 +334,36 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                   </div>
                 </>
               ) : null}
-              <p
-                style={{
-                  display: 'inline',
-                  fontFamily: 'Lato',
-                  fontWeight: 'bold',
-                  fontSize: 28,
-                  marginLeft: GroupNameData.GetGroupName.members.length === 2 ? 10 : '',
-                  color: darkMode ? '#fff' : '#000',
-                }}
-              >
-                {GroupNameData.GetGroupName.name}
-              </p>
+              {GroupNameData.GetGroupName.members.length === 2 ? (
+                <p
+                  style={{
+                    display: 'inline',
+                    fontFamily: 'Lato',
+                    fontWeight: 'bold',
+                    fontSize: 28,
+                    marginLeft: GroupNameData.GetGroupName.members.length === 2 ? 10 : '',
+                    color: darkMode ? '#fff' : '#000',
+                  }}
+                >
+                  {GroupNameData.GetGroupName.members[0].id === user?.id
+                    ? GroupNameData.GetGroupName.members[1].username
+                    : GroupNameData.GetGroupName.members[0].username}
+                </p>
+              ) : null}
+              {GroupNameData.GetGroupName.members.length > 2 && (
+                <p
+                  style={{
+                    display: 'inline',
+                    fontFamily: 'Lato',
+                    fontWeight: 'bold',
+                    fontSize: 28,
+                    marginLeft: GroupNameData.GetGroupName.members.length === 2 ? 10 : '',
+                    color: darkMode ? '#fff' : '#000',
+                  }}
+                >
+                  {GroupNameData.GetGroupName.name}
+                </p>
+              )}
               {(messageData && messageData.GetInitialMessages.length === 0) ||
               (realtimeData && realtimeData.GetAllMessages.length === 0) ? null : (
                 <p
@@ -398,6 +421,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
           onClick={() => setShowEmoji(false)}
           style={{
             overflowY: 'auto',
+            flexDirection: 'column',
             height:
               (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
               (typeof window !== 'undefined' && window.screen.availWidth) < 1800
@@ -461,7 +485,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                             height: 50,
                             borderRadius: 100,
                             left: 129,
-                            top: -5,
+                            top: 8,
                             position: 'relative',
                           }}
                           src={message.author.profile_picture}
@@ -475,7 +499,8 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                         style={{
                           color: darkMode ? '#ebeef0' : '#000',
                           position: 'relative',
-                          left: 566,
+                          left: 579,
+                          top: 10,
                           fontSize: 14,
                           fontFamily: 'Lato',
                         }}
@@ -536,7 +561,15 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                       </p>
                     )}
                     <div
-                      className={message.author.id === user.id ? feedStyles.yourmessage : feedStyles.message}
+                      className={
+                        message.author.id === user.id && user.dark_theme === 'true'
+                          ? feedStyles.yourmessage
+                          : message.author.id === user.id && user.dark_theme === 'false'
+                          ? feedStyles.yourmessagelight
+                          : message.author.id !== user.id && user.dark_theme === 'true'
+                          ? feedStyles.message
+                          : feedStyles.messagelight
+                      }
                       style={{
                         marginBottom: message.author.id !== user.id ? -40 : -4,
                       }}
@@ -713,20 +746,36 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                           )}
                         </div>
                       )}
-
-                      <p
-                        style={{
-                          fontWeight: groupSelected === group.id ? 'bold' : 'normal',
-                          fontFamily: 'Lato',
-                          color: darkMode ? '#fff' : '#000',
-                          position: 'relative',
-                          bottom: 50,
-                          left: 75,
-                        }}
-                        className={feedStyles.groupName}
-                      >
-                        {group.name}
-                      </p>
+                      {group.members.length === 2 ? (
+                        <p
+                          style={{
+                            fontWeight: groupSelected === group.id ? 'bold' : 'normal',
+                            fontFamily: 'Lato',
+                            color: darkMode ? '#fff' : '#000',
+                            position: 'relative',
+                            bottom: 50,
+                            left: 75,
+                          }}
+                          className={feedStyles.groupName}
+                        >
+                          {group.members[0].id === user?.id ? group.members[1].username : group.members[0].username}
+                        </p>
+                      ) : null}
+                      {group.members.length > 2 && (
+                        <p
+                          style={{
+                            fontWeight: groupSelected === group.id ? 'bold' : 'normal',
+                            fontFamily: 'Lato',
+                            color: darkMode ? '#fff' : '#000',
+                            position: 'relative',
+                            bottom: 50,
+                            left: 75,
+                          }}
+                          className={feedStyles.groupName}
+                        >
+                          {group.name}
+                        </p>
+                      )}
                     </div>
                   </Skeleton>
                 );
@@ -904,7 +953,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                     borderRadius: 10,
                     paddingRight: 100,
                     width: messageVal.length >= 88 ? 1500 : '',
-                    backgroundColor: darkMode ? '#2c2c2c' : '#F4F4F4',
+                    backgroundColor: darkMode ? '#303640' : '#F4F4F4',
                     minHeight: messageVal.length <= 88 ? 10 : 150,
                     bottom: messageVal.length >= 88 ? 80 : 0,
                     lineHeight: 1.8,
@@ -916,6 +965,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                     if (e.shiftKey) {
                       return;
                     }
+                    if (!messageVal.trim()) return;
                     if (e.key === 'Enter') {
                       const el = document.getElementById('chatDiv');
                       setMessages([
@@ -936,6 +986,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                           day,
                         },
                       ]);
+                      if (el) el.scrollTop = el.scrollHeight - el.clientHeight;
                       setMessageVal('');
                       e.preventDefault();
                       // Check If Text Is Empty Before Submitting
@@ -959,7 +1010,6 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                           day,
                         },
                       });
-                      if (el) el.scrollTop = el.scrollHeight - el.clientHeight;
                     }
                   }}
                   onChange={(e) => {
@@ -982,7 +1032,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                         }}
                         fontSize="large"
                         style={{
-                          color: darkMode ? '#fff' : 'gray',
+                          color: darkMode ? '#4097FF' : 'gray',
                           marginBottom: messageVal.length >= 88 ? 50 : '',
                         }}
                       />
@@ -991,7 +1041,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                         onClick={() => setShowEmoji(!showEmoji)}
                         fontSize="large"
                         style={{
-                          color: darkMode ? '#fff' : 'gray',
+                          color: darkMode ? '#4097FF' : 'gray',
                           marginBottom: messageVal.length >= 88 ? 50 : '',
                         }}
                       />

@@ -13,6 +13,17 @@
   width: 0px;
 }
 
+:root {
+  --msg-content-height: 26.75em;
+  --msg-spacing: 1em;
+  --msg1-height: 5.5em;
+  --msg2-height: 4em;
+  --msg3-height: 2.5em;
+  --msg4-height: 2.5em;
+  --msg5-height: 4em;
+  --msg6-height: 3.25em;
+}
+
 /* Track */
 *::-webkit-scrollbar-track {
   background: #f1f1f1;
@@ -43,6 +54,7 @@ body {
   margin: 0;
   padding: 0;
   overflow: hidden;
+  font-family: 'Helvetica Neue', Helvetica, sans-serif;
 }
 
 nav {

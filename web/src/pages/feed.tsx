@@ -256,8 +256,12 @@ const Feed: React.FC<FeedProps> = ({}) => {
                   <Skeleton
                     style={{ borderRadius: 15, position: 'relative', width: 310, left: 5 }}
                     isLoaded={!searchLoading}
+                    key={group.id}
                   >
                     <div
+                      style={{
+                        backgroundColor: group.id === groupSelected ? (!darkMode ? '#c5e2ed' : '#144e80') : '',
+                      }}
                       className={darkMode ? feedStyles.sidebarcontent : feedStyles.sidebarcontentlight}
                       key={group.id}
                       onClick={() => (window.location.href = `/chat/${group.id}`)}
@@ -289,20 +293,36 @@ const Feed: React.FC<FeedProps> = ({}) => {
                           )}
                         </div>
                       )}
-
-                      <p
-                        style={{
-                          fontWeight: groupSelected === group.id ? 'bold' : 'normal',
-                          fontFamily: 'Lato',
-                          color: darkMode ? '#fff' : '#000',
-                          position: 'relative',
-                          bottom: 50,
-                          left: 75,
-                        }}
-                        className={feedStyles.groupName}
-                      >
-                        {group.name}
-                      </p>
+                      {group.members.length === 2 ? (
+                        <p
+                          style={{
+                            fontWeight: groupSelected === group.id ? 'bold' : 'normal',
+                            fontFamily: 'Lato',
+                            color: darkMode ? '#fff' : '#000',
+                            position: 'relative',
+                            bottom: 50,
+                            left: 75,
+                          }}
+                          className={feedStyles.groupName}
+                        >
+                          {group.members[0].id === user?.id ? group.members[1].username : group.members[0].username}
+                        </p>
+                      ) : null}
+                      {group.members.length > 2 && (
+                        <p
+                          style={{
+                            fontWeight: groupSelected === group.id ? 'bold' : 'normal',
+                            fontFamily: 'Lato',
+                            color: darkMode ? '#fff' : '#000',
+                            position: 'relative',
+                            bottom: 50,
+                            left: 75,
+                          }}
+                          className={feedStyles.groupName}
+                        >
+                          {group.name}
+                        </p>
+                      )}
                     </div>
                   </Skeleton>
                 );
@@ -312,8 +332,10 @@ const Feed: React.FC<FeedProps> = ({}) => {
                   <Skeleton
                     style={{ borderRadius: 15, position: 'relative', width: 310, left: 5 }}
                     isLoaded={!searchLoading}
+                    key={group.id}
                   >
                     <div
+                      style={{ backgroundColor: group.id === groupSelected ? (!darkMode ? '#c5e2ed' : '#144e80') : '' }}
                       className={darkMode ? feedStyles.sidebarcontent : feedStyles.sidebarcontentlight}
                       key={group.id}
                       onClick={() => (window.location.href = `/chat/${group.id}`)}
