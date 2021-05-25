@@ -90,6 +90,19 @@ export const SEARCH_GROUPS = gql`
       }
       name
       id
+      last_message {
+        body
+        messageid
+        author {
+          username
+          email
+          profile_picture
+          id
+        }
+        image
+        time
+        date
+      }
     }
   }
 `;

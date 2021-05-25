@@ -157,6 +157,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   useEffect(() => {
     const el = document.getElementById('chatDiv');
     if (el) el.scrollTop = el.scrollHeight;
+    searchDataRefetch();
   }, [messages, realtimeData, messageData]);
 
   useEffect(() => {
@@ -464,6 +465,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
               />
             </div>
           )}
+
           {groupSelected !== '' &&
             messageData &&
             user &&
@@ -675,14 +677,14 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
             Chats
           </h1>
 
-          <div className="search-box" style={{ backgroundColor: !darkMode ? '#fff' : '', top: 86 }}>
+          <div className="search-box" style={{ backgroundColor: !darkMode ? '#fff' : '', top: 86, outline: 'none' }}>
             <input
               className="search-txt"
               type="text"
               name=""
               placeholder="Search for chats..."
               value={query}
-              style={{ color: !darkMode ? '#000' : '', paddingRight: 40 }}
+              style={{ color: !darkMode ? '#000' : '', paddingRight: 40, outline: 'none' }}
               onChange={(e) => setQuery(e.currentTarget.value)}
             />
             <a className="search-btn" style={{ backgroundColor: !darkMode ? 'transparent' : '' }}>
@@ -747,35 +749,40 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                         </div>
                       )}
                       {group.members.length === 2 ? (
-                        <p
-                          style={{
-                            fontWeight: groupSelected === group.id ? 'bold' : 'normal',
-                            fontFamily: 'Lato',
-                            color: darkMode ? '#fff' : '#000',
-                            position: 'relative',
-                            bottom: 50,
-                            left: 75,
-                          }}
-                          className={feedStyles.groupName}
-                        >
-                          {group.members[0].id === user?.id ? group.members[1].username : group.members[0].username}
-                        </p>
+                        <>
+                          <p
+                            style={{
+                              fontWeight: groupSelected === group.id ? 'bold' : 'normal',
+                              fontFamily: 'Lato',
+                              color: darkMode ? '#fff' : '#000',
+                              position: 'relative',
+                              fontSize: 20,
+                              bottom: 50,
+                              left: 75,
+                            }}
+                            className={feedStyles.groupName}
+                          >
+                            {group.members[0].id === user?.id ? group.members[1].username : group.members[0].username}
+                          </p>
+                          {group.last_message.body === null ? null : (
+                            <p
+                              style={{
+                                fontFamily: 'Lato',
+                                color: darkMode ? '#fff' : '#000',
+                                position: 'relative',
+                                bottom: 50,
+                                left: 75,
+                              }}
+                              className={feedStyles.groupName}
+                            >
+                              {group.last_message.author.id !== user?.id ? group.last_message.author.username : 'You'}:{' '}
+                              {group.last_message.body.length <= 31
+                                ? group.last_message.body
+                                : `${group.last_message.body.substr(0, 28)}...`}
+                            </p>
+                          )}
+                        </>
                       ) : null}
-                      {group.members.length > 2 && (
-                        <p
-                          style={{
-                            fontWeight: groupSelected === group.id ? 'bold' : 'normal',
-                            fontFamily: 'Lato',
-                            color: darkMode ? '#fff' : '#000',
-                            position: 'relative',
-                            bottom: 50,
-                            left: 75,
-                          }}
-                          className={feedStyles.groupName}
-                        >
-                          {group.name}
-                        </p>
-                      )}
                     </div>
                   </Skeleton>
                 );
@@ -817,11 +824,29 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                           color: darkMode ? '#fff' : '#000',
                           position: 'relative',
                           bottom: 85,
-                          left: 65,
+                          fontSize: 20,
+                          left: 75,
                         }}
                       >
                         {group.name}
                       </p>
+                      {group.last_message.body === null ? null : (
+                        <p
+                          style={{
+                            fontFamily: 'Lato',
+                            color: darkMode ? '#fff' : '#000',
+                            position: 'relative',
+                            bottom: 85,
+                            left: 78,
+                          }}
+                          className={feedStyles.groupName}
+                        >
+                          {group.last_message.author.id !== user?.id ? group.last_message.author.username : 'You'}:{' '}
+                          {group.last_message.body.length <= 31
+                            ? group.last_message.body
+                            : `${group.last_message.body.substr(0, 28)}...`}
+                        </p>
+                      )}
                     </div>
                   </Skeleton>
                 );
