@@ -179,7 +179,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
       setMessages(messages.reverse());
       console.log('DATA', messageData);
     }
-  }, [typeof messageData, groupSelected]);
+  }, [messageData, groupSelected]);
 
   const refetchOnline = async () => {
     await onlineRefetch({ groupid: window.location.href.substring(window.location.href.lastIndexOf('/') + 1) });
@@ -250,7 +250,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
 
     setInterval(() => {
       refetchOnline();
-    }, 15000);
+    }, 5000);
   }, []);
 
   var today: any = new Date();
