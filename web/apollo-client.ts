@@ -34,17 +34,7 @@ const link = process.browser
 
 const client = new ApolloClient({
   link,
-  cache: new InMemoryCache({
-    typePolicies: {
-      Subscription: {
-        fields: {
-          GetAllMessages: {
-            merge: true,
-          },
-        },
-      },
-    },
-  }),
+  cache: new InMemoryCache(),
 });
 
 export default client;
