@@ -107,7 +107,6 @@ export const Search = () => {
     const token = localStorage.getItem('token');
     if (session && !token) {
       const result = await client.query({ query: GET_USER_ID, variables: { email: session.user.email } });
-      console.log('RES', user);
       const currentUser: {
         username: string;
         email: string;
@@ -130,9 +129,6 @@ export const Search = () => {
   };
 
   useEffect(() => {
-    if (groupLoading) console.log('Loading');
-    if (groupData) console.log(groupData);
-    console.log('ITEMS', selectedItems);
     if (selectedItems.length > 0) {
       setError(false);
     }
@@ -140,7 +136,6 @@ export const Search = () => {
       setNameError(false);
     }
     GetUser();
-    console.log('ROUTER', router);
   }, [selectedItems, error, nameError, session, groupData]);
 
   return (

@@ -10,7 +10,7 @@ const wsLink = process.browser
       // uri: 'ws://localhost:4000/subscriptions',
       options: {
         reconnect: true,
-        timeout: 20000,
+        timeout: 5000,
       },
     })
   : null;
@@ -34,7 +34,17 @@ const link = process.browser
 
 const client = new ApolloClient({
   link,
-  cache: new InMemoryCache(),
+  cache: new InMemoryCache({
+    typePolicies: {
+      Subscription: {
+        fields: {
+          GetAllMessages: {
+            merge: true,
+          },
+        },
+      },
+    },
+  }),
 });
 
 export default client;

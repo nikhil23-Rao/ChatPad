@@ -60,6 +60,7 @@ export const getStaticProps = async (context) => {
 
 const Chat: React.FC<ChatProps> = ({ currId }) => {
   const [groupSelected, setGroupSelected] = useState('');
+  const [members, setMembers] = useState<any[]>([]);
   const [query, setQuery] = useState('');
   const [loader, setLoader] = useState(false);
   const [messages, setMessages] = useState<any[]>([]);
@@ -120,9 +121,12 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   const toast = useToast();
 
   const { data, loading } = useQuery(GET_GROUPS, { variables: { authorid: user?.id } });
-  const { data: messageData, loading: messageLoading } = useQuery(GET_INITIAL_MESSAGES, {
-    variables: { groupid: groupSelected, limit, offset: 0 },
-  });
+  const { data: messageData, loading: messageLoading, refetch: GetInitalMessagesRefetch } = useQuery(
+    GET_INITIAL_MESSAGES,
+    {
+      variables: { groupid: groupSelected, limit, offset: 0 },
+    },
+  );
   const { data: loadMoreData, loading: loadMoreLoading } = useQuery(LOAD_MORE, {
     variables: {
       limit,
@@ -135,7 +139,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   });
   const [SendMessage] = useMutation(SEND_MESSAGE);
   const { data: realtimeData } = useSubscription(GET_ALL_MESSAGES);
-  const { data: GroupNameData, loading: GroupNameLoading } = useQuery(GET_GROUP_NAME, {
+  const { data: GroupNameData, loading: GroupNameLoading, refetch: GroupNameRefetch } = useQuery(GET_GROUP_NAME, {
     variables: { groupid: groupSelected },
   });
   const { data: onlineData, loading: onlineLoading, refetch: onlineRefetch } = useQuery(GET_MEMBERS, {
@@ -157,7 +161,6 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   useEffect(() => {
     const el = document.getElementById('chatDiv');
     if (el) el.scrollTop = el.scrollHeight;
-    searchDataRefetch();
   }, [messages, realtimeData, messageData]);
 
   useEffect(() => {
@@ -165,10 +168,10 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
       const messages = [...messageData.GetInitialMessages];
       setMessages(messages.reverse());
     }
-  }, [typeof messageData]);
+  }, [groupSelected, messageData]);
 
   const refetchOnline = async () => {
-    await onlineRefetch({ groupid: groupSelected });
+    await onlineRefetch({ groupid: window.location.href.substr(window.location.href.lastIndexOf('/') + 1) });
   };
 
   useEffect(() => {
@@ -179,6 +182,10 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
       }
     }, 800); // Load time
   }, []);
+
+  useEffect(() => {
+    console.log('GROUPSELECTEDONLOAD', groupSelected);
+  }, [groupSelected]);
 
   useEffect(() => {
     (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
@@ -197,16 +204,16 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
       if (document.visibilityState === 'hidden' && user) {
         SetChatOn({ variables: { authorid: user.id, groupid: '' } });
       }
-    }, 15000);
+    }, 10000);
     setInterval(() => {
       if (document.visibilityState === 'visible' && user) {
         SetChatOn({ variables: { authorid: user.id, groupid: groupSelected } });
       }
-    }, 15000);
+    }, 10000);
 
     setInterval(() => {
       refetchOnline();
-    }, 15000);
+    }, 10000);
 
     const el = document.getElementById('chatDiv');
     if (el) {
@@ -229,10 +236,10 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
     ) {
       setMessages([...messages, realtimeData.GetAllMessages[realtimeData.GetAllMessages.length - 1]]);
     }
-    setGroupSelected(currId);
+    setGroupSelected(window.location.href.substr(window.location.href.lastIndexOf('/') + 1));
 
     GetUser();
-  }, [session, groupSelected, messageData, realtimeData, user?.dark_theme]);
+  }, [session, messageData, realtimeData, user?.dark_theme, groupSelected]);
 
   var today: any = new Date();
   var dd = String(today.getDate()).padStart(2, '0');
@@ -244,7 +251,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
 
   today = mm + '/' + dd + '/' + yyyy;
 
-  if (loading || router.isFallback)
+  if (loading || router.isFallback || onlineLoading)
     return (
       <div className={feedStyles.centered}>
         <Spinner thickness="4px" speed="0.65s" emptyColor="gray.200" color="blue.500" size="xl" />
@@ -444,7 +451,6 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                 if (!loadMoreData || loadMoreLoading) return setLoader(true);
                 setOffset(offset + 10);
                 const dataLoadMore = [...loadMoreData.LoadMore];
-                console.log('LOADMORE', dataLoadMore);
                 setMessages([...dataLoadMore.reverse(), ...messages]);
                 setLoader(false);
               }}
@@ -715,11 +721,25 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                   >
                     <div
                       style={{
-                        backgroundColor: group.id === groupSelected ? (!darkMode ? '#c5e2ed' : '#144e80') : '',
+                        backgroundColor:
+                          group.id === window.location.href.substr(window.location.href.lastIndexOf('/') + 1)
+                            ? !darkMode
+                              ? '#c5e2ed'
+                              : '#144e80'
+                            : '',
                       }}
                       className={darkMode ? feedStyles.sidebarcontent : feedStyles.sidebarcontentlight}
                       key={group.id}
-                      onClick={() => (window.location.href = `/chat/${group.id}`)}
+                      onClick={async () => {
+                        window.history.pushState('', '', `/chat/${group.id}`);
+                        const url = window.location.href;
+                        const id = url.substring(url.lastIndexOf('/') + 1);
+                        setGroupSelected(id);
+                        const data = await onlineRefetch({ groupid: id });
+                        console.log(data);
+                        await GetInitalMessagesRefetch({ groupid: id, limit, offset: 0 });
+                        await GroupNameRefetch({ groupid: id });
+                      }}
                     >
                       {group.members[0].id === user?.id ? (
                         <div style={{ marginTop: '3%', marginLeft: '3%', paddingTop: '3%' }}>
@@ -795,10 +815,26 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                     key={group.id}
                   >
                     <div
-                      style={{ backgroundColor: group.id === groupSelected ? (!darkMode ? '#c5e2ed' : '#144e80') : '' }}
+                      style={{
+                        backgroundColor:
+                          group.id === window.location.href.substr(window.location.href.lastIndexOf('/') + 1)
+                            ? !darkMode
+                              ? '#c5e2ed'
+                              : '#144e80'
+                            : '',
+                      }}
                       className={darkMode ? feedStyles.sidebarcontent : feedStyles.sidebarcontentlight}
                       key={group.id}
-                      onClick={() => (window.location.href = `/chat/${group.id}`)}
+                      onClick={async () => {
+                        window.history.pushState('', '', `/chat/${group.id}`);
+                        const url = window.location.href;
+                        const id = url.substring(url.lastIndexOf('/') + 1);
+                        setGroupSelected(id);
+                        const data = await onlineRefetch({ groupid: id });
+                        console.log(data);
+                        await GetInitalMessagesRefetch({ groupid: id, limit, offset: 0 });
+                        await GroupNameRefetch({ groupid: id });
+                      }}
                     >
                       <div style={{ marginTop: '3%', marginLeft: '6%', paddingTop: '3%' }}>
                         <img
