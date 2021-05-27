@@ -698,16 +698,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
           <br />
           <br />
           <br />
-          {searchLoading && (
-            <Spinner
-              thickness="4px"
-              speed="0.65s"
-              emptyColor="gray.200"
-              color="blue.500"
-              size="xl"
-              style={{ left: 190, position: 'relative', top: 30 }}
-            />
-          )}
+
           {searchData &&
             searchData.SearchGroups.map((group) => {
               if (group.members.length === 2) {
