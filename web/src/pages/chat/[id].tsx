@@ -104,15 +104,14 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
       setUser(currentUser);
       await SwitchOnline({ variables: { authorid: currentUser.id, value: true } });
       await SetChatOn({ variables: { authorid: currentUser.id, groupid: groupSelected } });
-      window.addEventListener('beforeunload', function (e) {
-        SwitchOnline({ variables: { authorid: currentUser.id, value: false } });
-        var start = Date.now(),
-          now = start;
-        var delay = 60; // msec
-        while (now - start < delay) {
-          now = Date.now();
-        }
-        delete e['returnValue'];
+      window.addEventListener('beforeunload', async function (e) {
+        const t0 = this.performance.now();
+        await SwitchOnline({ variables: { authorid: currentUser.id, value: false } });
+        await SetChatOn({ variables: { authorid: currentUser.id, groupid: '' } });
+        const t1 = this.performance.now();
+        console.log(t1 - t0);
+        for (var i = 0; i < 10000000 + (t1 - t0); i++) {}
+        return undefined;
       });
     }
   };
@@ -151,7 +150,8 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   const [SetChatOn] = useMutation(SET_CHAT_ON);
 
   const playSound = () => {
-    const audio: any = document.getElementById('sound');
+    const audio = document.getElementById('sound');
+
     if (audio) {
       (audio as HTMLMediaElement).play();
     }
@@ -267,11 +267,13 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
       <div>
         {GroupNameData && groupSelected !== '' && groupSelected !== undefined && groupSelected !== null && (
           <nav
-            className="navbar navbar-light"
+            className="navbar navbar-light shadow-lg"
             style={{
               background: darkMode ? '#1c1c1c' : '#fff',
               position: 'relative',
               height: 100,
+              borderBottom: darkMode ? '1px solid #4E4F51' : '1px solid #ccc',
+              boxShadow: '10px',
             }}
           >
             <span
@@ -452,7 +454,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                 setMessages([...dataLoadMore.reverse(), ...messages]);
                 setLoader(false);
               }}
-              style={{ color: '#fff', left: 1000 }}
+              style={{ color: '#fff', left: 1000, top: 20 }}
               className={feedStyles.loadmorebtn}
               children={<EjectIcon style={{ width: '4vh', height: '4vh' }} />}
             ></IconButton>
@@ -476,7 +478,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
             messages.map((message) => {
               return (
                 <React.Fragment key={message.messageid}>
-                  <div>
+                  <div style={{ position: 'relative', top: 30 }}>
                     <div
                       style={{
                         position: 'relative',
@@ -629,7 +631,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
         <div
           style={{
             position: 'absolute',
-            top: -8,
+            top: -3,
             right: 100,
           }}
         >
@@ -638,7 +640,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
             <div className="hamburger rainbow-box" style={{ borderRadius: 50, backgroundColor: 'transparent' }}>
               <div>
                 <i
-                  className={`fa fa-${visible ? 'user-plus' : 'plus'} fa-2x`}
+                  className={`fa fa-${visible ? 'user-plus' : 'plus'} fa-3x`}
                   style={{ color: darkMode ? '#fff' : '' }}
                 ></i>
               </div>
@@ -676,9 +678,9 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
               marginTop: 15,
               color: darkMode ? '#fff' : '#000',
             }}
-            className={tw('text-3xl text-primary-100')}
+            className={tw('text-3xl font-bold')}
           >
-            Chats
+            Your Chats
           </h1>
 
           <div className="search-box" style={{ backgroundColor: !darkMode ? '#fff' : '', top: 86, outline: 'none' }}>

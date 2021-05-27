@@ -57,13 +57,11 @@ const Feed: React.FC<FeedProps> = ({}) => {
       await SetChatOn({ variables: { authorid: currentUser.id, groupid: '' } });
       window.addEventListener('beforeunload', function (e) {
         SwitchOnline({ variables: { authorid: currentUser.id, value: false } });
-        var start = Date.now(),
-          now = start;
-        var delay = 60; // msec
-        while (now - start < delay) {
-          now = Date.now();
-        }
-        delete e['returnValue'];
+        window.addEventListener('beforeunload', async function (e) {
+          SwitchOnline({ variables: { authorid: currentUser.id, value: false } });
+          for (var i = 0; i < 5000000; i++) {}
+          return undefined;
+        });
       });
     }
     if (token) {
@@ -218,9 +216,9 @@ const Feed: React.FC<FeedProps> = ({}) => {
               marginTop: 15,
               color: darkMode ? '#fff' : '#000',
             }}
-            className={tw('text-3xl text-primary-100')}
+            className={tw('text-3xl font-bold')}
           >
-            Chats
+            Your Chats
           </h1>
           <div className="search-box" style={{ backgroundColor: !darkMode ? '#fff' : '', top: 86 }}>
             <input
