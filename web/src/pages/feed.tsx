@@ -253,147 +253,141 @@ const Feed: React.FC<FeedProps> = ({}) => {
             searchData.SearchGroups.map((group) => {
               if (group.members.length === 2) {
                 return (
-                  <Skeleton
-                    style={{ borderRadius: 15, position: 'relative', width: 310, left: 5 }}
-                    isLoaded={!searchLoading}
+                  <div
+                    style={{
+                      backgroundColor: group.id === groupSelected ? (!darkMode ? '#c5e2ed' : '#144e80') : '',
+                    }}
+                    className={darkMode ? feedStyles.sidebarcontent : feedStyles.sidebarcontentlight}
                     key={group.id}
+                    onClick={() => {
+                      window.history.pushState('', '', `/chat/${group.id}`);
+                      window.location.reload(true);
+                    }}
                   >
-                    <div
-                      style={{
-                        backgroundColor: group.id === groupSelected ? (!darkMode ? '#c5e2ed' : '#144e80') : '',
-                      }}
-                      className={darkMode ? feedStyles.sidebarcontent : feedStyles.sidebarcontentlight}
-                      key={group.id}
-                      onClick={() => (window.location.href = `/chat/${group.id}`)}
-                    >
-                      {group.members[0].id === user?.id ? (
-                        <div style={{ marginTop: '3%', marginLeft: '3%', paddingTop: '3%' }}>
-                          <img
-                            src={group.members[1].profile_picture}
-                            alt=""
-                            style={{ width: 54, height: 54, borderRadius: 125 }}
-                          />
-                          {group.members[1].online ? (
-                            <div className="onlinedot" style={{ position: 'absolute', bottom: 19, left: 48 }} />
-                          ) : (
-                            ''
-                          )}
-                        </div>
-                      ) : (
-                        <div style={{ marginTop: '3%', marginLeft: '3%', paddingTop: '3%' }}>
-                          <img
-                            src={group.members[0].profile_picture}
-                            alt=""
-                            style={{ width: 54, height: 54, borderRadius: 125 }}
-                          />
-                          {group.members[0].online ? (
-                            <div className="onlinedot" style={{ position: 'absolute', bottom: 19, left: 48 }} />
-                          ) : (
-                            ''
-                          )}
-                        </div>
-                      )}
-                      {group.members.length === 2 ? (
-                        <>
+                    {group.members[0].id === user?.id ? (
+                      <div style={{ marginTop: '3%', marginLeft: '3%', paddingTop: '3%' }}>
+                        <img
+                          src={group.members[1].profile_picture}
+                          alt=""
+                          style={{ width: 54, height: 54, borderRadius: 125 }}
+                        />
+                        {group.members[1].online ? (
+                          <div className="onlinedot" style={{ position: 'absolute', bottom: 19, left: 48 }} />
+                        ) : (
+                          ''
+                        )}
+                      </div>
+                    ) : (
+                      <div style={{ marginTop: '3%', marginLeft: '3%', paddingTop: '3%' }}>
+                        <img
+                          src={group.members[0].profile_picture}
+                          alt=""
+                          style={{ width: 54, height: 54, borderRadius: 125 }}
+                        />
+                        {group.members[0].online ? (
+                          <div className="onlinedot" style={{ position: 'absolute', bottom: 19, left: 48 }} />
+                        ) : (
+                          ''
+                        )}
+                      </div>
+                    )}
+                    {group.members.length === 2 ? (
+                      <>
+                        <p
+                          style={{
+                            fontWeight: groupSelected === group.id ? 'bold' : 'normal',
+                            fontFamily: 'Lato',
+                            color: darkMode ? '#fff' : '#000',
+                            position: 'relative',
+                            fontSize: 20,
+                            bottom: 50,
+                            left: 75,
+                          }}
+                          className={feedStyles.groupName}
+                        >
+                          {group.members[0].id === user?.id ? group.members[1].username : group.members[0].username}
+                        </p>
+                        {group.last_message.body === null ? null : (
                           <p
                             style={{
-                              fontWeight: groupSelected === group.id ? 'bold' : 'normal',
                               fontFamily: 'Lato',
                               color: darkMode ? '#fff' : '#000',
                               position: 'relative',
-                              fontSize: 20,
                               bottom: 50,
                               left: 75,
                             }}
                             className={feedStyles.groupName}
                           >
-                            {group.members[0].id === user?.id ? group.members[1].username : group.members[0].username}
+                            {group.last_message.author.id !== user?.id ? group.last_message.author.username : 'You'}:{' '}
+                            {group.last_message.body.length <= 31
+                              ? group.last_message.body
+                              : `${group.last_message.body.substr(0, 28)}...`}
                           </p>
-                          {group.last_message.body === null ? null : (
-                            <p
-                              style={{
-                                fontFamily: 'Lato',
-                                color: darkMode ? '#fff' : '#000',
-                                position: 'relative',
-                                bottom: 50,
-                                left: 75,
-                              }}
-                              className={feedStyles.groupName}
-                            >
-                              {group.last_message.author.id !== user?.id ? group.last_message.author.username : 'You'}:{' '}
-                              {group.last_message.body.length <= 31
-                                ? group.last_message.body
-                                : `${group.last_message.body.substr(0, 28)}...`}
-                            </p>
-                          )}
-                        </>
-                      ) : null}
-                    </div>
-                  </Skeleton>
+                        )}
+                      </>
+                    ) : null}
+                  </div>
                 );
               } else if (group.members.length > 2) {
                 const restOfPeople = group.members.length - 2;
                 return (
-                  <Skeleton
-                    style={{ borderRadius: 15, position: 'relative', width: 310, left: 5 }}
-                    isLoaded={!searchLoading}
+                  <div
+                    style={{ backgroundColor: group.id === groupSelected ? (!darkMode ? '#c5e2ed' : '#144e80') : '' }}
+                    className={darkMode ? feedStyles.sidebarcontent : feedStyles.sidebarcontentlight}
                     key={group.id}
+                    onClick={() => {
+                      window.history.pushState('', '', `/chat/${group.id}`);
+                      window.location.reload(true);
+                    }}
                   >
-                    <div
-                      style={{ backgroundColor: group.id === groupSelected ? (!darkMode ? '#c5e2ed' : '#144e80') : '' }}
-                      className={darkMode ? feedStyles.sidebarcontent : feedStyles.sidebarcontentlight}
-                      key={group.id}
-                      onClick={() => (window.location.href = `/chat/${group.id}`)}
+                    <div style={{ marginTop: '3%', marginLeft: '6%', paddingTop: '3%' }}>
+                      <img
+                        src={group.members[0].profile_picture}
+                        alt=""
+                        style={{ width: 30, height: 30, borderRadius: 25, position: 'relative', top: 3 }}
+                      />
+                    </div>
+
+                    <div style={{ marginLeft: 3 }}>
+                      <img
+                        src={group.members[1].profile_picture}
+                        alt=""
+                        style={{ width: 30, height: 30, borderRadius: 25 }}
+                      />
+                    </div>
+                    <div className={`${feedStyles.dot} text-center`}>+{restOfPeople}</div>
+
+                    <p
+                      style={{
+                        fontWeight: groupSelected === group.id ? 'bold' : 'normal',
+                        fontFamily: 'Lato',
+                        color: darkMode ? '#fff' : '#000',
+                        position: 'relative',
+                        bottom: 85,
+                        fontSize: 20,
+                        left: 75,
+                      }}
                     >
-                      <div style={{ marginTop: '3%', marginLeft: '6%', paddingTop: '3%' }}>
-                        <img
-                          src={group.members[0].profile_picture}
-                          alt=""
-                          style={{ width: 30, height: 30, borderRadius: 25, position: 'relative', top: 3 }}
-                        />
-                      </div>
-
-                      <div style={{ marginLeft: 3 }}>
-                        <img
-                          src={group.members[1].profile_picture}
-                          alt=""
-                          style={{ width: 30, height: 30, borderRadius: 25 }}
-                        />
-                      </div>
-                      <div className={`${feedStyles.dot} text-center`}>+{restOfPeople}</div>
-
+                      {group.name}
+                    </p>
+                    {group.last_message.body === null ? null : (
                       <p
                         style={{
-                          fontWeight: groupSelected === group.id ? 'bold' : 'normal',
                           fontFamily: 'Lato',
                           color: darkMode ? '#fff' : '#000',
                           position: 'relative',
                           bottom: 85,
-                          fontSize: 20,
-                          left: 75,
+                          left: 78,
                         }}
+                        className={feedStyles.groupName}
                       >
-                        {group.name}
+                        {group.last_message.author.id !== user?.id ? group.last_message.author.username : 'You'}:{' '}
+                        {group.last_message.body.length <= 31
+                          ? group.last_message.body
+                          : `${group.last_message.body.substr(0, 28)}...`}
                       </p>
-                      {group.last_message.body === null ? null : (
-                        <p
-                          style={{
-                            fontFamily: 'Lato',
-                            color: darkMode ? '#fff' : '#000',
-                            position: 'relative',
-                            bottom: 85,
-                            left: 78,
-                          }}
-                          className={feedStyles.groupName}
-                        >
-                          {group.last_message.author.id !== user?.id ? group.last_message.author.username : 'You'}:{' '}
-                          {group.last_message.body.length <= 31
-                            ? group.last_message.body
-                            : `${group.last_message.body.substr(0, 28)}...`}
-                        </p>
-                      )}
-                    </div>
-                  </Skeleton>
+                    )}
+                  </div>
                 );
               }
             })}
