@@ -32,6 +32,7 @@ export const GET_GROUPS = gql`
       }
       id
       name
+      image
     }
   }
 `;
@@ -73,6 +74,7 @@ export const GET_GROUP_NAME = gql`
       }
       name
       id
+      image
     }
   }
 `;
@@ -99,10 +101,8 @@ export const SEARCH_GROUPS = gql`
           profile_picture
           id
         }
-        image
-        time
-        date
       }
+      image
     }
   }
 `;

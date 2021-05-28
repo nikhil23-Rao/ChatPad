@@ -27,8 +27,8 @@ export const LOGIN = gql`
 `;
 
 export const CREATE_GROUP = gql`
-  mutation CreateGroup($id: String, $members: [User], $name: String) {
-    CreateGroup(id: $id, members: $members, name: $name)
+  mutation CreateGroup($id: String, $members: [User], $name: String, $image: String) {
+    CreateGroup(id: $id, members: $members, name: $name, image: $image)
   }
 `;
 

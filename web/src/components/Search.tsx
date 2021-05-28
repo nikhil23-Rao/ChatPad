@@ -16,7 +16,7 @@ export const Search = () => {
   const [session] = useSession();
   const [inputValue, setInputValue] = useState<any>('');
   const [error, setError] = useState(false);
-  const [duplicate, setDuplicate] = useState(false);
+  const [image, setImage] = useState<string | any>('');
   const [nameError, setNameError] = useState(false);
   const [nameVal, setNameVal] = useState('');
   const [user, setUser] = useState<{
@@ -138,8 +138,50 @@ export const Search = () => {
     GetUser();
   }, [selectedItems, error, nameError, session, groupData]);
 
+  const reader = (file) => {
+    return new Promise((resolve, reject) => {
+      const fileReader = new FileReader();
+      fileReader.onload = () => resolve(fileReader.result);
+      fileReader.readAsDataURL(file);
+    });
+  };
+
   return (
     <>
+      <input
+        type="file"
+        id="filepicker"
+        accept="image/x-png,image/gif,image/jpeg"
+        onChange={(e: any) => {
+          const file = e.target.files[0];
+          console.log('FILE', file);
+          reader(file).then((res) => setImage(res));
+        }}
+        style={{ display: 'none' }}
+      />
+      {selectedItems.length > 1 ? (
+        <div
+          style={{
+            position: 'relative',
+            border: '3px dotted #add8e6',
+            width: 160,
+            height: 160,
+            left: 240,
+            bottom: 50,
+            cursor: 'pointer',
+          }}
+          onClick={() => document.getElementById('filepicker')?.click()}
+        >
+          {image.length === 0 ? (
+            <>
+              <i className="fa fa-camera fa-5x" style={{ top: 40, left: 40, position: 'relative' }}></i>
+              <p style={{ top: 50, left: 17, position: 'relative', fontFamily: 'Helvetica' }}>Add a group image</p>
+            </>
+          ) : (
+            <img src={image} alt="" style={{ width: '100%', height: '100%' }} />
+          )}
+        </div>
+      ) : null}
       <div>
         <div style={comboboxWrapperStyles as any}>
           <div style={comboboxStyles} {...getComboboxProps()}>
@@ -223,6 +265,7 @@ export const Search = () => {
         </ul>
         <div className="mt-4" style={{ marginLeft: '36%' }}>
           <Button
+            style={{ width: 200 }}
             colorScheme="green"
             isLoading={loading}
             onClick={async () => {
@@ -261,7 +304,7 @@ export const Search = () => {
                   setLoading(true);
                   await client.mutate({
                     mutation: CREATE_GROUP,
-                    variables: { id: generateId(24), members: GetMembers(), name: nameVal },
+                    variables: { id: generateId(24), members: GetMembers(), name: nameVal, image },
                   });
                   setLoading(false);
                   router.reload();
@@ -273,9 +316,16 @@ export const Search = () => {
               }
             }}
           >
-            Create Group
+            Create Chat
           </Button>
         </div>
+        {image.length !== 0 && (
+          <div className="mt-2" style={{ marginLeft: '36%' }}>
+            <Button colorScheme="red" style={{ width: 200 }} onClick={() => setImage('')}>
+              Clear Image
+            </Button>
+          </div>
+        )}
       </div>
     </>
   );

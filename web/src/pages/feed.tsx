@@ -156,7 +156,22 @@ const Feed: React.FC<FeedProps> = ({}) => {
             >
               <i className="fa fa-paper-plane fa-5x" style={{ color: darkMode ? '#fff' : '#000' }}></i>
             </div>
-            <p style={{ top: '62%', position: 'fixed', left: '44%', color: darkMode ? '#fff' : '#000' }}>
+            <p
+              style={{
+                top:
+                  (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
+                  (typeof window !== 'undefined' && window.screen.availWidth) < 1800
+                    ? '62%'
+                    : '58%',
+                position: 'fixed',
+                left:
+                  (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
+                  (typeof window !== 'undefined' && window.screen.availWidth) < 1800
+                    ? '44%'
+                    : '46%',
+                color: darkMode ? '#fff' : '#000',
+              }}
+            >
               To start, select a group on the left hand side or create a new group.
             </p>
           </>
@@ -254,6 +269,7 @@ const Feed: React.FC<FeedProps> = ({}) => {
                   <div
                     style={{
                       backgroundColor: group.id === groupSelected ? (!darkMode ? '#c5e2ed' : '#144e80') : '',
+                      marginBottom: 20,
                     }}
                     className={darkMode ? feedStyles.sidebarcontent : feedStyles.sidebarcontentlight}
                     key={group.id}
@@ -327,10 +343,14 @@ const Feed: React.FC<FeedProps> = ({}) => {
                   </div>
                 );
               } else if (group.members.length > 2) {
+                console.log(group);
                 const restOfPeople = group.members.length - 2;
                 return (
                   <div
-                    style={{ backgroundColor: group.id === groupSelected ? (!darkMode ? '#c5e2ed' : '#144e80') : '' }}
+                    style={{
+                      backgroundColor: group.id === groupSelected ? (!darkMode ? '#c5e2ed' : '#144e80') : '',
+                      marginBottom: 20,
+                    }}
                     className={darkMode ? feedStyles.sidebarcontent : feedStyles.sidebarcontentlight}
                     key={group.id}
                     onClick={() => {
@@ -338,22 +358,34 @@ const Feed: React.FC<FeedProps> = ({}) => {
                       window.location.reload(true);
                     }}
                   >
-                    <div style={{ marginTop: '3%', marginLeft: '6%', paddingTop: '3%' }}>
-                      <img
-                        src={group.members[0].profile_picture}
-                        alt=""
-                        style={{ width: 30, height: 30, borderRadius: 25, position: 'relative', top: 3 }}
-                      />
-                    </div>
+                    {group.image.length === 0 ? (
+                      <>
+                        <div style={{ marginTop: '3%', marginLeft: '6%', paddingTop: '3%' }}>
+                          <img
+                            src={group.members[0].profile_picture}
+                            alt=""
+                            style={{ width: 30, height: 30, borderRadius: 25, position: 'relative', top: 3 }}
+                          />
+                        </div>
 
-                    <div style={{ marginLeft: 3 }}>
-                      <img
-                        src={group.members[1].profile_picture}
-                        alt=""
-                        style={{ width: 30, height: 30, borderRadius: 25 }}
-                      />
-                    </div>
-                    <div className={`${feedStyles.dot} text-center`}>+{restOfPeople}</div>
+                        <div style={{ marginLeft: 3 }}>
+                          <img
+                            src={group.members[1].profile_picture}
+                            alt=""
+                            style={{ width: 30, height: 30, borderRadius: 25 }}
+                          />
+                        </div>
+                      </>
+                    ) : (
+                      <div>
+                        <img
+                          src={group.image}
+                          style={{ width: 64, height: 64, borderRadius: 125, position: 'relative', top: 12, left: 6 }}
+                          alt=""
+                        />
+                      </div>
+                    )}
+                    {group.image.length === 0 && <div className={`${feedStyles.dot} text-center`}>+{restOfPeople}</div>}
 
                     <p
                       style={{
@@ -361,9 +393,9 @@ const Feed: React.FC<FeedProps> = ({}) => {
                         fontFamily: 'Lato',
                         color: darkMode ? '#fff' : '#000',
                         position: 'relative',
-                        bottom: 85,
+                        bottom: group.image.length === 0 ? 85 : 50,
                         fontSize: 20,
-                        left: 75,
+                        left: group.image.length === 0 ? 75 : 80,
                       }}
                     >
                       {group.name}
@@ -374,8 +406,8 @@ const Feed: React.FC<FeedProps> = ({}) => {
                           fontFamily: 'Lato',
                           color: darkMode ? '#fff' : '#000',
                           position: 'relative',
-                          bottom: 85,
-                          left: 78,
+                          bottom: group.image.length === 0 ? 85 : 50,
+                          left: group.image.length === 0 ? 78 : 83,
                         }}
                         className={feedStyles.groupName}
                       >

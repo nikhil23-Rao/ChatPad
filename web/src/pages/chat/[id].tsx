@@ -4,6 +4,18 @@ import feedStyles from '../../styles/feed.module.css';
 import client from '@/../apollo-client';
 import { IconButton } from '@material-ui/core';
 import {
+  Drawer,
+  DrawerBody,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerOverlay,
+  DrawerContent,
+  DrawerCloseButton,
+  Button,
+  Input,
+  useDisclosure,
+} from '@chakra-ui/react';
+import {
   GET_CHAT_PATHS,
   GET_GROUPS,
   GET_GROUP_NAME,
@@ -61,6 +73,7 @@ export const getStaticProps = async (context) => {
 const Chat: React.FC<ChatProps> = ({ currId }) => {
   const [groupSelected, setGroupSelected] = useState('');
   const [query, setQuery] = useState('');
+  const [sidebarShown, setSidebarShown] = useState(true);
   const [loader, setLoader] = useState(false);
   const [messages, setMessages] = useState<any[]>([]);
   const [showEmoji, setShowEmoji] = useState(false);
@@ -104,19 +117,23 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
       setUser(currentUser);
       await SwitchOnline({ variables: { authorid: currentUser.id, value: true } });
       await SetChatOn({ variables: { authorid: currentUser.id, groupid: groupSelected } });
-      window.addEventListener('beforeunload', async function (e) {
-        const t0 = this.performance.now();
-        await SwitchOnline({ variables: { authorid: currentUser.id, value: false } });
-        await SetChatOn({ variables: { authorid: currentUser.id, groupid: '' } });
-        const t1 = this.performance.now();
-        console.log(t1 - t0);
-        for (var i = 0; i < 10000000 + (t1 - t0); i++) {}
-        return undefined;
+      window.addEventListener('beforeunload', function (e) {
+        SwitchOnline({ variables: { authorid: currentUser.id, value: false } });
+        SetChatOn({ variables: { authorid: currentUser.id, value: '' } });
+        var start = Date.now(),
+          now = start;
+        var delay = 100; // msec
+        while (now - start < delay) {
+          now = Date.now();
+        }
+        delete e['returnValue'];
       });
     }
   };
 
   const toast = useToast();
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const btnRef = React.useRef();
 
   const { data, loading } = useQuery(GET_GROUPS, { variables: { authorid: user?.id } });
   const { data: messageData, loading: messageLoading, refetch: GetInitalMessagesRefetch } = useQuery(
@@ -189,6 +206,8 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
       ? ((document.body.style as any) = 'overflow: hidden; zoom: 0.8;')
       : 'overflow: hidden; zoom: 1;';
 
+    onClose();
+
     if (user && user.dark_theme === 'true') {
       (document.body.style as any) = 'background: #0C0E12';
     }
@@ -248,7 +267,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
 
   today = mm + '/' + dd + '/' + yyyy;
 
-  if (loading || router.isFallback)
+  if (loading || router.isFallback || onlineLoading)
     return (
       <div className={feedStyles.centered}>
         <Spinner thickness="4px" speed="0.65s" emptyColor="gray.200" color="blue.500" size="xl" />
@@ -303,42 +322,60 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                 </>
               ) : GroupNameData.GetGroupName.members.length > 2 ? (
                 <>
-                  <div style={{ display: 'inline', position: 'relative', left: 50 }}>
-                    <img
-                      src={GroupNameData.GetGroupName.members[0].profile_picture}
-                      style={{
-                        width: 31,
-                        height: 31,
-                        borderRadius: 100,
-                        display: 'inline',
-                        position: 'relative',
-                        top: 8,
-                        left: 18,
-                      }}
-                      alt=""
-                    />{' '}
-                    <img
-                      src={GroupNameData.GetGroupName.members[1].profile_picture}
-                      style={{
-                        width: 31,
-                        height: 31,
-                        borderRadius: 100,
-                        display: 'inline',
-                        position: 'relative',
-                        top: -10,
-                        right: 5,
-                      }}
-                      alt=""
-                    />
-                    <div
-                      className={feedStyles.navdot}
-                      style={{ position: 'relative', top: 10, right: 60, width: 30, height: 30 }}
-                    >
-                      <p style={{ position: 'relative', left: 2, top: 2 }}>
-                        +{GroupNameData.GetGroupName.members.length - 2}
-                      </p>
+                  {GroupNameData.GetGroupName.image.length === 0 ? (
+                    <div style={{ display: 'inline', position: 'relative', left: 50 }}>
+                      <img
+                        src={GroupNameData.GetGroupName.members[0].profile_picture}
+                        style={{
+                          width: 31,
+                          height: 31,
+                          borderRadius: 100,
+                          display: 'inline',
+                          position: 'relative',
+                          top: 8,
+                          left: 18,
+                        }}
+                        alt=""
+                      />{' '}
+                      <img
+                        src={GroupNameData.GetGroupName.members[1].profile_picture}
+                        style={{
+                          width: 31,
+                          height: 31,
+                          borderRadius: 100,
+                          display: 'inline',
+                          position: 'relative',
+                          top: -10,
+                          right: 5,
+                        }}
+                        alt=""
+                      />
+                      <div
+                        className={feedStyles.navdot}
+                        style={{ position: 'relative', top: 10, right: 60, width: 30, height: 30 }}
+                      >
+                        <p style={{ position: 'relative', left: 2, top: 2 }}>
+                          +{GroupNameData.GetGroupName.members.length - 2}
+                        </p>
+                      </div>
                     </div>
-                  </div>
+                  ) : (
+                    <div style={{ display: 'inline', position: 'relative', left: 50 }}>
+                      <img
+                        src={GroupNameData.GetGroupName.image}
+                        style={{
+                          width: 71,
+                          height: 71,
+                          borderRadius: 100,
+                          display: 'inline',
+                          position: 'relative',
+                          top: 0,
+                          right: 5,
+                        }}
+                        alt=""
+                      />
+                    </div>
+                  )}
                 </>
               ) : null}
               {GroupNameData.GetGroupName.members.length === 2 ? (
@@ -364,7 +401,12 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                     fontFamily: 'Lato',
                     fontWeight: 'bold',
                     fontSize: 28,
-                    marginLeft: GroupNameData.GetGroupName.members.length === 2 ? 10 : '',
+                    marginLeft:
+                      GroupNameData.GetGroupName.members.length === 2
+                        ? 10
+                        : GroupNameData.GetGroupName.image.length > 0
+                        ? 60
+                        : '',
                     color: darkMode ? '#fff' : '#000',
                   }}
                 >
@@ -380,7 +422,12 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                     position: 'relative',
                     textAlign: 'left',
                     color: darkMode ? '#fff' : '#000',
-                    bottom: GroupNameData.GetGroupName.members.length === 2 ? 15 : 5,
+                    bottom:
+                      GroupNameData.GetGroupName.members.length === 2
+                        ? 15
+                        : GroupNameData.GetGroupName.image.length > 0
+                        ? 20
+                        : 5,
                     marginLeft:
                       GroupNameData.GetGroupName.members.length === 2
                         ? 66
@@ -580,6 +627,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                       }
                       style={{
                         marginBottom: message.author.id !== user.id ? -40 : -4,
+                        marginLeft: !sidebarShown ? -100 : '',
                       }}
                     >
                       {message.image ? (
@@ -631,6 +679,23 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
         <div
           style={{
             position: 'absolute',
+            top: 28,
+            right: 120,
+          }}
+        >
+          <i
+            className="fa fa-info-circle fa-3x"
+            ref={btnRef as any}
+            onClick={() => {
+              (document.body.style as any) = 'zoom: 1';
+              onOpen();
+            }}
+            style={{ color: darkMode ? '#fff' : '', cursor: 'pointer' }}
+          ></i>
+        </div>
+        <div
+          style={{
+            position: 'absolute',
             top: -3,
             right: 100,
           }}
@@ -657,199 +722,379 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
             </div>
           </div>
         </div>
-        <div
-          className={feedStyles.leftsidebar}
-          style={{
-            backgroundColor: darkMode ? '#1c1c1c' : '#EDEDED',
-            borderRightColor: darkMode ? '#4E4F51' : '',
-            overflowY: 'auto',
-            overflowX: 'hidden',
-            height:
-              (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
-              (typeof window !== 'undefined' && window.screen.availWidth) < 1800
-                ? '110vh'
-                : '87vh',
-          }}
-        >
-          <h1
+        {sidebarShown ? (
+          <div
+            className={feedStyles.leftsidebar}
             style={{
-              fontSize: 24,
-              marginRight: 35,
-              marginTop: 15,
-              color: darkMode ? '#fff' : '#000',
+              backgroundColor: darkMode ? '#1c1c1c' : '#EDEDED',
+              borderRightColor: darkMode ? '#4E4F51' : '',
+              overflowY: 'auto',
+              overflowX: 'hidden',
+              height:
+                (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
+                (typeof window !== 'undefined' && window.screen.availWidth) < 1800
+                  ? '110vh'
+                  : '87vh',
             }}
-            className={tw('text-3xl font-bold')}
           >
-            Your Chats
-          </h1>
+            <h1
+              style={{
+                fontSize: 24,
+                marginRight: 35,
+                marginTop: 15,
+                color: darkMode ? '#fff' : '#000',
+              }}
+              className={tw('text-3xl font-bold')}
+            >
+              Your Chats
+            </h1>
 
-          <div className="search-box" style={{ backgroundColor: !darkMode ? '#fff' : '', top: 86, outline: 'none' }}>
-            <input
-              className="search-txt"
-              type="text"
-              name=""
-              placeholder="Search for chats..."
-              value={query}
-              style={{ color: !darkMode ? '#000' : '', paddingRight: 40, outline: 'none' }}
-              onChange={(e) => setQuery(e.currentTarget.value)}
-            />
-            <a className="search-btn" style={{ backgroundColor: !darkMode ? 'transparent' : '' }}>
-              <i className="fa fa-search" style={{ color: '#4097ff' }}></i>
-            </a>
-          </div>
-          <br />
-          <br />
-          <br />
+            <div className="search-box" style={{ backgroundColor: !darkMode ? '#fff' : '', top: 86, outline: 'none' }}>
+              <input
+                className="search-txt"
+                type="text"
+                name=""
+                placeholder="Search for chats..."
+                value={query}
+                style={{ color: !darkMode ? '#000' : '', paddingRight: 40, outline: 'none' }}
+                onChange={(e) => setQuery(e.currentTarget.value)}
+              />
+              <a className="search-btn" style={{ backgroundColor: !darkMode ? 'transparent' : '' }}>
+                <i className="fa fa-search" style={{ color: '#4097ff' }}></i>
+              </a>
+            </div>
+            <br />
+            <br />
+            <br />
+            {GroupNameData && GroupNameData.GetGroupName ? (
+              <Drawer
+                isOpen={isOpen}
+                placement="right"
+                onClose={() => {
+                  (document.body.style as any) = 'zoom: 0.8';
+                  onClose();
+                }}
+                finalFocusRef={btnRef as any}
+              >
+                <DrawerOverlay />
+                <DrawerContent style={{ backgroundColor: darkMode ? '#303640' : '' }}>
+                  <DrawerCloseButton style={{ color: '#F56565' }} />
+                  <DrawerHeader style={{ color: darkMode ? '#fff' : '#000' }}>
+                    {GroupNameData && GroupNameData.GetGroupName && GroupNameData.GetGroupName.members.length > 2
+                      ? GroupNameData.GetGroupName.name
+                      : 'DM (Direct Message)'}
+                  </DrawerHeader>
 
-          {searchData &&
-            searchData.SearchGroups.map((group) => {
-              if (group.members.length === 2) {
-                return (
-                  <div
-                    style={{
-                      backgroundColor: group.id === groupSelected ? (!darkMode ? '#c5e2ed' : '#144e80') : '',
-                    }}
-                    className={darkMode ? feedStyles.sidebarcontent : feedStyles.sidebarcontentlight}
-                    key={group.id}
-                    onClick={() => {
-                      window.history.pushState('', '', `/chat/${group.id}`);
-                      window.location.reload(true);
-                    }}
-                  >
-                    {group.members[0].id === user?.id ? (
-                      <div style={{ marginTop: '3%', marginLeft: '3%', paddingTop: '3%' }}>
-                        <img
-                          src={group.members[1].profile_picture}
-                          alt=""
-                          style={{ width: 54, height: 54, borderRadius: 125 }}
-                        />
-                        {group.members[1].online ? (
-                          <div className="onlinedot" style={{ position: 'absolute', bottom: 19, left: 48 }} />
-                        ) : (
-                          ''
-                        )}
-                      </div>
-                    ) : (
-                      <div style={{ marginTop: '3%', marginLeft: '3%', paddingTop: '3%' }}>
-                        <img
-                          src={group.members[0].profile_picture}
-                          alt=""
-                          style={{ width: 54, height: 54, borderRadius: 125 }}
-                        />
-                        {group.members[0].online ? (
-                          <div className="onlinedot" style={{ position: 'absolute', bottom: 19, left: 48 }} />
-                        ) : (
-                          ''
-                        )}
-                      </div>
-                    )}
-                    {group.members.length === 2 ? (
-                      <>
-                        <p
-                          style={{
-                            fontWeight: groupSelected === group.id ? 'bold' : 'normal',
-                            fontFamily: 'Lato',
-                            color: darkMode ? '#fff' : '#000',
-                            position: 'relative',
-                            fontSize: 20,
-                            bottom: 50,
-                            left: 75,
-                          }}
-                          className={feedStyles.groupName}
-                        >
-                          {group.members[0].id === user?.id ? group.members[1].username : group.members[0].username}
-                        </p>
-                        {group.last_message.body === null ? null : (
+                  <DrawerBody>
+                    {GroupNameData && GroupNameData.GetGroupName && GroupNameData.GetGroupName.members.length === 2 ? (
+                      GroupNameData.GetGroupName.members[0].id === user?.id ? (
+                        <>
+                          <img
+                            src={GroupNameData.GetGroupName.members[1].profile_picture}
+                            style={{ borderRadius: 100, left: 100, position: 'relative' }}
+                            alt=""
+                          />
                           <p
                             style={{
+                              fontSize: 24,
+                              marginRight: 35,
+                              marginTop: 15,
+                              marginLeft: 92,
+                              color: darkMode ? '#fff' : '#000',
+                            }}
+                            className={tw('text-3xl font-bold')}
+                          >
+                            {typeof GroupNameData !== 'undefined' && GroupNameData.GetGroupName.members[1].username}
+                          </p>
+                        </>
+                      ) : (
+                        <>
+                          <img
+                            style={{ borderRadius: 100, left: 100, position: 'relative' }}
+                            src={
+                              typeof GroupNameData !== 'undefined' &&
+                              GroupNameData.GetGroupName.members[0].profile_picture
+                            }
+                            alt=""
+                          />
+                          <p
+                            style={{
+                              fontSize: 24,
+                              marginRight: 35,
+                              marginTop: 15,
+                              marginLeft: 92,
+                              color: darkMode ? '#fff' : '#000',
+                            }}
+                            className={tw('text-3xl font-bold')}
+                          >
+                            {typeof GroupNameData !== 'undefined' && GroupNameData.GetGroupName.members[0].username}
+                          </p>
+                        </>
+                      )
+                    ) : typeof GroupNameData !== 'undefined' && GroupNameData.GetGroupName.members.length > 2 ? (
+                      <>
+                        {typeof GroupNameData !== 'undefined' && GroupNameData.GetGroupName.image.length > 0 ? (
+                          <>
+                            <img
+                              style={{ borderRadius: 100, left: 100, position: 'relative', width: 100, height: 100 }}
+                              src={GroupNameData.GetGroupName.image}
+                              alt=""
+                            />
+
+                            {GroupNameData.GetGroupName.members.map((member) => {
+                              return (
+                                <p
+                                  style={{
+                                    fontSize: 24,
+                                    marginRight: 35,
+                                    marginLeft: 120,
+                                    color: darkMode ? '#fff' : '#000',
+                                    position: 'relative',
+                                    top: 20,
+                                  }}
+                                  className={tw('text-3xl font-bold')}
+                                >
+                                  {member.username !== user?.username
+                                    ? member.username.substr(0, member.username.indexOf(' '))
+                                    : 'You'}
+                                </p>
+                              );
+                            })}
+                          </>
+                        ) : (
+                          <>
+                            <img
+                              style={{ borderRadius: 100, left: 100, position: 'relative', width: 50, top: 30 }}
+                              src={GroupNameData.GetGroupName.members[0].profile_picture}
+                              alt=""
+                            />
+                            <img
+                              style={{
+                                borderRadius: 100,
+                                left: 140,
+                                bottom: 20,
+                                position: 'relative',
+                                width: 50,
+                              }}
+                              src={GroupNameData.GetGroupName.members[1].profile_picture}
+                              alt=""
+                            />
+                            <div
+                              style={{
+                                borderRadius: 200,
+                                left: 90,
+                                marginBottom: 200,
+                                position: 'relative',
+                                width: 50,
+                                height: 50,
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                              }}
+                              className={feedStyles.dot}
+                            >
+                              <p style={{ fontSize: 22, position: 'relative', left: 10, top: 8 }}>
+                                +{GroupNameData.GetGroupName.members.length - 2}
+                              </p>
+                            </div>
+                            {GroupNameData.GetGroupName.members.map((member) => {
+                              return (
+                                <p
+                                  style={{
+                                    fontSize: 24,
+                                    marginRight: 35,
+                                    marginLeft: 120,
+                                    color: darkMode ? '#fff' : '#000',
+                                    position: 'relative',
+                                    bottom: 200,
+                                  }}
+                                  className={tw('text-3xl font-bold')}
+                                >
+                                  {member.username !== user?.username
+                                    ? member.username.substr(0, member.username.indexOf(' '))
+                                    : 'You'}
+                                </p>
+                              );
+                            })}
+                          </>
+                        )}
+                      </>
+                    ) : null}
+                  </DrawerBody>
+                </DrawerContent>
+              </Drawer>
+            ) : null}
+
+            {searchData &&
+              searchData.SearchGroups.map((group) => {
+                if (group.members.length === 2) {
+                  return (
+                    <div
+                      style={{
+                        backgroundColor: group.id === groupSelected ? (!darkMode ? '#c5e2ed' : '#144e80') : '',
+                        marginBottom: 20,
+                      }}
+                      className={darkMode ? feedStyles.sidebarcontent : feedStyles.sidebarcontentlight}
+                      key={group.id}
+                      onClick={() => {
+                        window.history.pushState('', '', `/chat/${group.id}`);
+                        window.location.reload(true);
+                      }}
+                    >
+                      {group.members[0].id === user?.id ? (
+                        <div style={{ marginTop: '3%', marginLeft: '3%', paddingTop: '3%' }}>
+                          <img
+                            src={group.members[1].profile_picture}
+                            alt=""
+                            style={{ width: 54, height: 54, borderRadius: 125 }}
+                          />
+                          {group.members[1].online ? (
+                            <div className="onlinedot" style={{ position: 'absolute', bottom: 19, left: 48 }} />
+                          ) : (
+                            ''
+                          )}
+                        </div>
+                      ) : (
+                        <div style={{ marginTop: '3%', marginLeft: '3%', paddingTop: '3%' }}>
+                          <img
+                            src={group.members[0].profile_picture}
+                            alt=""
+                            style={{ width: 54, height: 54, borderRadius: 125 }}
+                          />
+                          {group.members[0].online ? (
+                            <div className="onlinedot" style={{ position: 'absolute', bottom: 19, left: 48 }} />
+                          ) : (
+                            ''
+                          )}
+                        </div>
+                      )}
+                      {group.members.length === 2 ? (
+                        <>
+                          <p
+                            style={{
+                              fontWeight: groupSelected === group.id ? 'bold' : 'normal',
                               fontFamily: 'Lato',
                               color: darkMode ? '#fff' : '#000',
                               position: 'relative',
+                              fontSize: 20,
                               bottom: 50,
                               left: 75,
                             }}
                             className={feedStyles.groupName}
                           >
-                            {group.last_message.author.id !== user?.id ? group.last_message.author.username : 'You'}:{' '}
-                            {group.last_message.body.length <= 31
-                              ? group.last_message.body
-                              : `${group.last_message.body.substr(0, 28)}...`}
+                            {group.members[0].id === user?.id ? group.members[1].username : group.members[0].username}
                           </p>
-                        )}
-                      </>
-                    ) : null}
-                  </div>
-                );
-              } else if (group.members.length > 2) {
-                const restOfPeople = group.members.length - 2;
-                return (
-                  <div
-                    style={{ backgroundColor: group.id === groupSelected ? (!darkMode ? '#c5e2ed' : '#144e80') : '' }}
-                    className={darkMode ? feedStyles.sidebarcontent : feedStyles.sidebarcontentlight}
-                    key={group.id}
-                    onClick={() => {
-                      window.history.pushState('', '', `/chat/${group.id}`);
-                      window.location.reload(true);
-                    }}
-                  >
-                    <div style={{ marginTop: '3%', marginLeft: '6%', paddingTop: '3%' }}>
-                      <img
-                        src={group.members[0].profile_picture}
-                        alt=""
-                        style={{ width: 30, height: 30, borderRadius: 25, position: 'relative', top: 3 }}
-                      />
+                          {group.last_message.body === null ? null : (
+                            <p
+                              style={{
+                                fontFamily: 'Lato',
+                                color: darkMode ? '#fff' : '#000',
+                                position: 'relative',
+                                bottom: 50,
+                                left: 75,
+                              }}
+                              className={feedStyles.groupName}
+                            >
+                              {group.last_message.author.id !== user?.id ? group.last_message.author.username : 'You'}:{' '}
+                              {group.last_message.body.length <= 31
+                                ? group.last_message.body
+                                : `${group.last_message.body.substr(0, 28)}...`}
+                            </p>
+                          )}
+                        </>
+                      ) : null}
                     </div>
-
-                    <div style={{ marginLeft: 3 }}>
-                      <img
-                        src={group.members[1].profile_picture}
-                        alt=""
-                        style={{ width: 30, height: 30, borderRadius: 25 }}
-                      />
-                    </div>
-                    <div className={`${feedStyles.dot} text-center`}>+{restOfPeople}</div>
-
-                    <p
+                  );
+                } else if (group.members.length > 2) {
+                  console.log(group);
+                  const restOfPeople = group.members.length - 2;
+                  return (
+                    <div
                       style={{
-                        fontWeight: groupSelected === group.id ? 'bold' : 'normal',
-                        fontFamily: 'Lato',
-                        color: darkMode ? '#fff' : '#000',
-                        position: 'relative',
-                        bottom: 85,
-                        fontSize: 20,
-                        left: 75,
+                        backgroundColor: group.id === groupSelected ? (!darkMode ? '#c5e2ed' : '#144e80') : '',
+                        marginBottom: 20,
+                      }}
+                      className={darkMode ? feedStyles.sidebarcontent : feedStyles.sidebarcontentlight}
+                      key={group.id}
+                      onClick={() => {
+                        window.history.pushState('', '', `/chat/${group.id}`);
+                        window.location.reload(true);
                       }}
                     >
-                      {group.name}
-                    </p>
-                    {group.last_message.body === null ? null : (
+                      {group.image.length === 0 ? (
+                        <>
+                          <div style={{ marginTop: '3%', marginLeft: '6%', paddingTop: '3%' }}>
+                            <img
+                              src={group.members[0].profile_picture}
+                              alt=""
+                              style={{ width: 30, height: 30, borderRadius: 25, position: 'relative', top: 3 }}
+                            />
+                          </div>
+
+                          <div style={{ marginLeft: 3 }}>
+                            <img
+                              src={group.members[1].profile_picture}
+                              alt=""
+                              style={{ width: 30, height: 30, borderRadius: 25 }}
+                            />
+                          </div>
+                        </>
+                      ) : (
+                        <div>
+                          <img
+                            src={group.image}
+                            style={{ width: 64, height: 64, borderRadius: 125, position: 'relative', top: 12, left: 6 }}
+                            alt=""
+                          />
+                        </div>
+                      )}
+                      {group.image.length === 0 && (
+                        <div className={`${feedStyles.dot} text-center`}>+{restOfPeople}</div>
+                      )}
+
                       <p
                         style={{
+                          fontWeight: groupSelected === group.id ? 'bold' : 'normal',
                           fontFamily: 'Lato',
                           color: darkMode ? '#fff' : '#000',
                           position: 'relative',
-                          bottom: 85,
-                          left: 78,
+                          bottom: group.image.length === 0 ? 85 : 50,
+                          fontSize: 20,
+                          left: group.image.length === 0 ? 75 : 80,
                         }}
-                        className={feedStyles.groupName}
                       >
-                        {group.last_message.author.id !== user?.id ? group.last_message.author.username : 'You'}:{' '}
-                        {group.last_message.body.length <= 31
-                          ? group.last_message.body
-                          : `${group.last_message.body.substr(0, 28)}...`}
+                        {group.name}
                       </p>
-                    )}
-                  </div>
-                );
-              }
-            })}
-        </div>
+                      {group.last_message.body === null ? null : (
+                        <p
+                          style={{
+                            fontFamily: 'Lato',
+                            color: darkMode ? '#fff' : '#000',
+                            position: 'relative',
+                            bottom: group.image.length === 0 ? 85 : 50,
+                            left: group.image.length === 0 ? 78 : 83,
+                          }}
+                          className={feedStyles.groupName}
+                        >
+                          {group.last_message.author.id !== user?.id ? group.last_message.author.username : 'You'}:{' '}
+                          {group.last_message.body.length <= 31
+                            ? group.last_message.body
+                            : `${group.last_message.body.substr(0, 28)}...`}
+                        </p>
+                      )}
+                    </div>
+                  );
+                }
+              })}
+          </div>
+        ) : null}
+
         <div
           className={feedStyles.profile}
           style={{
             backgroundColor: darkMode ? '#1c1c1c' : '#EDEDED',
             borderRightColor: darkMode ? '#4E4F51' : '',
             borderBottomColor: !darkMode ? '#ccc' : '#4E4F51',
+            display: !sidebarShown ? 'none' : '',
           }}
         >
           <div style={{ position: 'fixed', zIndex: 1, left: 74, top: 70 }} className="onlinedot"></div>
@@ -966,9 +1211,10 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                   placeholder="Send a message..."
                   style={{
                     color: darkMode ? '#fff' : '#000',
+                    right: !sidebarShown ? 90 : '',
                     borderRadius: 10,
                     paddingRight: 100,
-                    width: messageVal.length >= 88 ? 1500 : '',
+                    width: messageVal.length >= 88 || !sidebarShown ? 3000 : '',
                     backgroundColor: darkMode ? '#303640' : '#F4F4F4',
                     minHeight: messageVal.length <= 88 ? 10 : 150,
                     bottom: messageVal.length >= 88 ? 80 : 0,
@@ -1036,7 +1282,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                 <InputRightElement
                   style={{
                     backgroundColor: 'transparent',
-                    right: 24,
+                    right: !sidebarShown ? 115 : 24,
                     cursor: 'pointer',
                   }}
                 >
