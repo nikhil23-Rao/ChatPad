@@ -267,7 +267,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
 
   today = mm + '/' + dd + '/' + yyyy;
 
-  if (loading || router.isFallback || onlineLoading)
+  if (loading || router.isFallback)
     return (
       <div className={feedStyles.centered}>
         <Spinner thickness="4px" speed="0.65s" emptyColor="gray.200" color="blue.500" size="xl" />
