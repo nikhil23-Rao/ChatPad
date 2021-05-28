@@ -771,7 +771,11 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                 isOpen={isOpen}
                 placement="right"
                 onClose={() => {
-                  (document.body.style as any) = 'zoom: 0.8';
+                  (document.body.style as any) =
+                    (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
+                    (typeof window !== 'undefined' && window.screen.availWidth) < 1800
+                      ? 'zoom: 0.8'
+                      : 'zoom: 1';
                   onClose();
                 }}
                 finalFocusRef={btnRef as any}
