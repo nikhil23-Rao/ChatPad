@@ -122,7 +122,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
         SetChatOn({ variables: { authorid: currentUser.id, value: '' } });
         var start = Date.now(),
           now = start;
-        var delay = 100; // msec
+        var delay = 60; // msec
         while (now - start < delay) {
           now = Date.now();
         }
