@@ -1291,12 +1291,11 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                   style={{
                     color: darkMode ? '#fff' : '#000',
                     right: !sidebarShown ? 90 : '',
-                    borderRadius: 10,
                     paddingRight: 100,
-                    width: messageVal.length >= 88 || !sidebarShown ? 3000 : '',
+                    borderRadius: 10,
                     backgroundColor: darkMode ? '#303640' : '#F4F4F4',
-                    minHeight: messageVal.length <= 88 ? 10 : 150,
-                    bottom: messageVal.length >= 88 ? 80 : 10,
+                    minHeight: 10,
+                    bottom: 10,
                     lineHeight: 1.8,
                     position: 'absolute',
                   }}
@@ -1382,7 +1381,6 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                         fontSize="large"
                         style={{
                           color: darkMode ? '#4097FF' : 'gray',
-                          marginBottom: messageVal.length >= 88 ? 50 : '',
                         }}
                       />
 
@@ -1391,7 +1389,6 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                         fontSize="large"
                         style={{
                           color: darkMode ? '#4097FF' : 'gray',
-                          marginBottom: messageVal.length >= 88 ? 50 : '',
                         }}
                       />
                     </>
