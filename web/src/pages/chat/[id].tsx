@@ -28,13 +28,12 @@ import {
 import { Search } from '../../components/Search';
 import { useMutation, useQuery, useSubscription } from '@apollo/client';
 import EjectIcon from '@material-ui/icons/Eject';
-import { SEND_MESSAGE, SET_CHAT_ON, SWITCH_ONLINE, TOGGLE_THEME } from '@/apollo/Mutations';
+import { SEND_MESSAGE, SET_CHAT_ON, SET_USER_TYPING, SWITCH_ONLINE, TOGGLE_THEME } from '@/apollo/Mutations';
 import { generateId } from '@/../utils/GenerateId';
 import Head from 'next/head';
-import { GET_ALL_MESSAGES } from '@/apollo/Subscriptions';
+import { GET_ALL_MESSAGES, GET_USERS_TYPING } from '@/apollo/Subscriptions';
 import { Picker } from 'emoji-mart';
 import { useRouter } from 'next/dist/client/router';
-import { animateScroll } from 'react-scroll';
 import { InputGroup, InputRightElement, Skeleton, SkeletonCircle, useToast, Spinner, Textarea } from '@chakra-ui/react';
 import EmojiEmotionsIcon from '@material-ui/icons/EmojiEmotions';
 import InsertPhotoIcon from '@material-ui/icons/InsertPhoto';
@@ -75,6 +74,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   const [query, setQuery] = useState('');
   const [sidebarShown, setSidebarShown] = useState(true);
   const [loader, setLoader] = useState(false);
+  const [messageLoader, setMessageLoader] = useState(false);
   const [messages, setMessages] = useState<any[]>([]);
   const [showEmoji, setShowEmoji] = useState(false);
   const [limit, setLimit] = useState(9);
@@ -116,7 +116,12 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
       setDarkMode(currentUser.dark_theme === 'true' ? true : false);
       setUser(currentUser);
       await SwitchOnline({ variables: { authorid: currentUser.id, value: true } });
-      await SetChatOn({ variables: { authorid: currentUser.id, groupid: groupSelected } });
+      await SetChatOn({
+        variables: {
+          authorid: currentUser.id,
+          groupid: window.location.href.substr(window.location.href.lastIndexOf('/') + 1),
+        },
+      });
       window.addEventListener('beforeunload', function (e) {
         SwitchOnline({ variables: { authorid: currentUser.id, value: false } });
         SetChatOn({ variables: { authorid: currentUser.id, value: '' } });
@@ -154,6 +159,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   });
   const [SendMessage] = useMutation(SEND_MESSAGE);
   const { data: realtimeData } = useSubscription(GET_ALL_MESSAGES);
+  const { data: typingData } = useSubscription(GET_USERS_TYPING);
   const { data: GroupNameData, loading: GroupNameLoading } = useQuery(GET_GROUP_NAME, {
     variables: { groupid: groupSelected },
   });
@@ -165,6 +171,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   const [ToggleTheme] = useMutation(TOGGLE_THEME);
   const [SwitchOnline] = useMutation(SWITCH_ONLINE);
   const [SetChatOn] = useMutation(SET_CHAT_ON);
+  const [SetUserTyping] = useMutation(SET_USER_TYPING);
 
   const playSound = () => {
     const audio = document.getElementById('sound');
@@ -173,6 +180,43 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
       (audio as HTMLMediaElement).play();
     }
   };
+
+  const GetUrl = (url: string) => {
+    window.location.href = url;
+  };
+
+  useEffect(() => {
+    GetUser();
+  }, [session]);
+
+  useEffect(() => {
+    setInterval(() => {
+      GetInitalMessagesRefetch();
+      refetchOnline();
+    }, 1000);
+  }, []);
+
+  useEffect(() => {
+    if (messageVal.length > 0 && user) {
+      SetUserTyping({
+        variables: {
+          authorid: user.id,
+          groupid: window.location.href.substr(window.location.href.lastIndexOf('/') + 1),
+          value: true,
+        },
+      });
+    }
+    if (messageVal.length === 0 && user) {
+      SetUserTyping({
+        variables: {
+          authorid: user.id,
+          groupid: window.location.href.substr(window.location.href.lastIndexOf('/') + 1),
+          value: false,
+        },
+      });
+    }
+    refetchOnline();
+  }, [user, messageVal, session, messageData]);
 
   useEffect(() => {
     const el = document.getElementById('chatDiv');
@@ -185,10 +229,10 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
       const messages = [...messageData.GetInitialMessages];
       setMessages(messages.reverse());
     }
-  }, [typeof messageData]);
+  }, [typeof messageData, groupSelected]);
 
   const refetchOnline = async () => {
-    await onlineRefetch({ groupid: groupSelected });
+    await onlineRefetch({ groupid: window.location.href.substr(window.location.href.lastIndexOf('/') + 1) });
   };
 
   useEffect(() => {
@@ -198,6 +242,10 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
         el.scrollTop = el.scrollHeight - el.clientHeight;
       }
     }, 800); // Load time
+  }, []);
+
+  useEffect(() => {
+    setGroupSelected(currId);
   }, []);
 
   useEffect(() => {
@@ -228,7 +276,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
 
     setInterval(() => {
       refetchOnline();
-    }, 15000);
+    }, 5000);
 
     const el = document.getElementById('chatDiv');
     if (el) {
@@ -252,10 +300,8 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
       setMessages([...messages, realtimeData.GetAllMessages[realtimeData.GetAllMessages.length - 1]]);
     }
 
-    setGroupSelected(currId);
-
     GetUser();
-  }, [session, messageData, realtimeData, user?.dark_theme]);
+  }, [session, messageData, realtimeData, user?.dark_theme, groupSelected]);
 
   var today: any = new Date();
   var dd = String(today.getDate()).padStart(2, '0');
@@ -267,10 +313,10 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
 
   today = mm + '/' + dd + '/' + yyyy;
 
-  if (loading || router.isFallback)
+  if (router.isFallback || loading)
     return (
       <div className={feedStyles.centered}>
-        <Spinner thickness="4px" speed="0.65s" emptyColor="gray.200" color="blue.500" size="xl" />
+        <Spinner thickness="4px" speed="0.95s" emptyColor="gray.200" color="blue.500" size="xl" />
       </div>
     );
 
@@ -447,7 +493,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                       ? 'Last active ' +
                         Math.round((Date.now() - messages[messages.length - 1].time) / 60000) +
                         ' minutes ago'
-                      : Math.round((Date.now() - messages[messages.length - 1].time) / 60000) > 60 &&
+                      : Math.round((Date.now() - messages[messages.length - 1].time) / 60000) >= 60 &&
                         Math.round((Date.now() - messages[messages.length - 1].time) / 60000) < 1440
                       ? `Last active ${
                           day === messages[messages.length - 1].date[2]
@@ -497,7 +543,6 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                 if (!loadMoreData || loadMoreLoading) return setLoader(true);
                 setOffset(offset + 10);
                 const dataLoadMore = [...loadMoreData.LoadMore];
-                console.log('LOADMORE', dataLoadMore);
                 setMessages([...dataLoadMore.reverse(), ...messages]);
                 setLoader(false);
               }}
@@ -587,7 +632,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                             Math.round((Date.now() - message.time) / 60000) > 0 &&
                             Math.round((Date.now() - message.time) / 60000) < 60
                               ? 1575
-                              : Math.round((Date.now() - message.time) / 60000) > 60 &&
+                              : Math.round((Date.now() - message.time) / 60000) >= 60 &&
                                 Math.round((Date.now() - message.time) / 60000) < 1440
                               ? 1610
                               : Math.round((Date.now() - message.time) / 60000) > 1440
@@ -604,7 +649,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                           : Math.round((Date.now() - message.time) / 60000) > 0 &&
                             Math.round((Date.now() - message.time) / 60000) < 60
                           ? Math.round((Date.now() - message.time) / 60000) + ' minutes ago'
-                          : Math.round((Date.now() - message.time) / 60000) > 60 &&
+                          : Math.round((Date.now() - message.time) / 60000) >= 60 &&
                             Math.round((Date.now() - message.time) / 60000) < 1440
                           ? message.date[1]
                           : Math.round((Date.now() - message.time) / 60000) > 1440 &&
@@ -940,8 +985,19 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                       className={darkMode ? feedStyles.sidebarcontent : feedStyles.sidebarcontentlight}
                       key={group.id}
                       onClick={() => {
+                        // setTimeout(() => {
+                        // setMessageLoader(true);
                         window.history.pushState('', '', `/chat/${group.id}`);
-                        window.location.reload(true);
+                        window.location.reload(false);
+                        // const url = window.location.href;
+                        // const id = url.substring(url.lastIndexOf('/') + 1);
+                        // setGroupSelected(id);
+                        // GetInitalMessagesRefetch({ groupid: id, offset: 0, limit });
+                        // onlineRefetch({ groupid: id });
+                        // }, 100);
+                        // setTimeout(() => {
+                        //   setMessageLoader(false);
+                        // }, 1000);
                       }}
                     >
                       {group.members[0].id === user?.id ? (
@@ -1009,7 +1065,6 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                     </div>
                   );
                 } else if (group.members.length > 2) {
-                  console.log(group);
                   const restOfPeople = group.members.length - 2;
                   return (
                     <div
@@ -1019,9 +1074,27 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                       }}
                       className={darkMode ? feedStyles.sidebarcontent : feedStyles.sidebarcontentlight}
                       key={group.id}
+                      // onClick={() => {
+                      //   window.history.pushState('', '', `/chat/${group.id}`);
+                      //   window.location.reload(true);
+                      // }}
                       onClick={() => {
+                        // setTimeout(() => {
+                        //   setMessageLoader(true);
+                        //   window.history.pushState('', '', `/chat/${group.id}`);
+                        //   const url = window.location.href;
+                        //   const id = url.substring(url.lastIndexOf('/') + 1);
+                        //   setGroupSelected(id);
+                        //   GetInitalMessagesRefetch({ groupid: id, offset: 0, limit });
+                        //   onlineRefetch({ groupid: id });
+                        // }, 100);
+
                         window.history.pushState('', '', `/chat/${group.id}`);
-                        window.location.reload(true);
+                        window.location.reload(false);
+
+                        // setTimeout(() => {
+                        //   setMessageLoader(false);
+                        // }, 1000);
                       }}
                     >
                       {group.image.length === 0 ? (
@@ -1184,33 +1257,35 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                     if (member.id !== user.id) {
                       return (
                         <div>
-                          <img
-                            src={member.profile_picture}
-                            style={{
-                              borderRadius: 100,
-                              width: messageVal.length <= 88 ? 43 : 76,
-                              position: 'relative',
-                              bottom: messageVal.length <= 88 ? 45 : 128,
-                              left:
-                                onlineData.GetMembers.length === 3
-                                  ? '220%'
-                                  : onlineData.GetMembers.length === 2
-                                  ? '150%'
-                                  : onlineData.GetMembers.length === 4
-                                  ? '300%'
-                                  : onlineData.GetMembers.length === 5
-                                  ? '390%'
-                                  : onlineData.GetMembers.length === 6
-                                  ? '510%'
-                                  : '',
-                              opacity: member.online && member.chaton === groupSelected ? 1 : 0.5,
-                            }}
-                            alt=""
-                          />
+                          <div>
+                            <img
+                              src={member.profile_picture}
+                              style={{
+                                borderRadius: 100,
+                                width: messageVal.length <= 88 ? 43 : 76,
+                                position: 'relative',
+                                bottom: messageVal.length <= 88 ? 45 : 128,
+                                opacity: member.online && member.chaton === groupSelected ? 1 : 0.5,
+                              }}
+                              alt=""
+                            />
+                            {member.typing &&
+                            member.chaton === window.location.href.substr(window.location.href.lastIndexOf('/') + 1) ? (
+                              <div className="chat-bubble" style={{ marginLeft: 46, top: -80, position: 'relative' }}>
+                                <div className="typing">
+                                  <div className="dot"></div>
+                                  <div className="dot"></div>
+                                  <div className="dot"></div>
+                                </div>
+                              </div>
+                            ) : null}
+                          </div>
+                          <div style={{ display: 'flex', flexDirection: 'row' }}></div>
                         </div>
                       );
                     }
                   })}
+
                 <Textarea
                   placeholder="Send a message..."
                   style={{
@@ -1221,8 +1296,9 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                     width: messageVal.length >= 88 || !sidebarShown ? 3000 : '',
                     backgroundColor: darkMode ? '#303640' : '#F4F4F4',
                     minHeight: messageVal.length <= 88 ? 10 : 150,
-                    bottom: messageVal.length >= 88 ? 80 : 0,
+                    bottom: messageVal.length >= 88 ? 80 : 10,
                     lineHeight: 1.8,
+                    position: 'absolute',
                   }}
                   resize="none"
                   value={messageVal}
@@ -1254,6 +1330,13 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                       ]);
                       if (el) el.scrollTop = el.scrollHeight - el.clientHeight;
                       setMessageVal('');
+                      SetUserTyping({
+                        variables: {
+                          authorid: user.id,
+                          groupid: window.location.href.substr(window.location.href.lastIndexOf('/') + 1),
+                          value: false,
+                        },
+                      });
                       e.preventDefault();
                       // Check If Text Is Empty Before Submitting
                       if (!messageVal.trim()) {

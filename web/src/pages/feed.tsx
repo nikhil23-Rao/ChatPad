@@ -343,7 +343,6 @@ const Feed: React.FC<FeedProps> = ({}) => {
                   </div>
                 );
               } else if (group.members.length > 2) {
-                console.log(group);
                 const restOfPeople = group.members.length - 2;
                 return (
                   <div

@@ -29,6 +29,7 @@ export const GET_GROUPS = gql`
         id
         online
         chaton
+        typing
       }
       id
       name
@@ -71,6 +72,7 @@ export const GET_GROUP_NAME = gql`
         id
         online
         chaton
+        typing
       }
       name
       id
@@ -89,6 +91,7 @@ export const SEARCH_GROUPS = gql`
         id
         online
         chaton
+        typing
       }
       name
       id
@@ -116,6 +119,7 @@ export const GET_MEMBERS = gql`
       id
       online
       chaton
+      typing
     }
   }
 `;

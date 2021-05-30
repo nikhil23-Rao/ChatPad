@@ -90,6 +90,7 @@ export const Search = () => {
         profile_picture: (selectedItems[item] as any).profile_picture,
         online: (selectedItems[item] as any).online,
         chaton: (selectedItems[item] as any).chaton,
+        typing: false,
       } as never);
     }
     members.push({
@@ -99,6 +100,7 @@ export const Search = () => {
       profile_picture: user?.profile_picture,
       online: true,
       chaton: user?.chaton,
+      typing: false,
     } as never);
     return members;
   };
@@ -115,6 +117,7 @@ export const Search = () => {
         dark_theme: string;
         online: boolean;
         chaton: string | any;
+        typing: boolean;
       } = {
         username: session.user.name!,
         email: session.user.email!,
@@ -123,6 +126,7 @@ export const Search = () => {
         online: true,
         profile_picture: session.user.image!,
         chaton: result.data.GetUserId[3],
+        typing: false,
       };
       setUser(currentUser);
     }

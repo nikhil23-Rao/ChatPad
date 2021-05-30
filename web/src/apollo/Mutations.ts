@@ -85,3 +85,9 @@ export const SET_CHAT_ON = gql`
     SetChatOn(authorid: $authorid, groupid: $groupid)
   }
 `;
+
+export const SET_USER_TYPING = gql`
+  mutation SetUserTyping($authorid: String, $groupid: String, $value: Boolean) {
+    SetUserTyping(authorid: $authorid, value: $value, groupid: $groupid)
+  }
+`;
