@@ -985,16 +985,15 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                       className={darkMode ? feedStyles.sidebarcontent : feedStyles.sidebarcontentlight}
                       key={group.id}
                       onClick={() => {
-                        // setTimeout(() => {
-                        // setMessageLoader(true);
-                        window.history.pushState('', '', `/chat/${group.id}`);
-                        window.location.reload(false);
-                        // const url = window.location.href;
-                        // const id = url.substring(url.lastIndexOf('/') + 1);
-                        // setGroupSelected(id);
-                        // GetInitalMessagesRefetch({ groupid: id, offset: 0, limit });
-                        // onlineRefetch({ groupid: id });
-                        // }, 100);
+                        setTimeout(() => {
+                          setMessageLoader(true);
+                          window.history.pushState('', '', `/chat/${group.id}`);
+                          const url = window.location.href;
+                          const id = url.substring(url.lastIndexOf('/') + 1);
+                          setGroupSelected(id);
+                          GetInitalMessagesRefetch({ groupid: id, offset: 0, limit });
+                          onlineRefetch({ groupid: id });
+                        }, 100);
                         // setTimeout(() => {
                         //   setMessageLoader(false);
                         // }, 1000);
@@ -1079,19 +1078,15 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                       //   window.location.reload(true);
                       // }}
                       onClick={() => {
-                        // setTimeout(() => {
-                        //   setMessageLoader(true);
-                        //   window.history.pushState('', '', `/chat/${group.id}`);
-                        //   const url = window.location.href;
-                        //   const id = url.substring(url.lastIndexOf('/') + 1);
-                        //   setGroupSelected(id);
-                        //   GetInitalMessagesRefetch({ groupid: id, offset: 0, limit });
-                        //   onlineRefetch({ groupid: id });
-                        // }, 100);
-
-                        window.history.pushState('', '', `/chat/${group.id}`);
-                        window.location.reload(false);
-
+                        setTimeout(() => {
+                          setMessageLoader(true);
+                          window.history.pushState('', '', `/chat/${group.id}`);
+                          const url = window.location.href;
+                          const id = url.substring(url.lastIndexOf('/') + 1);
+                          setGroupSelected(id);
+                          GetInitalMessagesRefetch({ groupid: id, offset: 0, limit });
+                          onlineRefetch({ groupid: id });
+                        }, 100);
                         // setTimeout(() => {
                         //   setMessageLoader(false);
                         // }, 1000);
@@ -1262,16 +1257,16 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                               src={member.profile_picture}
                               style={{
                                 borderRadius: 100,
-                                width: messageVal.length <= 88 ? 43 : 76,
+                                width: 43,
                                 position: 'relative',
-                                bottom: messageVal.length <= 88 ? 45 : 128,
+                                bottom: 45,
                                 opacity: member.online && member.chaton === groupSelected ? 1 : 0.5,
                               }}
                               alt=""
                             />
                             {member.typing &&
                             member.chaton === window.location.href.substr(window.location.href.lastIndexOf('/') + 1) ? (
-                              <div className="chat-bubble" style={{ marginLeft: 46, top: -80, position: 'relative' }}>
+                              <div className="chat-bubble" style={{ marginLeft: 46, top: -84, position: 'relative' }}>
                                 <div className="typing">
                                   <div className="dot"></div>
                                   <div className="dot"></div>
@@ -1294,7 +1289,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                     paddingRight: 100,
                     borderRadius: 10,
                     backgroundColor: darkMode ? '#303640' : '#F4F4F4',
-                    minHeight: 10,
+                    minHeight: messageVal.length <= 88 ? 10 : '',
                     bottom: 10,
                     lineHeight: 1.8,
                     position: 'absolute',
@@ -1367,6 +1362,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                 />
                 <InputRightElement
                   style={{
+                    top: 2,
                     backgroundColor: 'transparent',
                     right: !sidebarShown ? 115 : 24,
                     cursor: 'pointer',
@@ -1414,7 +1410,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                                 id: user.id,
                                 profile_picture: user.profile_picture,
                               },
-                              image: false,
+                              image: true,
                               messageid: generateId(24),
                               time: formatAMPM(new Date()),
                               date: today,
