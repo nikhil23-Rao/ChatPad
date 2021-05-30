@@ -115,13 +115,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
       };
       setDarkMode(currentUser.dark_theme === 'true' ? true : false);
       setUser(currentUser);
-      await SwitchOnline({ variables: { authorid: currentUser.id, value: true } });
-      await SetChatOn({
-        variables: {
-          authorid: currentUser.id,
-          groupid: window.location.href.substr(window.location.href.lastIndexOf('/') + 1),
-        },
-      });
+
       window.addEventListener('beforeunload', function (e) {
         SwitchOnline({ variables: { authorid: currentUser.id, value: false } });
         SetChatOn({ variables: { authorid: currentUser.id, value: '' } });
@@ -181,19 +175,11 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
     }
   };
 
-  const GetUrl = (url: string) => {
-    window.location.href = url;
-  };
-
   useEffect(() => {
-    setInterval(async () => {
-      await GetInitalMessagesRefetch({
-        groupid: window.location.href.substr(window.location.href.lastIndexOf('/') + 1),
-      });
-      await onlineRefetch({ groupid: window.location.href.substr(window.location.href.lastIndexOf('/') + 1) });
-      GetUser();
-    }, 1000);
-  }, []);
+    setInterval(() => {
+      onlineRefetch({ groupid: window.location.href.substr(window.location.href.lastIndexOf('/') + 1) });
+    }, 5000);
+  }, [typeof window, messageData, realtimeData]);
 
   useEffect(() => {
     if (messageVal.length > 0 && user) {
@@ -215,6 +201,18 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
       });
     }
   }, [user, messageVal, session, messageData]);
+
+  useEffect(() => {
+    if (user && typeof window !== 'undefined') {
+      SwitchOnline({ variables: { authorid: user.id, value: true } });
+      SetChatOn({
+        variables: {
+          authorid: user.id,
+          groupid: window.location.href.substr(window.location.href.lastIndexOf('/') + 1),
+        },
+      });
+    }
+  }, [user, groupSelected, typeof window, messages, messageData, realtimeData]);
 
   useEffect(() => {
     const el = document.getElementById('chatDiv');
@@ -266,16 +264,12 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
       if (document.visibilityState === 'hidden' && user) {
         SetChatOn({ variables: { authorid: user.id, groupid: '' } });
       }
-    }, 15000);
+    }, 10000);
     setInterval(() => {
       if (document.visibilityState === 'visible' && user) {
         SetChatOn({ variables: { authorid: user.id, groupid: groupSelected } });
       }
-    }, 15000);
-
-    setInterval(() => {
-      refetchOnline();
-    }, 5000);
+    }, 10000);
 
     const el = document.getElementById('chatDiv');
     if (el) {
@@ -982,15 +976,16 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                       className={darkMode ? feedStyles.sidebarcontent : feedStyles.sidebarcontentlight}
                       key={group.id}
                       onClick={() => {
-                        setTimeout(() => {
-                          setMessageLoader(true);
-                          window.history.pushState('', '', `/chat/${group.id}`);
-                          const url = window.location.href;
-                          const id = url.substring(url.lastIndexOf('/') + 1);
-                          setGroupSelected(id);
-                          GetInitalMessagesRefetch({ groupid: id, offset: 0, limit });
-                          onlineRefetch({ groupid: id });
-                        }, 100);
+                        // setTimeout(() => {
+                        //   setMessageLoader(true);
+                        //   window.history.pushState('', '', `/chat/${group.id}`);
+                        //   const url = window.location.href;
+                        //   const id = url.substring(url.lastIndexOf('/') + 1);
+                        //   setGroupSelected(id);
+                        //   GetInitalMessagesRefetch({ groupid: id, offset: 0, limit });
+                        //   onlineRefetch({ groupid: id });
+                        // }, 100);
+                        (window.location as any) = `/chat/${group.id}`;
                         // setTimeout(() => {
                         //   setMessageLoader(false);
                         // }, 1000);
@@ -1075,15 +1070,16 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                       //   window.location.reload(true);
                       // }}
                       onClick={() => {
-                        setTimeout(() => {
-                          setMessageLoader(true);
-                          window.history.pushState('', '', `/chat/${group.id}`);
-                          const url = window.location.href;
-                          const id = url.substring(url.lastIndexOf('/') + 1);
-                          setGroupSelected(id);
-                          GetInitalMessagesRefetch({ groupid: id, offset: 0, limit });
-                          onlineRefetch({ groupid: id });
-                        }, 100);
+                        (window.location as any) = `/chat/${group.id}`;
+                        // setTimeout(() => {
+                        //   setMessageLoader(true);
+                        //   window.history.pushState('', '', `/chat/${group.id}`);
+                        //   const url = window.location.href;
+                        //   const id = url.substring(url.lastIndexOf('/') + 1);
+                        //   setGroupSelected(id);
+                        //   GetInitalMessagesRefetch({ groupid: id, offset: 0, limit });
+                        //   onlineRefetch({ groupid: id });
+                        // }, 100);
                         // setTimeout(() => {
                         //   setMessageLoader(false);
                         // }, 1000);
