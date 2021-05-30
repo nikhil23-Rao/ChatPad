@@ -187,17 +187,21 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
 
   useEffect(() => {
     GetUser();
-  }, [session]);
+  }, [session, realtimeData, messageData, messages]);
 
   useEffect(() => {
-    setInterval(() => {
-      GetInitalMessagesRefetch();
-      refetchOnline();
+    setInterval(async () => {
+      await GetInitalMessagesRefetch({
+        groupid: window.location.href.substr(window.location.href.lastIndexOf('/') + 1),
+      });
+      await onlineRefetch({ groupid: window.location.href.substr(window.location.href.lastIndexOf('/') + 1) });
+      GetUser();
     }, 1000);
   }, []);
 
   useEffect(() => {
     if (messageVal.length > 0 && user) {
+      SwitchOnline({ variables: { authorid: user.id, value: true } });
       SetUserTyping({
         variables: {
           authorid: user.id,
@@ -207,6 +211,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
       });
     }
     if (messageVal.length === 0 && user) {
+      SwitchOnline({ variables: { authorid: user.id, value: true } });
       SetUserTyping({
         variables: {
           authorid: user.id,
@@ -215,7 +220,6 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
         },
       });
     }
-    refetchOnline();
   }, [user, messageVal, session, messageData]);
 
   useEffect(() => {
