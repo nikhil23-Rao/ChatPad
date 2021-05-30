@@ -1091,7 +1091,7 @@ main {
 }
 .typing .dot {
   animation: mercuryTypingAnimation 1.8s infinite ease-in-out;
-  background-color: #fff;
+  background-color: darksalmon;
   border-radius: 50%;
   height: 7px;
   margin-right: 4px;
@@ -1118,7 +1118,7 @@ main {
     background-color: #fff;
   }
   28% {
-    transform: translateY(-7px);
+    transform: translateY(0px);
     background-color: #fff;
   }
   44% {
