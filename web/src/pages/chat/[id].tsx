@@ -186,10 +186,6 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   };
 
   useEffect(() => {
-    GetUser();
-  }, [session, realtimeData, messageData, messages]);
-
-  useEffect(() => {
     setInterval(async () => {
       await GetInitalMessagesRefetch({
         groupid: window.location.href.substr(window.location.href.lastIndexOf('/') + 1),
@@ -201,7 +197,6 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
 
   useEffect(() => {
     if (messageVal.length > 0 && user) {
-      SwitchOnline({ variables: { authorid: user.id, value: true } });
       SetUserTyping({
         variables: {
           authorid: user.id,
@@ -211,7 +206,6 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
       });
     }
     if (messageVal.length === 0 && user) {
-      SwitchOnline({ variables: { authorid: user.id, value: true } });
       SetUserTyping({
         variables: {
           authorid: user.id,
@@ -253,6 +247,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   }, []);
 
   useEffect(() => {
+    GetUser();
     (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
     (typeof window !== 'undefined' && window.screen.availWidth) < 1800
       ? ((document.body.style as any) = 'overflow: hidden; zoom: 0.8;')
@@ -303,8 +298,6 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
     ) {
       setMessages([...messages, realtimeData.GetAllMessages[realtimeData.GetAllMessages.length - 1]]);
     }
-
-    GetUser();
   }, [session, messageData, realtimeData, user?.dark_theme, groupSelected]);
 
   var today: any = new Date();
