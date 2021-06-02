@@ -173,6 +173,16 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
     setInterval(() => {
       onlineRefetch({ groupid: window.location.href.substr(window.location.href.lastIndexOf('/') + 1) });
     }, 15000);
+    setInterval(() => {
+      if (document.visibilityState === 'hidden' && user) {
+        SetChatOn({ variables: { authorid: user.id, groupid: '' } });
+      }
+    }, 15000);
+    setInterval(() => {
+      if (document.visibilityState === 'visible' && user) {
+        SetChatOn({ variables: { authorid: user.id, groupid: groupSelected } });
+      }
+    }, 15000);
   }, [typeof window, messageData, realtimeData]);
 
   useEffect(() => {
@@ -253,17 +263,6 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
     if (window.screen.availHeight < 863 || window.screen.availWidth < 1800) {
       document.body.style.zoom = '80%';
     }
-
-    setInterval(() => {
-      if (document.visibilityState === 'hidden' && user) {
-        SetChatOn({ variables: { authorid: user.id, groupid: '' } });
-      }
-    }, 10000);
-    setInterval(() => {
-      if (document.visibilityState === 'visible' && user) {
-        SetChatOn({ variables: { authorid: user.id, groupid: groupSelected } });
-      }
-    }, 10000);
 
     const el = document.getElementById('chatDiv');
     if (el) {
