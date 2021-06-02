@@ -189,7 +189,7 @@ const Me: React.FC<MeProps> = ({}) => {
                       color: user.dark_theme === 'true' ? '#fff' : '',
                     }}
                   >
-                    Light Theme
+                    Luminous Light
                   </p>
                   <p
                     style={{
@@ -200,7 +200,7 @@ const Me: React.FC<MeProps> = ({}) => {
                       color: user.dark_theme === 'true' ? '#fff' : '',
                     }}
                   >
-                    Dark Theme
+                    Default Dark
                   </p>
                 </div>
               )}

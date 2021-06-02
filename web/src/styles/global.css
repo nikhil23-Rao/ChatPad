@@ -47,10 +47,6 @@ textarea {
   resize: none;
 }
 
-html {
-  overflow-y: hidden;
-  overflow-x: hidden;
-}
 body {
   margin: 0;
   padding: 0;
@@ -410,7 +406,7 @@ h1 {
 }
 
 /* We define "grid-area" names for the direct child of the grid parent */
-.pc-project-1 {
+/* /* .pc-project-1 {
   grid-area: pc-project-1;
   border-radius: 6px 0 0 0;
   width: 100%;
@@ -879,12 +875,14 @@ main {
   flex-direction: column;
 }
 
+/* linear-gradient(to right, #7323bd, #fd1d1d, #fcb045) */
+
 .photo {
   width: 200px;
   height: 200px;
   margin-top: -120px;
   border-radius: 100px;
-  box-shadow: 0px 5px 50px 0px #3182ce, 0px 0px 0px 7px #63b3ed;
+  box-shadow: 0px 5px 50px 0px #7323bd, 0px 0px 0px 7px #63b3ed;
 }
 
 .active {
@@ -1043,7 +1041,6 @@ main {
   cursor: pointer;
   max-width: 100%;
 }
-
 .darkmodebtn {
   width: 5em;
   height: 5em;
@@ -1205,5 +1202,124 @@ main {
 @keyframes bulge {
   50% {
     transform: scale(1.05);
+  }
+}
+
+/* ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+ul li {
+  display: inline-block;
+  clear: both;
+  padding: 20px;
+  border-radius: 30px;
+  margin-bottom: 2px;
+  font-family: Helvetica, Arial, sans-serif;
+}
+
+.him {
+  background: #eee;
+  float: left;
+}
+
+.me {
+  position: relative;
+  width: 506px;
+  left: 1200px;
+  margin-bottom: 10px;
+  display: block;
+  background-attachment: fixed;
+  background-image: linear-gradient(#0993f6 0%, rgb(146, 0, 255) 50%, rgb(255, 46, 25) 100%);
+  color: #fff;
+  border-radius: 19px;
+}
+
+.him ~ .me {
+  border-bottom-right-radius: 5px;
+}
+
+.me ~ .me {
+  border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px;
+}
+
+.me:last-of-type {
+  border-bottom-right-radius: 30px;
+}
+
+discussion {
+}
+
+.discussion > .bubble {
+  border-radius: 1em;
+  padding: 0.25em 0.75em;
+  margin: 0.0625em;
+  max-width: 50%;
+}
+
+.discussion > .bubble.sender {
+  top: 55px;
+  position: relative;
+  left: 1200px;
+  width: 450px;
+  margin-bottom: 10px;
+  display: block;
+  background-attachment: fixed;
+  background-image: linear-gradient(#0993f6 0%, rgb(146, 0, 255) 50%, rgb(255, 46, 25) 100%);
+  color: #fff;
+  border-radius: 39px;
+}
+.discussion > .bubble.recipient {
+  position: relative;
+  width: 450px;
+  left: 566px;
+  display: block;
+  background-attachment: fixed;
+  background: #f4f4f4;
+  border-radius: 19px;
+}
+
+.discussion > .bubble.sender.first {
+  border-bottom-right-radius: 0.2em;
+}
+.discussion > .bubble.sender.last {
+  border-top-right-radius: 0.2em;
+}
+.discussion > .bubble.sender.middle {
+  border-bottom-right-radius: 0.4em;
+  border-top-right-radius: 0.4em;
+}
+
+.discussion > .bubble.recipient.first {
+  border-bottom-left-radius: 0.2em;
+}
+.discussion > .bubble.recipient.last {
+  border-top-left-radius: 0.2em;
+}
+.discussion > .bubble.recipient.middle {
+  border-bottom-left-radius: 0.4em;
+  border-top-left-radius: 0.4em;
+} */
+
+.conic-gradient:after {
+  display: block;
+  border-radius: 9999px;
+  content: '';
+  width: 86px;
+  height: 86px;
+  top: 6px;
+  left: 17px;
+  position: absolute;
+  z-index: -1;
+  background-image: linear-gradient(to right, #7323bd, #fd1d1d, #fcb045);
+  animation: spin 6s linear infinite;
+}
+
+@keyframes spin {
+  100% {
+    transform: rotate(360deg);
   }
 }

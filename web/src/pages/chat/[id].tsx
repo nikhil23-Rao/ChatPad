@@ -117,15 +117,9 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
       setUser(currentUser);
 
       window.addEventListener('beforeunload', function (e) {
+        e.preventDefault();
         SwitchOnline({ variables: { authorid: currentUser.id, value: false } });
         SetChatOn({ variables: { authorid: currentUser.id, value: '' } });
-        var start = Date.now(),
-          now = start;
-        var delay = 60; // msec
-        while (now - start < delay) {
-          now = Date.now();
-        }
-        delete e['returnValue'];
       });
     }
   };
@@ -323,13 +317,12 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
       <div>
         {GroupNameData && groupSelected !== '' && groupSelected !== undefined && groupSelected !== null && (
           <nav
-            className="navbar navbar-light shadow-lg"
+            className="navbar navbar-light "
             style={{
               background: darkMode ? '#1c1c1c' : '#fff',
               position: 'relative',
               height: 100,
-              borderBottom: darkMode ? '1px solid #4E4F51' : '1px solid #ccc',
-              boxShadow: '10px',
+              borderBottom: darkMode ? '1px solid #4E4F51' : ' 1px solid #eeeeee',
             }}
           >
             <span
@@ -558,7 +551,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
           {groupSelected !== '' &&
             messageData &&
             user &&
-            messages.map((message) => {
+            messages.map((message, idx) => {
               return (
                 <React.Fragment key={message.messageid}>
                   <div style={{ position: 'relative', top: 30 }}>
@@ -664,6 +657,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                       style={{
                         marginBottom: message.author.id !== user.id ? -40 : -4,
                         marginLeft: !sidebarShown ? -100 : '',
+                        color: message.author.id !== user.id && user.dark_theme === 'false' ? '' : '#fff',
                       }}
                     >
                       {message.image ? (
@@ -726,7 +720,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
               (document.body.style as any) = 'zoom: 1';
               onOpen();
             }}
-            style={{ color: darkMode ? '#fff' : '', cursor: 'pointer' }}
+            style={{ color: darkMode ? '#4097FF' : '', cursor: 'pointer' }}
           ></i>
         </div>
         <div
@@ -742,7 +736,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
               <div>
                 <i
                   className={`fa fa-${visible ? 'user-plus' : 'plus'} fa-3x`}
-                  style={{ color: darkMode ? '#fff' : '' }}
+                  style={{ color: darkMode ? '#4097FF' : '' }}
                 ></i>
               </div>
             </div>
@@ -762,7 +756,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
           <div
             className={feedStyles.leftsidebar}
             style={{
-              backgroundColor: darkMode ? '#1c1c1c' : '#EDEDED',
+              backgroundColor: darkMode ? '#1c1c1c' : '',
               borderRightColor: darkMode ? '#4E4F51' : '',
               overflowY: 'auto',
               overflowX: 'hidden',
@@ -785,7 +779,10 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
               Your Chats
             </h1>
 
-            <div className="search-box" style={{ backgroundColor: !darkMode ? '#fff' : '', top: 86, outline: 'none' }}>
+            <div
+              className="search-box"
+              style={{ backgroundColor: !darkMode ? '#F4F4F4' : '#3D3D3D', top: 86, outline: 'none' }}
+            >
               <input
                 className="search-txt"
                 type="text"
@@ -795,7 +792,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                 style={{ color: !darkMode ? '#000' : '', paddingRight: 40, outline: 'none' }}
                 onChange={(e) => setQuery(e.currentTarget.value)}
               />
-              <a className="search-btn" style={{ backgroundColor: !darkMode ? 'transparent' : '' }}>
+              <a className="search-btn" style={{ backgroundColor: !darkMode ? 'transparent' : '#3D3D3D' }}>
                 <i className="fa fa-search" style={{ color: '#4097ff' }}></i>
               </a>
             </div>
@@ -970,12 +967,14 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                   return (
                     <div
                       style={{
-                        backgroundColor: group.id === groupSelected ? (!darkMode ? '#c5e2ed' : '#144e80') : '',
-                        marginBottom: 20,
+                        backgroundColor: group.id === groupSelected ? (!darkMode ? '#E9EAEB' : '#313131') : '',
+                        marginBottom: -12,
                       }}
                       className={darkMode ? feedStyles.sidebarcontent : feedStyles.sidebarcontentlight}
                       key={group.id}
-                      onClick={() => {
+                      onClick={(e: any) => {
+                        e.preventDefault();
+                        delete e['returnValue'];
                         // setTimeout(() => {
                         //   setMessageLoader(true);
                         //   window.history.pushState('', '', `/chat/${group.id}`);
@@ -985,7 +984,12 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                         //   GetInitalMessagesRefetch({ groupid: id, offset: 0, limit });
                         //   onlineRefetch({ groupid: id });
                         // }, 100);
-                        (window.location as any) = `/chat/${group.id}`;
+                        window.addEventListener('beforeunload', (e) => {
+                          e.preventDefault();
+                          delete e['returnValue'];
+                        });
+                        window.history.pushState('', '', `/chat/${group.id}`);
+                        window.location.reload(true);
                         // setTimeout(() => {
                         //   setMessageLoader(false);
                         // }, 1000);
@@ -1060,8 +1064,8 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                   return (
                     <div
                       style={{
-                        backgroundColor: group.id === groupSelected ? (!darkMode ? '#c5e2ed' : '#144e80') : '',
-                        marginBottom: 20,
+                        backgroundColor: group.id === groupSelected ? (!darkMode ? '#E9EAEB' : '#313131') : '',
+                        marginBottom: -12,
                       }}
                       className={darkMode ? feedStyles.sidebarcontent : feedStyles.sidebarcontentlight}
                       key={group.id}
@@ -1069,8 +1073,13 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                       //   window.history.pushState('', '', `/chat/${group.id}`);
                       //   window.location.reload(true);
                       // }}
-                      onClick={() => {
-                        (window.location as any) = `/chat/${group.id}`;
+                      onClick={(e: any) => {
+                        window.addEventListener('beforeunload', (e) => {
+                          e.preventDefault();
+                          delete e['returnValue'];
+                        });
+                        window.history.pushState('', '', `/chat/${group.id}`);
+                        window.location.reload(true);
                         // setTimeout(() => {
                         //   setMessageLoader(true);
                         //   window.history.pushState('', '', `/chat/${group.id}`);
@@ -1087,7 +1096,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                     >
                       {group.image.length === 0 ? (
                         <>
-                          <div style={{ marginTop: '3%', marginLeft: '6%', paddingTop: '3%' }}>
+                          <div style={{ marginTop: '3%', marginLeft: '7%', paddingTop: '3%' }}>
                             <img
                               src={group.members[0].profile_picture}
                               alt=""
@@ -1095,7 +1104,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                             />
                           </div>
 
-                          <div style={{ marginLeft: 3 }}>
+                          <div style={{ marginLeft: 17 }}>
                             <img
                               src={group.members[1].profile_picture}
                               alt=""
@@ -1113,7 +1122,12 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                         </div>
                       )}
                       {group.image.length === 0 && (
-                        <div className={`${feedStyles.dot} text-center`}>+{restOfPeople}</div>
+                        <div
+                          className={`${feedStyles.dot} text-center`}
+                          style={{ width: 29, height: 29, position: 'relative', left: 5, top: -28 }}
+                        >
+                          <p style={{ position: 'relative', top: 3, right: 2 }}>+{restOfPeople}</p>
+                        </div>
                       )}
 
                       <p
@@ -1156,13 +1170,16 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
         <div
           className={feedStyles.profile}
           style={{
-            backgroundColor: darkMode ? '#1c1c1c' : '#EDEDED',
+            backgroundColor: darkMode ? '#1c1c1c' : '',
             borderRightColor: darkMode ? '#4E4F51' : '',
-            borderBottomColor: !darkMode ? '#ccc' : '#4E4F51',
+            borderBottomColor: !darkMode ? '#eeeeee' : '#4E4F51',
             display: !sidebarShown ? 'none' : '',
           }}
         >
-          <div style={{ position: 'fixed', zIndex: 1, left: 74, top: 70 }} className="onlinedot"></div>
+          <div
+            style={{ position: 'fixed', zIndex: 1, left: 77, top: 70, width: 20, height: 20 }}
+            className="onlinedot"
+          ></div>
 
           <div style={{ marginLeft: 120, marginTop: 17 }}>
             <h1
@@ -1195,6 +1212,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
               </h1>
             </div>
           </div>
+          <div className="conic-gradient"></div>
           <div style={{ cursor: 'pointer' }}>
             <img
               src={user! && (user.profile_picture as string | undefined)}
@@ -1204,10 +1222,11 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                 width: 75,
                 height: 75,
                 borderRadius: 35,
-                top: 10,
-                marginLeft: '5%',
+                top: 11.4,
+                marginLeft: '5.17%',
                 position: 'absolute',
                 zIndex: -1,
+                WebkitBorderRadius: 35,
               }}
             />
           </div>
@@ -1281,7 +1300,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                     right: !sidebarShown ? 90 : '',
                     paddingRight: 100,
                     borderRadius: 10,
-                    backgroundColor: darkMode ? '#303640' : '#F4F4F4',
+                    backgroundColor: darkMode ? '#3D3D3D' : '#F4F4F4',
                     minHeight: messageVal.length <= 88 ? 10 : '',
                     bottom: 10,
                     lineHeight: 1.8,
@@ -1429,13 +1448,14 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
             {showEmoji && (
               <span>
                 <Picker
+                  emojiSize={50}
                   style={{
                     position: 'absolute',
-                    bottom: 100,
+                    bottom: 200,
                     left:
                       (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
                       (typeof window !== 'undefined' && window.screen.availWidth) < 1800
-                        ? 1420
+                        ? 750
                         : 1530,
                   }}
                   onSelect={(e: any) => {

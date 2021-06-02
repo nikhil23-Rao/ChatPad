@@ -154,7 +154,7 @@ const Feed: React.FC<FeedProps> = ({}) => {
                 left: '55%',
               }}
             >
-              <i className="fa fa-paper-plane fa-5x" style={{ color: darkMode ? '#fff' : '#000' }}></i>
+              <i className="fa fa-paper-plane fa-5x" style={{ color: darkMode ? '#fff' : 'gray' }}></i>
             </div>
             <p
               style={{
@@ -213,7 +213,7 @@ const Feed: React.FC<FeedProps> = ({}) => {
         <div
           className={feedStyles.leftsidebar}
           style={{
-            backgroundColor: darkMode ? '#1c1c1c' : '#EDEDED',
+            backgroundColor: darkMode ? '#1c1c1c' : '',
             borderRightColor: darkMode ? '#4E4F51' : '',
             overflowY: 'auto',
             overflowX: 'hidden',
@@ -235,7 +235,7 @@ const Feed: React.FC<FeedProps> = ({}) => {
           >
             Your Chats
           </h1>
-          <div className="search-box" style={{ backgroundColor: !darkMode ? '#fff' : '', top: 86 }}>
+          <div className="search-box" style={{ backgroundColor: !darkMode ? '#eeeeee' : '#3D3D3D', top: 86 }}>
             <input
               className="search-txt"
               type="text"
@@ -245,7 +245,7 @@ const Feed: React.FC<FeedProps> = ({}) => {
               style={{ color: !darkMode ? '#000' : '', paddingRight: 40, outline: 'none' }}
               onChange={(e) => setQuery(e.currentTarget.value)}
             />
-            <a className="search-btn" style={{ backgroundColor: !darkMode ? 'transparent' : '' }}>
+            <a className="search-btn" style={{ backgroundColor: !darkMode ? 'transparent' : '#3D3D3D' }}>
               <i className="fa fa-search" style={{ color: '#4097ff' }}></i>
             </a>
           </div>
@@ -268,14 +268,32 @@ const Feed: React.FC<FeedProps> = ({}) => {
                 return (
                   <div
                     style={{
-                      backgroundColor: group.id === groupSelected ? (!darkMode ? '#c5e2ed' : '#144e80') : '',
-                      marginBottom: 20,
+                      backgroundColor: group.id === groupSelected ? (!darkMode ? '#E9EAEB' : '#313131') : '',
+                      marginBottom: -12,
                     }}
                     className={darkMode ? feedStyles.sidebarcontent : feedStyles.sidebarcontentlight}
                     key={group.id}
-                    onClick={() => {
+                    onClick={(e: any) => {
+                      e.preventDefault();
+                      delete e['returnValue'];
+                      // setTimeout(() => {
+                      //   setMessageLoader(true);
+                      //   window.history.pushState('', '', `/chat/${group.id}`);
+                      //   const url = window.location.href;
+                      //   const id = url.substring(url.lastIndexOf('/') + 1);
+                      //   setGroupSelected(id);
+                      //   GetInitalMessagesRefetch({ groupid: id, offset: 0, limit });
+                      //   onlineRefetch({ groupid: id });
+                      // }, 100);
+                      window.addEventListener('beforeunload', (e) => {
+                        e.preventDefault();
+                        delete e['returnValue'];
+                      });
                       window.history.pushState('', '', `/chat/${group.id}`);
                       window.location.reload(true);
+                      // setTimeout(() => {
+                      //   setMessageLoader(false);
+                      // }, 1000);
                     }}
                   >
                     {group.members[0].id === user?.id ? (
@@ -347,19 +365,39 @@ const Feed: React.FC<FeedProps> = ({}) => {
                 return (
                   <div
                     style={{
-                      backgroundColor: group.id === groupSelected ? (!darkMode ? '#c5e2ed' : '#144e80') : '',
-                      marginBottom: 20,
+                      backgroundColor: group.id === groupSelected ? (!darkMode ? '#E9EAEB' : '#313131') : '',
+                      marginBottom: -12,
                     }}
                     className={darkMode ? feedStyles.sidebarcontent : feedStyles.sidebarcontentlight}
                     key={group.id}
-                    onClick={() => {
+                    // onClick={() => {
+                    //   window.history.pushState('', '', `/chat/${group.id}`);
+                    //   window.location.reload(true);
+                    // }}
+                    onClick={(e: any) => {
+                      window.addEventListener('beforeunload', (e) => {
+                        e.preventDefault();
+                        delete e['returnValue'];
+                      });
                       window.history.pushState('', '', `/chat/${group.id}`);
                       window.location.reload(true);
+                      // setTimeout(() => {
+                      //   setMessageLoader(true);
+                      //   window.history.pushState('', '', `/chat/${group.id}`);
+                      //   const url = window.location.href;
+                      //   const id = url.substring(url.lastIndexOf('/') + 1);
+                      //   setGroupSelected(id);
+                      //   GetInitalMessagesRefetch({ groupid: id, offset: 0, limit });
+                      //   onlineRefetch({ groupid: id });
+                      // }, 100);
+                      // setTimeout(() => {
+                      //   setMessageLoader(false);
+                      // }, 1000);
                     }}
                   >
                     {group.image.length === 0 ? (
                       <>
-                        <div style={{ marginTop: '3%', marginLeft: '6%', paddingTop: '3%' }}>
+                        <div style={{ marginTop: '3%', marginLeft: '7%', paddingTop: '3%' }}>
                           <img
                             src={group.members[0].profile_picture}
                             alt=""
@@ -367,7 +405,7 @@ const Feed: React.FC<FeedProps> = ({}) => {
                           />
                         </div>
 
-                        <div style={{ marginLeft: 3 }}>
+                        <div style={{ marginLeft: 17 }}>
                           <img
                             src={group.members[1].profile_picture}
                             alt=""
@@ -384,7 +422,14 @@ const Feed: React.FC<FeedProps> = ({}) => {
                         />
                       </div>
                     )}
-                    {group.image.length === 0 && <div className={`${feedStyles.dot} text-center`}>+{restOfPeople}</div>}
+                    {group.image.length === 0 && (
+                      <div
+                        className={`${feedStyles.dot} text-center`}
+                        style={{ width: 29, height: 29, position: 'relative', left: 5, top: -28 }}
+                      >
+                        <p style={{ position: 'relative', top: 3, right: 2 }}>+{restOfPeople}</p>
+                      </div>
+                    )}
 
                     <p
                       style={{
@@ -424,12 +469,15 @@ const Feed: React.FC<FeedProps> = ({}) => {
         <div
           className={feedStyles.profile}
           style={{
-            backgroundColor: darkMode ? '#1c1c1c' : '#EDEDED',
+            backgroundColor: darkMode ? '#1c1c1c' : '',
             borderRightColor: darkMode ? '#4E4F51' : '',
-            borderBottomColor: !darkMode ? '#ccc' : '#4E4F51',
+            borderBottomColor: !darkMode ? '#EEEEEE' : '#4E4F51',
           }}
         >
-          <div style={{ position: 'fixed', zIndex: 1, left: 74, top: 70 }} className="onlinedot"></div>
+          <div
+            style={{ position: 'fixed', zIndex: 1, left: 77, top: 70, width: 20, height: 20 }}
+            className="onlinedot"
+          ></div>
 
           <div style={{ marginLeft: 120, marginTop: 17 }}>
             <h1
@@ -462,6 +510,7 @@ const Feed: React.FC<FeedProps> = ({}) => {
               </h1>
             </div>
           </div>
+          <div className="conic-gradient"></div>
           <div style={{ cursor: 'pointer' }}>
             <img
               src={user! && (user.profile_picture as string | undefined)}
@@ -471,10 +520,11 @@ const Feed: React.FC<FeedProps> = ({}) => {
                 width: 75,
                 height: 75,
                 borderRadius: 35,
-                top: 10,
-                marginLeft: '5%',
+                top: 11,
+                marginLeft: '5.2%',
                 position: 'absolute',
                 zIndex: -1,
+                WebkitBorderRadius: 35,
               }}
             />
           </div>

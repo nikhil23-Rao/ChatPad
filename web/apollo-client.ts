@@ -10,7 +10,7 @@ const wsLink = process.browser
       // uri: 'ws://localhost:4000/subscriptions',
       options: {
         reconnect: true,
-        timeout: 5000,
+        timeout: 60000,
       },
     })
   : null;

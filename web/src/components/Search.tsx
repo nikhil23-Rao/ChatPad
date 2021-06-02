@@ -99,7 +99,7 @@ export const Search = () => {
       email: user?.email,
       profile_picture: user?.profile_picture,
       online: true,
-      chaton: user?.chaton,
+      chaton: '',
       typing: false,
     } as never);
     return members;
@@ -158,7 +158,6 @@ export const Search = () => {
         accept="image/x-png,image/gif,image/jpeg"
         onChange={(e: any) => {
           const file = e.target.files[0];
-          console.log('FILE', file);
           reader(file).then((res) => setImage(res));
         }}
         style={{ display: 'none' }}
