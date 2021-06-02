@@ -172,7 +172,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   useEffect(() => {
     setInterval(() => {
       onlineRefetch({ groupid: window.location.href.substr(window.location.href.lastIndexOf('/') + 1) });
-    }, 5000);
+    }, 15000);
   }, [typeof window, messageData, realtimeData]);
 
   useEffect(() => {
