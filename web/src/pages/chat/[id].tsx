@@ -180,7 +180,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
         onlineRefetch({ groupid: window.location.href.substr(window.location.href.lastIndexOf('/') + 1) });
       }
     }, 15000);
-  }, []);
+  }, [typeof window, messageData, realtimeData]);
 
   useEffect(() => {
     if (messageVal.length > 0 && user) {
