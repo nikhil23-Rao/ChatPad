@@ -89,7 +89,7 @@ export const Search = () => {
         email: (selectedItems[item] as any).email,
         profile_picture: (selectedItems[item] as any).profile_picture,
         online: (selectedItems[item] as any).online,
-        chaton: (selectedItems[item] as any).chaton,
+        chaton: '',
         typing: false,
       } as never);
     }

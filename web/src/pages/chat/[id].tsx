@@ -170,19 +170,6 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   };
 
   useEffect(() => {
-    setInterval(() => {
-      if (document.visibilityState === 'hidden' && user) {
-        SetChatOn({ variables: { authorid: user.id, groupid: '' } });
-        onlineRefetch({ groupid: window.location.href.substr(window.location.href.lastIndexOf('/') + 1) });
-      }
-      if (document.visibilityState === 'visible' && user) {
-        SetChatOn({ variables: { authorid: user.id, groupid: groupSelected } });
-        onlineRefetch({ groupid: window.location.href.substr(window.location.href.lastIndexOf('/') + 1) });
-      }
-    }, 15000);
-  }, [typeof window, messageData, realtimeData]);
-
-  useEffect(() => {
     if (messageVal.length > 0 && user) {
       SetUserTyping({
         variables: {
@@ -228,10 +215,6 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
     }
   }, [typeof messageData, groupSelected]);
 
-  const refetchOnline = async () => {
-    await onlineRefetch({ groupid: window.location.href.substr(window.location.href.lastIndexOf('/') + 1) });
-  };
-
   useEffect(() => {
     setTimeout(() => {
       const el = document.getElementById('chatDiv');
@@ -265,6 +248,23 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
     if (el) {
       el.scrollTop = el.scrollHeight - el.clientHeight;
     }
+
+    setInterval(() => {
+      if (document.visibilityState === 'hidden' && user) {
+        console.log('switching', onlineData);
+        SetChatOn({ variables: { authorid: user.id, groupid: '' } });
+        SwitchOnline({ variables: { authorid: user.id, value: false } });
+        onlineRefetch({ groupid: groupSelected });
+        console.log('done switching', onlineData);
+      }
+      if (document.visibilityState !== 'hidden' && user) {
+        console.log('switching', onlineData);
+        SetChatOn({ variables: { authorid: user.id, groupid: groupSelected } });
+        SwitchOnline({ variables: { authorid: user.id, value: true } });
+        onlineRefetch({ groupid: groupSelected });
+        console.log('done switching', onlineData);
+      }
+    }, 5000);
 
     if (realtimeData && messages.includes(realtimeData.GetAllMessages[realtimeData.GetAllMessages.length - 1])) return;
     if (
