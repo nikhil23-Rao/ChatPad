@@ -171,19 +171,15 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
 
   useEffect(() => {
     setInterval(() => {
-      onlineRefetch({ groupid: window.location.href.substr(window.location.href.lastIndexOf('/') + 1) });
-    }, 15000);
-    setInterval(() => {
       if (document.visibilityState === 'hidden' && user) {
         SetChatOn({ variables: { authorid: user.id, groupid: '' } });
       }
-    }, 15000);
-    setInterval(() => {
       if (document.visibilityState === 'visible' && user) {
         SetChatOn({ variables: { authorid: user.id, groupid: groupSelected } });
       }
+      onlineRefetch({ groupid: window.location.href.substr(window.location.href.lastIndexOf('/') + 1) });
     }, 15000);
-  }, [typeof window, messageData, realtimeData]);
+  }, [typeof window]);
 
   useEffect(() => {
     if (messageVal.length > 0 && user) {
