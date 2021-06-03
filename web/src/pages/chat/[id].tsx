@@ -1046,9 +1046,9 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                               className={feedStyles.groupName}
                             >
                               {group.last_message.author.id !== user?.id ? group.last_message.author.username : 'You'}:{' '}
-                              {group.last_message.body.length <= 31
+                              {group.last_message.body.length <= 25
                                 ? group.last_message.body
-                                : `${group.last_message.body.substr(0, 28)}...`}
+                                : `${group.last_message.body.substr(0, 20)}...`}
                             </p>
                           )}
                         </>
