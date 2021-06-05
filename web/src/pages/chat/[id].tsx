@@ -28,7 +28,14 @@ import {
 import { Search } from '../../components/Search';
 import { useMutation, useQuery, useSubscription } from '@apollo/client';
 import EjectIcon from '@material-ui/icons/Eject';
-import { SEND_MESSAGE, SET_CHAT_ON, SET_USER_TYPING, SWITCH_ONLINE, TOGGLE_THEME } from '@/apollo/Mutations';
+import {
+  ADD_READ_BY,
+  SEND_MESSAGE,
+  SET_CHAT_ON,
+  SET_USER_TYPING,
+  SWITCH_ONLINE,
+  TOGGLE_THEME,
+} from '@/apollo/Mutations';
 import { generateId } from '@/../utils/GenerateId';
 import Head from 'next/head';
 import { GET_ALL_MESSAGES, GET_USERS_TYPING } from '@/apollo/Subscriptions';
@@ -115,6 +122,8 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
       };
       setDarkMode(currentUser.dark_theme === 'true' ? true : false);
       setUser(currentUser);
+      SwitchOnline({ variables: { authorid: currentUser.id, value: true } });
+      SetChatOn({ variables: { authorid: currentUser.id, value: groupSelected } });
 
       window.addEventListener('beforeunload', function (e) {
         e.preventDefault();
@@ -156,7 +165,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
       groupid: groupSelected,
     },
   });
-  const [ToggleTheme] = useMutation(TOGGLE_THEME);
+  const [AddReadBy] = useMutation(ADD_READ_BY);
   const [SwitchOnline] = useMutation(SWITCH_ONLINE);
   const [SetChatOn] = useMutation(SET_CHAT_ON);
   const [SetUserTyping] = useMutation(SET_USER_TYPING);
@@ -170,25 +179,35 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   };
 
   useEffect(() => {
-    if (messageVal.length > 0 && user) {
+    // setInterval(() => {
+    //   if (document.visibilityState === 'hidden') {
+    //     SetChatOn({ variables: { authorid: user.id, groupid: '' } });
+    //   }
+    //   if (document.visibilityState !== 'hidden') {
+    //     SetChatOn({ variables: { authorid: user.id, groupid: groupSelected } });
+    //   }
+    // }, 5000);
+    if (messageVal.replace(/\s/g, '').length && user) {
       SetUserTyping({
         variables: {
           authorid: user.id,
-          groupid: window.location.href.substr(window.location.href.lastIndexOf('/') + 1),
+          groupid: groupSelected,
           value: true,
         },
       });
+      onlineRefetch();
     }
-    if (messageVal.length === 0 && user) {
+    if (!messageVal.replace(/\s/g, '').length && user) {
       SetUserTyping({
         variables: {
           authorid: user.id,
-          groupid: window.location.href.substr(window.location.href.lastIndexOf('/') + 1),
+          groupid: groupSelected,
           value: false,
         },
       });
+      onlineRefetch();
     }
-  }, [user, messageVal, session, messageData]);
+  }, [user, messageVal, messages]);
 
   useEffect(() => {
     if (user && typeof window !== 'undefined') {
@@ -224,9 +243,39 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
     }, 800); // Load time
   }, []);
 
+  const updateReadBy = async () => {
+    if (
+      user &&
+      messages.length > 0 &&
+      messages[messages.length - 1].author.id !== user.id &&
+      messages[messages.length - 1].read_by.includes(user.id)
+    )
+      return console.log('NOT SENDING REQUEST');
+    if (
+      document.visibilityState === 'visible' &&
+      user &&
+      messages.length > 0 &&
+      messages[messages.length - 1].author.id !== user.id
+    ) {
+      console.log('SENDING');
+      await AddReadBy({
+        variables: {
+          member: user.id,
+          messageid: messages[messages.length - 1].messageid,
+        },
+      });
+      await searchDataRefetch({ authorid: user.id, query });
+      console.log('SENT');
+    }
+  };
+
   useEffect(() => {
     setGroupSelected(currId);
   }, []);
+
+  useEffect(() => {
+    updateReadBy();
+  }, [messageData, realtimeData, messages, user]);
 
   useEffect(() => {
     GetUser();
@@ -249,23 +298,6 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
       el.scrollTop = el.scrollHeight - el.clientHeight;
     }
 
-    setInterval(() => {
-      if (document.visibilityState === 'hidden' && user) {
-        console.log('switching', onlineData);
-        SetChatOn({ variables: { authorid: user.id, groupid: '' } });
-        SwitchOnline({ variables: { authorid: user.id, value: false } });
-        onlineRefetch({ groupid: groupSelected });
-        console.log('done switching', onlineData);
-      }
-      if (document.visibilityState !== 'hidden' && user) {
-        console.log('switching', onlineData);
-        SetChatOn({ variables: { authorid: user.id, groupid: groupSelected } });
-        SwitchOnline({ variables: { authorid: user.id, value: true } });
-        onlineRefetch({ groupid: groupSelected });
-        console.log('done switching', onlineData);
-      }
-    }, 5000);
-
     if (realtimeData && messages.includes(realtimeData.GetAllMessages[realtimeData.GetAllMessages.length - 1])) return;
     if (
       document.visibilityState === 'hidden' &&
@@ -275,6 +307,8 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
     ) {
       playSound();
     }
+    console.log(realtimeData);
+
     if (
       realtimeData &&
       realtimeData.GetAllMessages[realtimeData.GetAllMessages.length - 1].author.id !== user?.id &&
@@ -282,6 +316,17 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
     ) {
       setMessages([...messages, realtimeData.GetAllMessages[realtimeData.GetAllMessages.length - 1]]);
     }
+
+    setInterval(() => {
+      if (document.visibilityState === 'hidden' && user) {
+        SetChatOn({ variables: { groupid: '', authorid: user.id } });
+        onlineRefetch({ groupid: groupSelected });
+      }
+      if (document.visibilityState !== 'hidden' && user) {
+        SetChatOn({ variables: { groupid: groupSelected, authorid: user.id } });
+        onlineRefetch({ groupid: groupSelected });
+      }
+    }, 5000);
   }, [session, messageData, realtimeData, user?.dark_theme, groupSelected]);
 
   var today: any = new Date();
@@ -505,10 +550,10 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
             height:
               (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
               (typeof window !== 'undefined' && window.screen.availWidth) < 1800
-                ? messageVal.length <= 88
+                ? messageVal.length <= 75
                   ? '90vh'
                   : '77vh'
-                : messageVal.length <= 88
+                : messageVal.length <= 75
                 ? '69vh'
                 : '63vh', // Screen size monitor different height from laptop
             overflowX: 'hidden',
@@ -969,8 +1014,6 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                       className={darkMode ? feedStyles.sidebarcontent : feedStyles.sidebarcontentlight}
                       key={group.id}
                       onClick={(e: any) => {
-                        e.preventDefault();
-                        delete e['returnValue'];
                         // setTimeout(() => {
                         //   setMessageLoader(true);
                         //   window.history.pushState('', '', `/chat/${group.id}`);
@@ -980,17 +1023,20 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                         //   GetInitalMessagesRefetch({ groupid: id, offset: 0, limit });
                         //   onlineRefetch({ groupid: id });
                         // }, 100);
-                        window.addEventListener('beforeunload', (e) => {
-                          e.preventDefault();
-                          delete e['returnValue'];
-                        });
+
                         window.history.pushState('', '', `/chat/${group.id}`);
-                        window.location.reload(true);
+                        history.go(0);
                         // setTimeout(() => {
                         //   setMessageLoader(false);
                         // }, 1000);
                       }}
                     >
+                      {user &&
+                      group.last_message.body !== null &&
+                      group.last_message.author.id !== user.id &&
+                      !group.last_message.read_by.includes(user.id) ? (
+                        <div className="newmessagedot" style={{ top: 37, position: 'absolute', left: 380 }}></div>
+                      ) : null}
                       {group.members[0].id === user?.id ? (
                         <div style={{ marginTop: '3%', marginLeft: '3%', paddingTop: '3%' }}>
                           <img
@@ -1022,7 +1068,13 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                         <>
                           <p
                             style={{
-                              fontWeight: groupSelected === group.id ? 'bold' : 'normal',
+                              fontWeight:
+                                user &&
+                                group.last_message.body !== null &&
+                                group.last_message.author.id !== user.id &&
+                                !group.last_message.read_by.includes(user.id)
+                                  ? 'bold'
+                                  : 'normal',
                               fontFamily: 'Lato',
                               color: darkMode ? '#fff' : '#000',
                               position: 'relative',
@@ -1039,6 +1091,13 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                               style={{
                                 fontFamily: 'Lato',
                                 color: darkMode ? '#fff' : '#000',
+                                fontWeight:
+                                  user &&
+                                  group.last_message.body !== null &&
+                                  group.last_message.author.id !== user.id &&
+                                  !group.last_message.read_by.includes(user.id)
+                                    ? 'bold'
+                                    : 'normal',
                                 position: 'relative',
                                 bottom: 50,
                                 left: 75,
@@ -1046,9 +1105,9 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                               className={feedStyles.groupName}
                             >
                               {group.last_message.author.id !== user?.id ? group.last_message.author.username : 'You'}:{' '}
-                              {group.last_message.body.length <= 25
+                              {group.last_message.body.length <= 31
                                 ? group.last_message.body
-                                : `${group.last_message.body.substr(0, 20)}...`}
+                                : `${group.last_message.body.substr(0, 28)}...`}
                             </p>
                           )}
                         </>
@@ -1070,12 +1129,8 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                       //   window.location.reload(true);
                       // }}
                       onClick={(e: any) => {
-                        window.addEventListener('beforeunload', (e) => {
-                          e.preventDefault();
-                          delete e['returnValue'];
-                        });
                         window.history.pushState('', '', `/chat/${group.id}`);
-                        window.location.reload(true);
+                        history.go(0);
                         // setTimeout(() => {
                         //   setMessageLoader(true);
                         //   window.history.pushState('', '', `/chat/${group.id}`);
@@ -1128,7 +1183,13 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
 
                       <p
                         style={{
-                          fontWeight: groupSelected === group.id ? 'bold' : 'normal',
+                          fontWeight:
+                            user &&
+                            group.last_message.author.id !== user.id &&
+                            group.last_message.body !== null &&
+                            !group.last_message.read_by.includes(user.id)
+                              ? 'bold'
+                              : 'normal',
                           fontFamily: 'Lato',
                           color: darkMode ? '#fff' : '#000',
                           position: 'relative',
@@ -1145,6 +1206,13 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                             fontFamily: 'Lato',
                             color: darkMode ? '#fff' : '#000',
                             position: 'relative',
+                            fontWeight:
+                              user &&
+                              group.last_message.author.id !== user.id &&
+                              document.visibilityState === 'hidden' &&
+                              !group.last_message.read_by.includes(user.id)
+                                ? 'bold'
+                                : 'normal',
                             bottom: group.image.length === 0 ? 85 : 50,
                             left: group.image.length === 0 ? 78 : 83,
                           }}
@@ -1230,7 +1298,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
         <div
           style={{
             height:
-              messageVal.length <= 88
+              messageVal.length <= 75
                 ? '20vh'
                 : (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
                   (typeof window !== 'undefined' && window.screen.availWidth) < 1800
@@ -1259,7 +1327,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                   onlineData.GetMembers.map((member) => {
                     if (member.id !== user.id) {
                       return (
-                        <div>
+                        <div style={{ bottom: messageVal.length <= 75 ? '' : 94, position: 'relative' }}>
                           <div>
                             <img
                               src={member.profile_picture}
@@ -1297,7 +1365,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                     paddingRight: 100,
                     borderRadius: 10,
                     backgroundColor: darkMode ? '#3D3D3D' : '#F4F4F4',
-                    minHeight: messageVal.length <= 88 ? 10 : '',
+                    minHeight: messageVal.length <= 75 ? 10 : 140,
                     bottom: 10,
                     lineHeight: 1.8,
                     position: 'absolute',
@@ -1309,8 +1377,24 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                     if (e.shiftKey) {
                       return;
                     }
-                    if (!messageVal.trim()) return;
                     if (e.key === 'Enter') {
+                      if (!messageVal.replace(/\s/g, '').length) {
+                        await SetUserTyping({
+                          variables: {
+                            authorid: user.id,
+                            groupid: groupSelected,
+                            value: false,
+                          },
+                        });
+                        return e.preventDefault();
+                      }
+                      await SetUserTyping({
+                        variables: {
+                          authorid: user.id,
+                          groupid: groupSelected,
+                          value: false,
+                        },
+                      });
                       const el = document.getElementById('chatDiv');
                       setMessages([
                         ...messages,
@@ -1330,20 +1414,11 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                           day,
                         },
                       ]);
+
                       if (el) el.scrollTop = el.scrollHeight - el.clientHeight;
-                      setMessageVal('');
-                      SetUserTyping({
-                        variables: {
-                          authorid: user.id,
-                          groupid: window.location.href.substr(window.location.href.lastIndexOf('/') + 1),
-                          value: false,
-                        },
-                      });
                       e.preventDefault();
-                      // Check If Text Is Empty Before Submitting
-                      if (!messageVal.trim()) {
-                        return;
-                      }
+                      setMessageVal('');
+
                       await SendMessage({
                         variables: {
                           groupid: groupSelected,
@@ -1448,11 +1523,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                   style={{
                     position: 'absolute',
                     bottom: 200,
-                    left:
-                      (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
-                      (typeof window !== 'undefined' && window.screen.availWidth) < 1800
-                        ? 750
-                        : 1530,
+                    left: 750,
                   }}
                   onSelect={(e: any) => {
                     let sym = e.unified.split('-');

@@ -91,3 +91,9 @@ export const SET_USER_TYPING = gql`
     SetUserTyping(authorid: $authorid, value: $value, groupid: $groupid)
   }
 `;
+
+export const ADD_READ_BY = gql`
+  mutation AddReadBy($messageid: String, $member: String) {
+    AddReadBy(messageid: $messageid, member: $member)
+  }
+`;

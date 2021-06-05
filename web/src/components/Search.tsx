@@ -297,20 +297,29 @@ export const Search = () => {
                 if (nameVal.length == 0 && selectedItems.length > 1) {
                   return setNameError(true);
                 }
+
                 if (!nameVal.replace(/\s/g, '').length && selectedItems.length > 1) {
                   return;
                 }
                 if (selectedItems.length === 0) {
                   return setError(true);
                 }
-                if (GetMembers() !== [] || selectedItems.length === 1) {
+                if (GetMembers() !== []) {
                   setLoading(true);
                   await client.mutate({
                     mutation: CREATE_GROUP,
-                    variables: { id: generateId(24), members: GetMembers(), name: nameVal, image },
+                    variables: {
+                      id: generateId(24),
+                      members: GetMembers(),
+                      name:
+                        selectedItems.length > 1
+                          ? nameVal
+                          : `DM: ${user?.username} ${(selectedItems[0] as any).username}`,
+                      image,
+                    },
                   });
+                  window.location.reload(false);
                   setLoading(false);
-                  router.reload();
                 } else if (GetMembers() === []) {
                   toast({ status: 'error', title: 'Oops! Something failed.' });
                 }

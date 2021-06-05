@@ -801,6 +801,14 @@ a.socialIcon:hover,
   display: inline-block;
 }
 
+.newmessagedot {
+  height: 20px;
+  width: 20px;
+  background-color: #0098fd;
+  border-radius: 50%;
+  display: inline-block;
+}
+
 .search-box {
   position: absolute;
   top: 9%;

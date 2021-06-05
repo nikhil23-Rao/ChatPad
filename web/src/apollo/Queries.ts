@@ -52,6 +52,7 @@ export const GET_INITIAL_MESSAGES = gql`
       image
       time
       date
+      read_by
     }
   }
 `;
@@ -96,6 +97,7 @@ export const SEARCH_GROUPS = gql`
       name
       id
       last_message {
+        read_by
         body
         messageid
         author {

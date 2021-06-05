@@ -15,6 +15,7 @@ export const GET_ALL_MESSAGES = gql`
       groupid
       time
       date
+      read_by
     }
   }
 `;

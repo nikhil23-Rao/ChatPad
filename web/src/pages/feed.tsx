@@ -168,7 +168,7 @@ const Feed: React.FC<FeedProps> = ({}) => {
                   (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
                   (typeof window !== 'undefined' && window.screen.availWidth) < 1800
                     ? '44%'
-                    : '46%',
+                    : '46.2%',
                 color: darkMode ? '#fff' : '#000',
               }}
             >
@@ -296,6 +296,12 @@ const Feed: React.FC<FeedProps> = ({}) => {
                       // }, 1000);
                     }}
                   >
+                    {user &&
+                    group.last_message.body !== null &&
+                    group.last_message.author.id !== user.id &&
+                    !group.last_message.read_by.includes(user.id) ? (
+                      <div className="newmessagedot" style={{ top: 37, position: 'absolute', left: 380 }}></div>
+                    ) : null}
                     {group.members[0].id === user?.id ? (
                       <div style={{ marginTop: '3%', marginLeft: '3%', paddingTop: '3%' }}>
                         <img
@@ -327,7 +333,13 @@ const Feed: React.FC<FeedProps> = ({}) => {
                       <>
                         <p
                           style={{
-                            fontWeight: groupSelected === group.id ? 'bold' : 'normal',
+                            fontWeight:
+                              user &&
+                              group.last_message.body !== null &&
+                              group.last_message.author.id !== user.id &&
+                              !group.last_message.read_by.includes(user.id)
+                                ? 'bold'
+                                : 'normal',
                             fontFamily: 'Lato',
                             color: darkMode ? '#fff' : '#000',
                             position: 'relative',
@@ -344,6 +356,13 @@ const Feed: React.FC<FeedProps> = ({}) => {
                             style={{
                               fontFamily: 'Lato',
                               color: darkMode ? '#fff' : '#000',
+                              fontWeight:
+                                user &&
+                                group.last_message.body !== null &&
+                                group.last_message.author.id !== user.id &&
+                                !group.last_message.read_by.includes(user.id)
+                                  ? 'bold'
+                                  : 'normal',
                               position: 'relative',
                               bottom: 50,
                               left: 75,
@@ -433,7 +452,13 @@ const Feed: React.FC<FeedProps> = ({}) => {
 
                     <p
                       style={{
-                        fontWeight: groupSelected === group.id ? 'bold' : 'normal',
+                        fontWeight:
+                          user &&
+                          group.last_message.author.id !== user.id &&
+                          group.last_message.body !== null &&
+                          !group.last_message.read_by.includes(user.id)
+                            ? 'bold'
+                            : 'normal',
                         fontFamily: 'Lato',
                         color: darkMode ? '#fff' : '#000',
                         position: 'relative',
@@ -450,6 +475,13 @@ const Feed: React.FC<FeedProps> = ({}) => {
                           fontFamily: 'Lato',
                           color: darkMode ? '#fff' : '#000',
                           position: 'relative',
+                          fontWeight:
+                            user &&
+                            group.last_message.author.id !== user.id &&
+                            document.visibilityState === 'hidden' &&
+                            !group.last_message.read_by.includes(user.id)
+                              ? 'bold'
+                              : 'normal',
                           bottom: group.image.length === 0 ? 85 : 50,
                           left: group.image.length === 0 ? 78 : 83,
                         }}

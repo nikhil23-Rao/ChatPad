@@ -1,8 +1,6 @@
 import React from 'react';
 import { css as emoCSS } from '@emotion/css';
 import styled from '@emotion/styled';
-import starWarsNames from 'starwars-names';
-import { matchSorter } from 'match-sorter';
 import client from '@/../apollo-client';
 import { GET_ALL_USERS } from '@/apollo/Queries';
 
