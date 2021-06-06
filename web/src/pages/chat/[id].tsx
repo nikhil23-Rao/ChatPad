@@ -14,6 +14,17 @@ import {
   Button,
   Input,
   useDisclosure,
+  Menu,
+  MenuButton,
+  MenuList,
+  MenuItem,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton,
 } from '@chakra-ui/react';
 import {
   GET_CHAT_PATHS,
@@ -88,7 +99,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   const [offset, setOffset] = useState(10);
   const router = useRouter();
   const [visible, setVisible] = useState(true);
-  const [closed, setClosed] = useState(false);
+  const [groupNameValue, setGroupNameValue] = useState('');
   const [messageVal, setMessageVal] = useState('');
   const [session] = useSession();
   const chatRef = useRef<null | HTMLElement>();
@@ -134,6 +145,11 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   };
 
   const toast = useToast();
+  const {
+    isOpen: editGroupNameModalIsOpen,
+    onOpen: editGroupNameModalOnOpen,
+    onClose: editGroupNameModalOnClose,
+  } = useDisclosure();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const btnRef = React.useRef();
 
@@ -179,14 +195,12 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   };
 
   useEffect(() => {
-    // setInterval(() => {
-    //   if (document.visibilityState === 'hidden') {
-    //     SetChatOn({ variables: { authorid: user.id, groupid: '' } });
-    //   }
-    //   if (document.visibilityState !== 'hidden') {
-    //     SetChatOn({ variables: { authorid: user.id, groupid: groupSelected } });
-    //   }
-    // }, 5000);
+    if (typeof GroupNameData !== 'undefined') {
+      setGroupNameValue(GroupNameData.GetGroupName.name);
+    }
+  }, [typeof GroupNameData]);
+
+  useEffect(() => {
     if (messageVal.replace(/\s/g, '').length && user) {
       SetUserTyping({
         variables: {
@@ -750,6 +764,42 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
         <div
           style={{
             position: 'absolute',
+            top: 20,
+            right: 165,
+          }}
+        >
+          <Menu>
+            <MenuButton px={4} py={2} transition="all 0.2s" _focus={{ outline: 'none' }}>
+              <i
+                className="fa fa-cog fa-3x"
+                ref={btnRef as any}
+                style={{ color: darkMode ? '#4097FF' : '', cursor: 'pointer' }}
+              ></i>
+            </MenuButton>
+            <MenuList style={{ marginRight: 25, position: 'relative', bottom: 14 }}>
+              {GroupNameData && GroupNameData.GetGroupName && GroupNameData.GetGroupName.members.length > 2 ? (
+                <>
+                  <MenuItem onClick={editGroupNameModalOnOpen}>
+                    {' '}
+                    <i className="fa fa-pencil" style={{ marginRight: 10 }}></i> Edit Group Name
+                  </MenuItem>
+                  <MenuItem>
+                    {' '}
+                    <i className="fa fa-users" style={{ marginRight: 10 }}></i> View Members
+                  </MenuItem>
+                </>
+              ) : null}
+              <MenuItem>
+                {' '}
+                <i className="fa fa-sign-out" style={{ marginRight: 10, marginTop: 2 }}></i> Exit Conversation
+              </MenuItem>
+            </MenuList>
+          </Menu>
+        </div>
+
+        <div
+          style={{
+            position: 'absolute',
             top: 28,
             right: 120,
           }}
@@ -764,6 +814,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
             style={{ color: darkMode ? '#4097FF' : '', cursor: 'pointer' }}
           ></i>
         </div>
+
         <div
           style={{
             position: 'absolute',
@@ -840,6 +891,21 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
             <br />
             <br />
             <br />
+            <Modal onClose={editGroupNameModalOnClose} isOpen={editGroupNameModalIsOpen} isCentered>
+              <ModalOverlay />
+              <ModalContent style={{ backgroundColor: darkMode ? '#2D3748' : '#E2E8F0' }}>
+                <ModalHeader style={{ color: darkMode ? '#fff' : '#000' }}>Edit Group Name</ModalHeader>
+                <ModalCloseButton style={{ color: '#F56565' }} />
+                <ModalBody style={{ color: darkMode ? '#fff' : '#000' }}>
+                  <Input value={groupNameValue} />
+                </ModalBody>
+                <ModalFooter>
+                  <Button onClick={editGroupNameModalOnClose} colorScheme="messenger">
+                    Save Changes
+                  </Button>
+                </ModalFooter>
+              </ModalContent>
+            </Modal>
             {GroupNameData && GroupNameData.GetGroupName ? (
               <Drawer
                 isOpen={isOpen}
@@ -1079,7 +1145,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                               color: darkMode ? '#fff' : '#000',
                               position: 'relative',
                               fontSize: 20,
-                              bottom: 50,
+                              bottom: 55,
                               left: 75,
                             }}
                             className={feedStyles.groupName}
@@ -1099,8 +1165,8 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                                     ? 'bold'
                                     : 'normal',
                                 position: 'relative',
-                                bottom: 50,
-                                left: 75,
+                                bottom: 55,
+                                left: 78,
                               }}
                               className={feedStyles.groupName}
                             >
@@ -1185,8 +1251,8 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                         style={{
                           fontWeight:
                             user &&
-                            group.last_message.author.id !== user.id &&
                             group.last_message.body !== null &&
+                            group.last_message.author.id !== user.id &&
                             !group.last_message.read_by.includes(user.id)
                               ? 'bold'
                               : 'normal',

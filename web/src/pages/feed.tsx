@@ -454,8 +454,9 @@ const Feed: React.FC<FeedProps> = ({}) => {
                       style={{
                         fontWeight:
                           user &&
-                          group.last_message.author.id !== user.id &&
                           group.last_message.body !== null &&
+                          group.last_message.author.id &&
+                          group.last_message.author.id !== user.id &&
                           !group.last_message.read_by.includes(user.id)
                             ? 'bold'
                             : 'normal',
