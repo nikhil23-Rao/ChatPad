@@ -264,12 +264,11 @@ const Feed: React.FC<FeedProps> = ({}) => {
           )}
           {searchData &&
             searchData.SearchGroups.map((group) => {
-              if (group.members.length === 2) {
+              if (group.dm) {
                 return (
                   <div
                     style={{
                       backgroundColor: group.id === groupSelected ? (!darkMode ? '#E9EAEB' : '#313131') : '',
-                      marginBottom: -12,
                     }}
                     className={darkMode ? feedStyles.sidebarcontent : feedStyles.sidebarcontentlight}
                     key={group.id}
@@ -303,33 +302,33 @@ const Feed: React.FC<FeedProps> = ({}) => {
                       <div className="newmessagedot" style={{ top: 37, position: 'absolute', left: 380 }}></div>
                     ) : null}
                     {group.members[0].id === user?.id ? (
-                      <div style={{ marginTop: '3%', marginLeft: '3%', paddingTop: '3%' }}>
+                      <div style={{ marginTop: '-1%', marginLeft: '3%', paddingTop: '3%' }}>
                         <img
                           src={group.members[1].profile_picture}
                           alt=""
                           style={{ width: 54, height: 54, borderRadius: 125 }}
                         />
                         {group.members[1].online ? (
-                          <div className="onlinedot" style={{ position: 'absolute', bottom: 19, left: 48 }} />
+                          <div className="onlinedot" style={{ position: 'absolute', bottom: 15, left: 63 }} />
                         ) : (
                           ''
                         )}
                       </div>
                     ) : (
-                      <div style={{ marginTop: '3%', marginLeft: '3%', paddingTop: '3%' }}>
+                      <div style={{ marginTop: '-1%', marginLeft: '2%', paddingTop: '3%' }}>
                         <img
                           src={group.members[0].profile_picture}
                           alt=""
                           style={{ width: 54, height: 54, borderRadius: 125 }}
                         />
                         {group.members[0].online ? (
-                          <div className="onlinedot" style={{ position: 'absolute', bottom: 19, left: 48 }} />
+                          <div className="onlinedot" style={{ position: 'absolute', bottom: 15, left: 63 }} />
                         ) : (
                           ''
                         )}
                       </div>
                     )}
-                    {group.members.length === 2 ? (
+                    {group.dm ? (
                       <>
                         <p
                           style={{
@@ -344,7 +343,7 @@ const Feed: React.FC<FeedProps> = ({}) => {
                             color: darkMode ? '#fff' : '#000',
                             position: 'relative',
                             fontSize: 20,
-                            bottom: 50,
+                            bottom: 52,
                             left: 75,
                           }}
                           className={feedStyles.groupName}
@@ -364,13 +363,21 @@ const Feed: React.FC<FeedProps> = ({}) => {
                                   ? 'bold'
                                   : 'normal',
                               position: 'relative',
-                              bottom: 50,
+                              bottom: 52,
                               left: 75,
                             }}
                             className={feedStyles.groupName}
                           >
                             {group.last_message.author.id !== user?.id ? group.last_message.author.username : 'You'}:{' '}
-                            {group.last_message.body.length <= 31
+                            {group.last_message.alert && group.last_message.body.includes('kicked')
+                              ? '(Kicked Member From Group)'
+                              : group.last_message.alert &&
+                                !group.last_message.body.includes('kicked') &&
+                                !group.last_message.body.includes('added')
+                              ? '(Changed The Group Name)'
+                              : group.last_message.body.includes('added') && group.last_message.alert
+                              ? '(Added Member To Group)'
+                              : group.last_message.body.length <= 31
                               ? group.last_message.body
                               : `${group.last_message.body.substr(0, 28)}...`}
                           </p>
@@ -379,13 +386,12 @@ const Feed: React.FC<FeedProps> = ({}) => {
                     ) : null}
                   </div>
                 );
-              } else if (group.members.length > 2) {
+              } else if (!group.dm) {
                 const restOfPeople = group.members.length - 2;
                 return (
                   <div
                     style={{
                       backgroundColor: group.id === groupSelected ? (!darkMode ? '#E9EAEB' : '#313131') : '',
-                      marginBottom: -12,
                     }}
                     className={darkMode ? feedStyles.sidebarcontent : feedStyles.sidebarcontentlight}
                     key={group.id}
@@ -414,37 +420,67 @@ const Feed: React.FC<FeedProps> = ({}) => {
                       // }, 1000);
                     }}
                   >
-                    {group.image.length === 0 ? (
+                    {group.image.length === 0 && user && group.members.length === 1 ? (
+                      <img
+                        src={user.profile_picture as any}
+                        alt=""
+                        style={{ width: 54, height: 54, borderRadius: 125, top: 10, position: 'relative', left: 10 }}
+                      />
+                    ) : null}
+                    {group.image.length === 0 && user && group.members.length >= 2 ? (
                       <>
-                        <div style={{ marginTop: '3%', marginLeft: '7%', paddingTop: '3%' }}>
-                          <img
-                            src={group.members[0].profile_picture}
-                            alt=""
-                            style={{ width: 30, height: 30, borderRadius: 25, position: 'relative', top: 3 }}
-                          />
-                        </div>
+                        <div
+                          style={{
+                            position: 'relative',
+                            bottom: 6,
+                            right: 8,
+                            marginLeft: group.members.length === 2 ? 10 : -2,
+                          }}
+                        >
+                          <div style={{ marginLeft: '7%', paddingTop: '3%' }}>
+                            <img
+                              src={group.members[0].profile_picture}
+                              alt=""
+                              style={{ width: 30, height: 30, borderRadius: 25, position: 'relative', top: 3 }}
+                            />
+                          </div>
 
-                        <div style={{ marginLeft: 17 }}>
-                          <img
-                            src={group.members[1].profile_picture}
-                            alt=""
-                            style={{ width: 30, height: 30, borderRadius: 25 }}
-                          />
+                          <div style={{ marginLeft: 17 }}>
+                            <img
+                              src={group.members[1].profile_picture}
+                              alt=""
+                              style={{ width: 30, height: 30, borderRadius: 25 }}
+                            />
+                          </div>
                         </div>
                       </>
-                    ) : (
+                    ) : group.image.length > 0 ? (
                       <div>
                         <img
                           src={group.image}
-                          style={{ width: 64, height: 64, borderRadius: 125, position: 'relative', top: 12, left: 6 }}
+                          style={{
+                            width: 54,
+                            height: 54,
+                            borderRadius: 125,
+                            position: 'relative',
+                            top: 5,
+                            left: 10,
+                          }}
                           alt=""
                         />
                       </div>
-                    )}
+                    ) : null}
                     {group.image.length === 0 && (
                       <div
                         className={`${feedStyles.dot} text-center`}
-                        style={{ width: 29, height: 29, position: 'relative', left: 5, top: -28 }}
+                        style={{
+                          width: 29,
+                          height: 29,
+                          position: 'relative',
+                          left: -5,
+                          top: -35,
+                          display: restOfPeople < 1 ? 'none' : '',
+                        }}
                       >
                         <p style={{ position: 'relative', top: 3, right: 2 }}>+{restOfPeople}</p>
                       </div>
@@ -463,9 +499,16 @@ const Feed: React.FC<FeedProps> = ({}) => {
                         fontFamily: 'Lato',
                         color: darkMode ? '#fff' : '#000',
                         position: 'relative',
-                        bottom: group.image.length === 0 ? 85 : 50,
+                        bottom:
+                          group.image.length === 0 && group.members.length === 1
+                            ? 47
+                            : group.image.length === 0 && restOfPeople !== 0
+                            ? 94
+                            : group.image.length === 0 && restOfPeople === 0
+                            ? 65
+                            : 50,
                         fontSize: 20,
-                        left: group.image.length === 0 ? 75 : 80,
+                        left: group.image.length === 0 ? 76 : 80,
                       }}
                     >
                       {group.name}
@@ -483,13 +526,28 @@ const Feed: React.FC<FeedProps> = ({}) => {
                             !group.last_message.read_by.includes(user.id)
                               ? 'bold'
                               : 'normal',
-                          bottom: group.image.length === 0 ? 85 : 50,
+                          bottom:
+                            group.image.length === 0 && group.members.length === 1
+                              ? 47
+                              : group.image.length === 0 && restOfPeople !== 0
+                              ? 94
+                              : group.image.length === 0 && restOfPeople === 0
+                              ? 68
+                              : 50,
                           left: group.image.length === 0 ? 78 : 83,
                         }}
                         className={feedStyles.groupName}
                       >
                         {group.last_message.author.id !== user?.id ? group.last_message.author.username : 'You'}:{' '}
-                        {group.last_message.body.length <= 31
+                        {group.last_message.alert && group.last_message.body.includes('kicked')
+                          ? '(Kicked Member From Group)'
+                          : group.last_message.alert &&
+                            !group.last_message.body.includes('kicked') &&
+                            !group.last_message.body.includes('added')
+                          ? '(Changed The Group Name)'
+                          : group.last_message.body.includes('added') && group.last_message.alert
+                          ? '(Added Member To Group)'
+                          : group.last_message.body.length <= 31
                           ? group.last_message.body
                           : `${group.last_message.body.substr(0, 28)}...`}
                       </p>

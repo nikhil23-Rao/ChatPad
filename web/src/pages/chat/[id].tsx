@@ -2,7 +2,15 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useSession } from 'next-auth/client';
 import feedStyles from '../../styles/feed.module.css';
 import client from '@/../apollo-client';
-import { IconButton } from '@material-ui/core';
+import {
+  Avatar,
+  IconButton,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemSecondaryAction,
+  ListItemText,
+} from '@material-ui/core';
 import {
   Drawer,
   DrawerBody,
@@ -26,6 +34,7 @@ import {
   ModalBody,
   ModalCloseButton,
 } from '@chakra-ui/react';
+import BackspaceIcon from '@material-ui/icons/Backspace';
 import {
   GET_CHAT_PATHS,
   GET_GROUPS,
@@ -41,6 +50,9 @@ import { useMutation, useQuery, useSubscription } from '@apollo/client';
 import EjectIcon from '@material-ui/icons/Eject';
 import {
   ADD_READ_BY,
+  CHANGE_GROUP_NAME,
+  DELETE_CONVERSATION,
+  KICK_MEMBERS,
   SEND_MESSAGE,
   SET_CHAT_ON,
   SET_USER_TYPING,
@@ -58,6 +70,7 @@ import InsertPhotoIcon from '@material-ui/icons/InsertPhoto';
 import { formatAMPM } from '@/../utils/formatTime';
 import { tw } from 'twind';
 import { isUrl } from '@/../utils/isUrl';
+import { AddMembers } from '@/components/AddMembers';
 interface ChatProps {
   currId: string;
 }
@@ -150,6 +163,26 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
     onOpen: editGroupNameModalOnOpen,
     onClose: editGroupNameModalOnClose,
   } = useDisclosure();
+  const {
+    isOpen: viewMembersModalIsOpen,
+    onOpen: viewMembersModalOnOpen,
+    onClose: viewMembersModalOnClose,
+  } = useDisclosure();
+  const {
+    isOpen: addMembersModalIsOpen,
+    onOpen: addMembersModalOnOpen,
+    onClose: addMembersModalOnClose,
+  } = useDisclosure();
+  const {
+    isOpen: leaveGroupModalIsOpen,
+    onOpen: leaveGroupModalOnOpen,
+    onClose: leaveGroupModalOnClose,
+  } = useDisclosure();
+  const {
+    isOpen: deleteConversationModalIsOpen,
+    onOpen: deleteConversationModalOnOpen,
+    onClose: deleteConversationModalOnClose,
+  } = useDisclosure();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const btnRef = React.useRef();
 
@@ -173,7 +206,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   const [SendMessage] = useMutation(SEND_MESSAGE);
   const { data: realtimeData } = useSubscription(GET_ALL_MESSAGES);
   const { data: typingData } = useSubscription(GET_USERS_TYPING);
-  const { data: GroupNameData, loading: GroupNameLoading } = useQuery(GET_GROUP_NAME, {
+  const { data: GroupNameData, loading: GroupNameLoading, refetch: groupNameRefetch } = useQuery(GET_GROUP_NAME, {
     variables: { groupid: groupSelected },
   });
   const { data: onlineData, loading: onlineLoading, refetch: onlineRefetch } = useQuery(GET_MEMBERS, {
@@ -185,6 +218,9 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   const [SwitchOnline] = useMutation(SWITCH_ONLINE);
   const [SetChatOn] = useMutation(SET_CHAT_ON);
   const [SetUserTyping] = useMutation(SET_USER_TYPING);
+  const [ChangeGroupName] = useMutation(CHANGE_GROUP_NAME);
+  const [KickMembers] = useMutation(KICK_MEMBERS);
+  const [DeleteConversation] = useMutation(DELETE_CONVERSATION);
 
   const playSound = () => {
     const audio = document.getElementById('sound');
@@ -249,6 +285,17 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   }, [typeof messageData, groupSelected]);
 
   useEffect(() => {
+    if (GroupNameData && user) {
+      console.log('HERE');
+      const arr = GroupNameData.GetGroupName.members.filter((member) => member.id === user?.id);
+      console.log('ARR', arr);
+      if (arr.length === 0) {
+        window.location.href = '/feed';
+      }
+    }
+  }, [GroupNameData]);
+
+  useEffect(() => {
     setTimeout(() => {
       const el = document.getElementById('chatDiv');
       if (el) {
@@ -299,6 +346,9 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
       : 'overflow: hidden; zoom: 1;';
 
     onClose();
+    addMembersModalOnClose();
+    viewMembersModalOnClose();
+    editGroupNameModalOnClose();
 
     if (user && user.dark_theme === 'true') {
       (document.body.style as any) = 'background: #0C0E12';
@@ -321,7 +371,6 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
     ) {
       playSound();
     }
-    console.log(realtimeData);
 
     if (
       realtimeData &&
@@ -335,10 +384,12 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
       if (document.visibilityState === 'hidden' && user) {
         SetChatOn({ variables: { groupid: '', authorid: user.id } });
         onlineRefetch({ groupid: groupSelected });
+        groupNameRefetch();
       }
       if (document.visibilityState !== 'hidden' && user) {
         SetChatOn({ variables: { groupid: groupSelected, authorid: user.id } });
         onlineRefetch({ groupid: groupSelected });
+        groupNameRefetch();
       }
     }, 5000);
   }, [session, messageData, realtimeData, user?.dark_theme, groupSelected]);
@@ -384,7 +435,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
               className="navbar-brand mb-0 h1"
               style={{ marginLeft: GroupNameData.GetGroupName.members.length === 2 ? 640 : 550, display: 'inline' }}
             >
-              {GroupNameData.GetGroupName.members.length === 2 ? (
+              {GroupNameData.GetGroupName.dm ? (
                 <>
                   {GroupNameData.GetGroupName.members[0].id === user?.id ? (
                     <img
@@ -405,9 +456,16 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                     </SkeletonCircle>
                   )}
                 </>
-              ) : GroupNameData.GetGroupName.members.length > 2 ? (
+              ) : !GroupNameData.GetGroupName.dm ? (
                 <>
-                  {GroupNameData.GetGroupName.image.length === 0 ? (
+                  {GroupNameData.GetGroupName.image.length === 0 && GroupNameData.GetGroupName.members.length === 1 ? (
+                    <img
+                      src={user?.profile_picture as any}
+                      alt=""
+                      style={{ width: 54, height: 54, borderRadius: 125, display: 'inline' }}
+                    />
+                  ) : null}
+                  {GroupNameData.GetGroupName.image.length === 0 && GroupNameData.GetGroupName.members.length >= 2 ? (
                     <div style={{ display: 'inline', position: 'relative', left: 50 }}>
                       <img
                         src={GroupNameData.GetGroupName.members[0].profile_picture}
@@ -437,14 +495,21 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                       />
                       <div
                         className={feedStyles.navdot}
-                        style={{ position: 'relative', top: 10, right: 60, width: 30, height: 30 }}
+                        style={{
+                          position: 'relative',
+                          top: 10,
+                          right: 60,
+                          width: 30,
+                          height: 30,
+                          display: GroupNameData.GetGroupName.members.length <= 2 ? 'none' : '',
+                        }}
                       >
                         <p style={{ position: 'relative', left: 2, top: 2 }}>
                           +{GroupNameData.GetGroupName.members.length - 2}
                         </p>
                       </div>
                     </div>
-                  ) : (
+                  ) : GroupNameData.GetGroupName.image.length > 0 ? (
                     <div style={{ display: 'inline', position: 'relative', left: 50 }}>
                       <img
                         src={GroupNameData.GetGroupName.image}
@@ -460,10 +525,10 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                         alt=""
                       />
                     </div>
-                  )}
+                  ) : null}
                 </>
               ) : null}
-              {GroupNameData.GetGroupName.members.length === 2 ? (
+              {GroupNameData.GetGroupName.dm ? (
                 <p
                   style={{
                     display: 'inline',
@@ -479,7 +544,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                     : GroupNameData.GetGroupName.members[0].username}
                 </p>
               ) : null}
-              {GroupNameData.GetGroupName.members.length > 2 && (
+              {!GroupNameData.GetGroupName.dm && (
                 <p
                   style={{
                     display: 'inline',
@@ -487,7 +552,12 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                     fontWeight: 'bold',
                     fontSize: 28,
                     marginLeft:
-                      GroupNameData.GetGroupName.members.length === 2
+                      !GroupNameData.GetGroupName.dm && GroupNameData.GetGroupName.members.length === 2
+                        ? 70
+                        : GroupNameData.GetGroupName.members.length === 1 &&
+                          GroupNameData.GetGroupName.image.length === 0
+                        ? 20
+                        : GroupNameData.GetGroupName.members.length === 2
                         ? 10
                         : GroupNameData.GetGroupName.image.length > 0
                         ? 60
@@ -508,17 +578,32 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                     textAlign: 'left',
                     color: darkMode ? '#fff' : '#000',
                     bottom:
-                      GroupNameData.GetGroupName.members.length === 2
+                      !GroupNameData.GetGroupName.dm &&
+                      GroupNameData.GetGroupName.members.length === 2 &&
+                      GroupNameData.GetGroupName.image.length === 0
+                        ? 2
+                        : GroupNameData.GetGroupName.members.length === 1 &&
+                          GroupNameData.GetGroupName.image.length === 0
+                        ? 13
+                        : GroupNameData.GetGroupName.members.length === 2 &&
+                          GroupNameData.GetGroupName.image.length === 0
                         ? 15
                         : GroupNameData.GetGroupName.image.length > 0
                         ? 20
                         : 5,
                     marginLeft:
-                      GroupNameData.GetGroupName.members.length === 2
+                      !GroupNameData.GetGroupName.dm && GroupNameData.GetGroupName.members.length === 2
+                        ? 140
+                        : GroupNameData.GetGroupName.image.length > 0
+                        ? 137
+                        : GroupNameData.GetGroupName.members.length === 1 &&
+                          GroupNameData.GetGroupName.image.length === 0
+                        ? 78
+                        : GroupNameData.GetGroupName.members.length === 2
                         ? 66
                         : GroupNameData.GetGroupName.members.length > 2
                         ? 137
-                        : 50,
+                        : 20,
                   }}
                 >
                   {messages && messages[messages.length - 1] && messages[messages.length - 1].time
@@ -585,7 +670,13 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                 setMessages([...dataLoadMore.reverse(), ...messages]);
                 setLoader(false);
               }}
-              style={{ color: '#fff', left: 1000, top: 20 }}
+              style={{
+                color: '#fff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginTop: 70,
+              }}
               className={feedStyles.loadmorebtn}
               children={<EjectIcon style={{ width: '4vh', height: '4vh' }} />}
             ></IconButton>
@@ -617,7 +708,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                         top: 75,
                       }}
                     >
-                      {message.author.id !== user.id ? (
+                      {message.author.id !== user.id && !message.alert ? (
                         <img
                           style={{
                             width: 50,
@@ -633,7 +724,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                       ) : null}
                     </div>
 
-                    {message.author.id !== user.id ? (
+                    {message.author.id !== user.id && !message.alert ? (
                       <p
                         style={{
                           color: darkMode ? '#ebeef0' : '#000',
@@ -662,52 +753,58 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                           : ' Now'}
                       </p>
                     ) : (
-                      <p
-                        style={{
-                          color: darkMode ? '#ebeef0' : '#000',
-                          position: 'relative',
-                          fontFamily: 'Lato',
-                          left:
-                            Math.round((Date.now() - message.time) / 60000) > 0 &&
-                            Math.round((Date.now() - message.time) / 60000) < 60
-                              ? 1575
-                              : Math.round((Date.now() - message.time) / 60000) >= 60 &&
-                                Math.round((Date.now() - message.time) / 60000) < 1440
-                              ? 1610
-                              : Math.round((Date.now() - message.time) / 60000) > 1440
-                              ? 1535
-                              : 1625,
-                          top: 10,
-                          fontSize: 14,
-                        }}
-                      >
-                        You •{' '}
-                        {Math.round((Date.now() - message.time) / 60000) >= 1 &&
-                        Math.round((Date.now() - message.time) / 60000) < 2
-                          ? Math.round((Date.now() - message.time) / 60000) + ' minute ago'
-                          : Math.round((Date.now() - message.time) / 60000) > 0 &&
-                            Math.round((Date.now() - message.time) / 60000) < 60
-                          ? Math.round((Date.now() - message.time) / 60000) + ' minutes ago'
-                          : Math.round((Date.now() - message.time) / 60000) >= 60 &&
-                            Math.round((Date.now() - message.time) / 60000) < 1440
-                          ? message.date[1]
-                          : Math.round((Date.now() - message.time) / 60000) > 1440 &&
-                            Math.round((Date.now() - message.time) / 60000) < 10080
-                          ? message.date[2] + ', ' + message.date[1]
-                          : Math.round((Date.now() - message.time) / 60000) > 1440
-                          ? message.date[1] + ' ' + message.date[0]
-                          : ' Now'}
-                      </p>
+                      !message.alert &&
+                      message.author.id === user.id && (
+                        <p
+                          style={{
+                            color: darkMode ? '#ebeef0' : '#000',
+                            position: 'relative',
+                            fontFamily: 'Lato',
+                            left:
+                              Math.round((Date.now() - message.time) / 60000) > 0 &&
+                              Math.round((Date.now() - message.time) / 60000) < 60
+                                ? 1575
+                                : Math.round((Date.now() - message.time) / 60000) >= 60 &&
+                                  Math.round((Date.now() - message.time) / 60000) < 1440
+                                ? 1610
+                                : Math.round((Date.now() - message.time) / 60000) > 1440
+                                ? 1535
+                                : 1625,
+                            top: 10,
+                            fontSize: 14,
+                          }}
+                        >
+                          You •{' '}
+                          {Math.round((Date.now() - message.time) / 60000) >= 1 &&
+                          Math.round((Date.now() - message.time) / 60000) < 2
+                            ? Math.round((Date.now() - message.time) / 60000) + ' minute ago'
+                            : Math.round((Date.now() - message.time) / 60000) > 0 &&
+                              Math.round((Date.now() - message.time) / 60000) < 60
+                            ? Math.round((Date.now() - message.time) / 60000) + ' minutes ago'
+                            : Math.round((Date.now() - message.time) / 60000) >= 60 &&
+                              Math.round((Date.now() - message.time) / 60000) < 1440
+                            ? message.date[1]
+                            : Math.round((Date.now() - message.time) / 60000) > 1440 &&
+                              Math.round((Date.now() - message.time) / 60000) < 10080
+                            ? message.date[2] + ', ' + message.date[1]
+                            : Math.round((Date.now() - message.time) / 60000) > 1440
+                            ? message.date[1] + ' ' + message.date[0]
+                            : ' Now'}
+                        </p>
+                      )
                     )}
+
                     <div
                       className={
-                        message.author.id === user.id && user.dark_theme === 'true'
-                          ? feedStyles.yourmessage
-                          : message.author.id === user.id && user.dark_theme === 'false'
-                          ? feedStyles.yourmessagelight
-                          : message.author.id !== user.id && user.dark_theme === 'true'
-                          ? feedStyles.message
-                          : feedStyles.messagelight
+                        !message.alert
+                          ? message.author.id === user.id && user.dark_theme === 'true'
+                            ? feedStyles.yourmessage
+                            : message.author.id === user.id && user.dark_theme === 'false'
+                            ? feedStyles.yourmessagelight
+                            : message.author.id !== user.id && user.dark_theme === 'true'
+                            ? feedStyles.message
+                            : feedStyles.messagelight
+                          : ''
                       }
                       style={{
                         marginBottom: message.author.id !== user.id ? -40 : -4,
@@ -728,6 +825,34 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                           src={message.body}
                           className={feedStyles.text}
                         />
+                      ) : message.alert ? (
+                        <div
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexDirection: 'column',
+                            marginLeft: 250,
+                            marginBottom: 30,
+                            marginTop: 70,
+                            fontWeight: 500,
+                          }}
+                          className={feedStyles.groupNameChangeText}
+                        >
+                          {message.body.includes('left the group') && message.alert
+                            ? message.body
+                            : !message.body.includes('kicked') && !message.body.includes('added')
+                            ? message.author.id !== user.id
+                              ? `${message.author.username} has changed the group name to ${message.body}`
+                              : `You have changed the group name to ${message.body}`
+                            : message.body.includes('kicked')
+                            ? message.author.id !== user.id
+                              ? `${message.author.username} has ${message.body}`
+                              : `You have ${message.body}`
+                            : message.author.id === user.id
+                            ? `You have ${message.body}`
+                            : `${message.author.username} has ${message.body}`}
+                        </div>
                       ) : isUrl(message.body) ? (
                         <p
                           style={{
@@ -776,23 +901,69 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                 style={{ color: darkMode ? '#4097FF' : '', cursor: 'pointer' }}
               ></i>
             </MenuButton>
-            <MenuList style={{ marginRight: 25, position: 'relative', bottom: 14 }}>
-              {GroupNameData && GroupNameData.GetGroupName && GroupNameData.GetGroupName.members.length > 2 ? (
-                <>
-                  <MenuItem onClick={editGroupNameModalOnOpen}>
+            <MenuList
+              style={{
+                marginRight:
+                  (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
+                  (typeof window !== 'undefined' && window.screen.availWidth) < 1800
+                    ? -25
+                    : 25,
+                position: 'relative',
+                bottom: 14,
+              }}
+            >
+              <>
+                {GroupNameData && GroupNameData.GetGroupName && !GroupNameData.GetGroupName.name.includes('DM:') ? (
+                  <>
+                    <MenuItem
+                      onClick={() => {
+                        (document.body.style as any) = 'zoom: 1';
+                        editGroupNameModalOnOpen();
+                      }}
+                    >
+                      {' '}
+                      <i className="fa fa-pencil" style={{ marginRight: 10 }}></i> Edit Group Name
+                    </MenuItem>
+                    <MenuItem
+                      onClick={() => {
+                        (document.body.style as any) = 'zoom: 1';
+                        viewMembersModalOnOpen();
+                      }}
+                    >
+                      {' '}
+                      <i className="fa fa-users" style={{ marginRight: 10 }}></i> View Members
+                    </MenuItem>
+                    <MenuItem
+                      onClick={() => {
+                        (document.body.style as any) = 'zoom: 1';
+                        addMembersModalOnOpen();
+                      }}
+                    >
+                      {' '}
+                      <i className="fa fa-user-plus" style={{ marginRight: 10 }}></i> Add Members
+                    </MenuItem>
+                    <MenuItem
+                      onClick={() => {
+                        (document.body.style as any) = 'zoom: 1';
+                        leaveGroupModalOnOpen();
+                      }}
+                    >
+                      {' '}
+                      <i className="fa fa-sign-out" style={{ marginRight: 10, marginTop: 2 }}></i> Leave Group
+                    </MenuItem>
+                  </>
+                ) : (
+                  <MenuItem
+                    onClick={() => {
+                      (document.body.style as any) = 'zoom: 1';
+                      deleteConversationModalOnOpen();
+                    }}
+                  >
                     {' '}
-                    <i className="fa fa-pencil" style={{ marginRight: 10 }}></i> Edit Group Name
+                    <i className="fa fa-trash" style={{ marginRight: 10, marginTop: 0 }}></i> Delete Conversation
                   </MenuItem>
-                  <MenuItem>
-                    {' '}
-                    <i className="fa fa-users" style={{ marginRight: 10 }}></i> View Members
-                  </MenuItem>
-                </>
-              ) : null}
-              <MenuItem>
-                {' '}
-                <i className="fa fa-sign-out" style={{ marginRight: 10, marginTop: 2 }}></i> Exit Conversation
-              </MenuItem>
+                )}
+              </>
             </MenuList>
           </Menu>
         </div>
@@ -891,17 +1062,304 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
             <br />
             <br />
             <br />
-            <Modal onClose={editGroupNameModalOnClose} isOpen={editGroupNameModalIsOpen} isCentered>
+            <Modal
+              onClose={() => {
+                (document.body.style as any) =
+                  (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
+                  (typeof window !== 'undefined' && window.screen.availWidth) < 1800
+                    ? 'zoom: 0.8'
+                    : 'zoom: 1';
+                editGroupNameModalOnClose();
+              }}
+              isOpen={editGroupNameModalIsOpen}
+              isCentered
+            >
               <ModalOverlay />
               <ModalContent style={{ backgroundColor: darkMode ? '#2D3748' : '#E2E8F0' }}>
                 <ModalHeader style={{ color: darkMode ? '#fff' : '#000' }}>Edit Group Name</ModalHeader>
                 <ModalCloseButton style={{ color: '#F56565' }} />
                 <ModalBody style={{ color: darkMode ? '#fff' : '#000' }}>
-                  <Input value={groupNameValue} />
+                  <Input value={groupNameValue} onChange={(e) => setGroupNameValue(e.target.value)} />
                 </ModalBody>
                 <ModalFooter>
-                  <Button onClick={editGroupNameModalOnClose} colorScheme="messenger">
+                  <Button
+                    disabled={
+                      !groupNameValue.trim() || groupNameValue === GroupNameData.GetGroupName.name ? true : false
+                    }
+                    onClick={async () => {
+                      ChangeGroupName({ variables: { groupid: groupSelected, value: groupNameValue } });
+                      await searchDataRefetch();
+                      await groupNameRefetch();
+                      setMessages([
+                        ...messages,
+                        {
+                          groupid: groupSelected,
+                          body: groupNameValue,
+                          author: {
+                            username: user?.username,
+                            email: user?.email,
+                            id: user?.id,
+                            profile_picture: user?.profile_picture,
+                          },
+                          image: false,
+                          messageid: generateId(24),
+                          date: today,
+                          time: Date.now(),
+                          day,
+                          alert: true,
+                        },
+                      ]);
+                      await SendMessage({
+                        variables: {
+                          groupid: groupSelected,
+                          body: ` ${groupNameValue}`,
+                          author: {
+                            username: user?.username,
+                            email: user?.email,
+                            id: user?.id,
+                            profile_picture: user?.profile_picture,
+                          },
+                          image: false,
+                          messageid: generateId(24),
+                          time: formatAMPM(new Date()),
+                          date: today,
+                          day,
+                          alert: true,
+                        },
+                      });
+                      editGroupNameModalOnClose();
+                      if (
+                        (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
+                        (typeof window !== 'undefined' && window.screen.availWidth) < 1800
+                      ) {
+                        (document.body.style as any) = 'zoom: 0.8';
+                      } else {
+                        (document.body.style as any) = 'zoom: 1';
+                      }
+                    }}
+                    colorScheme="messenger"
+                  >
                     Save Changes
+                  </Button>
+                </ModalFooter>
+              </ModalContent>
+            </Modal>
+            <Modal
+              onClose={() => {
+                (document.body.style as any) =
+                  (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
+                  (typeof window !== 'undefined' && window.screen.availWidth) < 1800
+                    ? 'zoom: 0.8'
+                    : 'zoom: 1';
+                deleteConversationModalOnClose();
+              }}
+              isOpen={deleteConversationModalIsOpen}
+              isCentered
+            >
+              <ModalOverlay />
+              <ModalContent style={{ backgroundColor: darkMode ? '#2D3748' : '#E2E8F0' }}>
+                <ModalHeader style={{ color: darkMode ? '#fff' : '#000' }}>
+                  Are You Sure You Want To Delete This Conversation
+                </ModalHeader>
+                <ModalCloseButton style={{ color: '#F56565' }} />
+                <ModalBody style={{ color: darkMode ? '#fff' : '#000' }}>
+                  If you delete this conversation you will NOT be able to access it again.
+                </ModalBody>
+                <ModalFooter>
+                  <Button mr={3} colorScheme="messenger" onClick={() => deleteConversationModalOnClose()}>
+                    Cancel
+                  </Button>
+                  <Button
+                    colorScheme="red"
+                    onClick={async () => {
+                      await DeleteConversation({ variables: { groupid: groupSelected } });
+                      window.location.href = '/feed';
+                    }}
+                  >
+                    Delete Conversation
+                  </Button>
+                </ModalFooter>
+              </ModalContent>
+            </Modal>
+            <Modal
+              onClose={() => {
+                (document.body.style as any) =
+                  (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
+                  (typeof window !== 'undefined' && window.screen.availWidth) < 1800
+                    ? 'zoom: 0.8'
+                    : 'zoom: 1';
+                leaveGroupModalOnClose();
+              }}
+              isOpen={leaveGroupModalIsOpen}
+              isCentered
+            >
+              <ModalOverlay />
+              <ModalContent style={{ backgroundColor: darkMode ? '#2D3748' : '#E2E8F0' }}>
+                <ModalHeader style={{ color: darkMode ? '#fff' : '#000' }}>Are You Sure You Want To Leave?</ModalHeader>
+                <ModalCloseButton style={{ color: '#F56565' }} />
+                <ModalBody style={{ color: darkMode ? '#fff' : '#000' }}>
+                  <p>
+                    If you leave this group you will NOT be able to come back unless someone from this group invites
+                    you.
+                  </p>
+                </ModalBody>
+                <ModalFooter>
+                  <Button colorScheme="twitter" mr={3} onClick={() => leaveGroupModalOnClose()}>
+                    Cancel
+                  </Button>
+                  <Button
+                    colorScheme="red"
+                    onClick={async () => {
+                      await KickMembers({ variables: { memberid: user?.id, groupid: groupSelected } });
+                      await SendMessage({
+                        variables: {
+                          groupid: groupSelected,
+                          body: `${user?.username} has left the group`,
+                          author: {
+                            username: user?.username,
+                            email: user?.email,
+                            id: user?.id,
+                            profile_picture: user?.profile_picture,
+                          },
+                          image: false,
+                          messageid: generateId(24),
+                          time: formatAMPM(new Date()),
+                          date: today,
+                          day,
+                          alert: true,
+                        },
+                      });
+                      window.location.href = '/feed';
+                    }}
+                  >
+                    Leave Group
+                  </Button>
+                </ModalFooter>
+              </ModalContent>
+            </Modal>
+            <Modal
+              onClose={() => {
+                (document.body.style as any) =
+                  (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
+                  (typeof window !== 'undefined' && window.screen.availWidth) < 1800
+                    ? 'zoom: 0.8'
+                    : 'zoom: 1';
+                addMembersModalOnClose();
+              }}
+              isOpen={addMembersModalIsOpen}
+              isCentered
+            >
+              <ModalOverlay />
+              <ModalContent style={{ backgroundColor: darkMode ? '#2D3748' : '#E2E8F0' }}>
+                <ModalHeader style={{ color: darkMode ? '#fff' : '#000' }}>
+                  Add Members To {GroupNameData && GroupNameData.GetGroupName && GroupNameData.GetGroupName.name}
+                </ModalHeader>
+                <ModalCloseButton style={{ color: '#F56565' }} />
+                <ModalBody style={{ color: darkMode ? '#fff' : '#000' }}>
+                  <AddMembers />
+                </ModalBody>
+              </ModalContent>
+            </Modal>
+            <Modal
+              size="3xl"
+              onClose={() => {
+                (document.body.style as any) =
+                  (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
+                  (typeof window !== 'undefined' && window.screen.availWidth) < 1800
+                    ? 'zoom: 0.8'
+                    : 'zoom: 1';
+                viewMembersModalOnClose();
+              }}
+              isOpen={viewMembersModalIsOpen}
+              isCentered
+            >
+              <ModalOverlay />
+              <ModalContent style={{ backgroundColor: darkMode ? '#2D3748' : '#E2E8F0' }}>
+                <ModalHeader style={{ color: darkMode ? '#fff' : '#000' }}>
+                  {GroupNameData && GroupNameData.GetGroupName ? `Members Of ${GroupNameData.GetGroupName.name}` : ''}
+                </ModalHeader>
+                <ModalCloseButton style={{ color: '#F56565' }} />
+                <ModalBody style={{ color: darkMode ? '#fff' : '#000' }}>
+                  <List>
+                    {GroupNameData &&
+                      GroupNameData.GetGroupName &&
+                      GroupNameData.GetGroupName.members.map((member) => {
+                        return (
+                          <>
+                            <ListItem key={member.id} button>
+                              <ListItemAvatar>
+                                <Avatar alt={member.username} src={member.profile_picture} />
+                              </ListItemAvatar>
+                              <ListItemText id={member.id} primary={member.id !== user?.id ? member.email : 'You'} />
+                              {member.id !== user?.id && (
+                                <ListItemSecondaryAction>
+                                  <IconButton
+                                    color="secondary"
+                                    edge="end"
+                                    children={<BackspaceIcon />}
+                                    onClick={async () => {
+                                      await KickMembers({ variables: { memberid: member.id, groupid: groupSelected } });
+
+                                      await groupNameRefetch();
+                                      await searchDataRefetch();
+                                      setMessages([
+                                        ...messages,
+                                        {
+                                          groupid: groupSelected,
+                                          body: `kicked ${member.username}`,
+                                          author: {
+                                            username: user?.username,
+                                            email: user?.email,
+                                            id: user?.id,
+                                            profile_picture: user?.profile_picture,
+                                          },
+                                          image: false,
+                                          messageid: generateId(24),
+                                          date: today,
+                                          time: Date.now(),
+                                          day,
+                                          alert: true,
+                                        },
+                                      ]);
+                                      await SendMessage({
+                                        variables: {
+                                          groupid: groupSelected,
+                                          body: `kicked ${member.username}`,
+                                          author: {
+                                            username: user?.username,
+                                            email: user?.email,
+                                            id: user?.id,
+                                            profile_picture: user?.profile_picture,
+                                          },
+                                          image: false,
+                                          messageid: generateId(24),
+                                          time: formatAMPM(new Date()),
+                                          date: today,
+                                          day,
+                                          alert: true,
+                                        },
+                                      });
+                                      await groupNameRefetch();
+                                      await searchDataRefetch();
+                                    }}
+                                  />
+                                </ListItemSecondaryAction>
+                              )}
+                            </ListItem>
+                          </>
+                        );
+                      })}
+                  </List>
+                </ModalBody>
+                <ModalFooter>
+                  <Button
+                    colorScheme="messenger"
+                    onClick={() => {
+                      viewMembersModalOnClose();
+                      addMembersModalOnOpen();
+                    }}
+                  >
+                    +
                   </Button>
                 </ModalFooter>
               </ModalContent>
@@ -1053,9 +1511,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                                   }}
                                   className={tw('text-3xl font-bold')}
                                 >
-                                  {member.username !== user?.username
-                                    ? member.username.substr(0, member.username.indexOf(' '))
-                                    : 'You'}
+                                  {member.username !== user?.username ? member.username : 'You'}
                                 </p>
                               );
                             })}
@@ -1070,16 +1526,17 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
 
             {searchData &&
               searchData.SearchGroups.map((group) => {
-                if (group.members.length === 2) {
+                if (group.dm) {
                   return (
                     <div
                       style={{
                         backgroundColor: group.id === groupSelected ? (!darkMode ? '#E9EAEB' : '#313131') : '',
-                        marginBottom: -12,
                       }}
                       className={darkMode ? feedStyles.sidebarcontent : feedStyles.sidebarcontentlight}
                       key={group.id}
                       onClick={(e: any) => {
+                        e.preventDefault();
+                        delete e['returnValue'];
                         // setTimeout(() => {
                         //   setMessageLoader(true);
                         //   window.history.pushState('', '', `/chat/${group.id}`);
@@ -1089,9 +1546,12 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                         //   GetInitalMessagesRefetch({ groupid: id, offset: 0, limit });
                         //   onlineRefetch({ groupid: id });
                         // }, 100);
-
+                        window.addEventListener('beforeunload', (e) => {
+                          e.preventDefault();
+                          delete e['returnValue'];
+                        });
                         window.history.pushState('', '', `/chat/${group.id}`);
-                        history.go(0);
+                        window.location.reload(true);
                         // setTimeout(() => {
                         //   setMessageLoader(false);
                         // }, 1000);
@@ -1104,33 +1564,33 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                         <div className="newmessagedot" style={{ top: 37, position: 'absolute', left: 380 }}></div>
                       ) : null}
                       {group.members[0].id === user?.id ? (
-                        <div style={{ marginTop: '3%', marginLeft: '3%', paddingTop: '3%' }}>
+                        <div style={{ marginTop: '-1%', marginLeft: '3%', paddingTop: '3%' }}>
                           <img
                             src={group.members[1].profile_picture}
                             alt=""
                             style={{ width: 54, height: 54, borderRadius: 125 }}
                           />
                           {group.members[1].online ? (
-                            <div className="onlinedot" style={{ position: 'absolute', bottom: 19, left: 48 }} />
+                            <div className="onlinedot" style={{ position: 'absolute', bottom: 15, left: 63 }} />
                           ) : (
                             ''
                           )}
                         </div>
                       ) : (
-                        <div style={{ marginTop: '3%', marginLeft: '3%', paddingTop: '3%' }}>
+                        <div style={{ marginTop: '-1%', marginLeft: '2%', paddingTop: '3%' }}>
                           <img
                             src={group.members[0].profile_picture}
                             alt=""
                             style={{ width: 54, height: 54, borderRadius: 125 }}
                           />
                           {group.members[0].online ? (
-                            <div className="onlinedot" style={{ position: 'absolute', bottom: 19, left: 48 }} />
+                            <div className="onlinedot" style={{ position: 'absolute', bottom: 15, left: 63 }} />
                           ) : (
                             ''
                           )}
                         </div>
                       )}
-                      {group.members.length === 2 ? (
+                      {group.dm ? (
                         <>
                           <p
                             style={{
@@ -1145,7 +1605,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                               color: darkMode ? '#fff' : '#000',
                               position: 'relative',
                               fontSize: 20,
-                              bottom: 55,
+                              bottom: 52,
                               left: 75,
                             }}
                             className={feedStyles.groupName}
@@ -1165,13 +1625,24 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                                     ? 'bold'
                                     : 'normal',
                                 position: 'relative',
-                                bottom: 55,
-                                left: 78,
+                                bottom: 52,
+                                left: 75,
                               }}
                               className={feedStyles.groupName}
                             >
                               {group.last_message.author.id !== user?.id ? group.last_message.author.username : 'You'}:{' '}
-                              {group.last_message.body.length <= 31
+                              {group.last_message.body.includes('has left') && group.last_message.alert
+                                ? '(Left The Group)'
+                                : group.last_message.alert && group.last_message.body.includes('kicked')
+                                ? '(Kicked Member From Group)'
+                                : group.last_message.alert &&
+                                  !group.last_message.body.includes('kicked') &&
+                                  !group.last_message.body.includes('added') &&
+                                  !group.last_message.body.includes('left')
+                                ? '(Changed The Group Name)'
+                                : group.last_message.body.includes('added') && group.last_message.alert
+                                ? '(Added Member To Group)'
+                                : group.last_message.body.length <= 31
                                 ? group.last_message.body
                                 : `${group.last_message.body.substr(0, 28)}...`}
                             </p>
@@ -1180,13 +1651,12 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                       ) : null}
                     </div>
                   );
-                } else if (group.members.length > 2) {
+                } else if (!group.dm) {
                   const restOfPeople = group.members.length - 2;
                   return (
                     <div
                       style={{
                         backgroundColor: group.id === groupSelected ? (!darkMode ? '#E9EAEB' : '#313131') : '',
-                        marginBottom: -12,
                       }}
                       className={darkMode ? feedStyles.sidebarcontent : feedStyles.sidebarcontentlight}
                       key={group.id}
@@ -1195,8 +1665,12 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                       //   window.location.reload(true);
                       // }}
                       onClick={(e: any) => {
+                        window.addEventListener('beforeunload', (e) => {
+                          e.preventDefault();
+                          delete e['returnValue'];
+                        });
                         window.history.pushState('', '', `/chat/${group.id}`);
-                        history.go(0);
+                        window.location.reload(true);
                         // setTimeout(() => {
                         //   setMessageLoader(true);
                         //   window.history.pushState('', '', `/chat/${group.id}`);
@@ -1211,37 +1685,67 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                         // }, 1000);
                       }}
                     >
-                      {group.image.length === 0 ? (
+                      {group.image.length === 0 && user && group.members.length === 1 ? (
+                        <img
+                          src={user.profile_picture as any}
+                          alt=""
+                          style={{ width: 54, height: 54, borderRadius: 125, top: 10, position: 'relative', left: 10 }}
+                        />
+                      ) : null}
+                      {group.image.length === 0 && user && group.members.length >= 2 ? (
                         <>
-                          <div style={{ marginTop: '3%', marginLeft: '7%', paddingTop: '3%' }}>
-                            <img
-                              src={group.members[0].profile_picture}
-                              alt=""
-                              style={{ width: 30, height: 30, borderRadius: 25, position: 'relative', top: 3 }}
-                            />
-                          </div>
+                          <div
+                            style={{
+                              position: 'relative',
+                              bottom: 6,
+                              right: 8,
+                              marginLeft: group.members.length === 2 ? 10 : -2,
+                            }}
+                          >
+                            <div style={{ marginLeft: '7%', paddingTop: '3%' }}>
+                              <img
+                                src={group.members[0].profile_picture}
+                                alt=""
+                                style={{ width: 30, height: 30, borderRadius: 25, position: 'relative', top: 3 }}
+                              />
+                            </div>
 
-                          <div style={{ marginLeft: 17 }}>
-                            <img
-                              src={group.members[1].profile_picture}
-                              alt=""
-                              style={{ width: 30, height: 30, borderRadius: 25 }}
-                            />
+                            <div style={{ marginLeft: 17 }}>
+                              <img
+                                src={group.members[1].profile_picture}
+                                alt=""
+                                style={{ width: 30, height: 30, borderRadius: 25 }}
+                              />
+                            </div>
                           </div>
                         </>
-                      ) : (
+                      ) : group.image.length > 0 ? (
                         <div>
                           <img
                             src={group.image}
-                            style={{ width: 64, height: 64, borderRadius: 125, position: 'relative', top: 12, left: 6 }}
+                            style={{
+                              width: 54,
+                              height: 54,
+                              borderRadius: 125,
+                              position: 'relative',
+                              top: 5,
+                              left: 10,
+                            }}
                             alt=""
                           />
                         </div>
-                      )}
+                      ) : null}
                       {group.image.length === 0 && (
                         <div
                           className={`${feedStyles.dot} text-center`}
-                          style={{ width: 29, height: 29, position: 'relative', left: 5, top: -28 }}
+                          style={{
+                            width: 29,
+                            height: 29,
+                            position: 'relative',
+                            left: -5,
+                            top: -35,
+                            display: restOfPeople < 1 ? 'none' : '',
+                          }}
                         >
                           <p style={{ position: 'relative', top: 3, right: 2 }}>+{restOfPeople}</p>
                         </div>
@@ -1252,6 +1756,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                           fontWeight:
                             user &&
                             group.last_message.body !== null &&
+                            group.last_message.author.id &&
                             group.last_message.author.id !== user.id &&
                             !group.last_message.read_by.includes(user.id)
                               ? 'bold'
@@ -1259,9 +1764,16 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                           fontFamily: 'Lato',
                           color: darkMode ? '#fff' : '#000',
                           position: 'relative',
-                          bottom: group.image.length === 0 ? 85 : 50,
+                          bottom:
+                            group.image.length === 0 && group.members.length === 1
+                              ? 47
+                              : group.image.length === 0 && restOfPeople !== 0
+                              ? 94
+                              : group.image.length === 0 && restOfPeople === 0
+                              ? 65
+                              : 50,
                           fontSize: 20,
-                          left: group.image.length === 0 ? 75 : 80,
+                          left: group.image.length === 0 ? 76 : 80,
                         }}
                       >
                         {group.name}
@@ -1279,13 +1791,30 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                               !group.last_message.read_by.includes(user.id)
                                 ? 'bold'
                                 : 'normal',
-                            bottom: group.image.length === 0 ? 85 : 50,
+                            bottom:
+                              group.image.length === 0 && group.members.length === 1
+                                ? 47
+                                : group.image.length === 0 && restOfPeople !== 0
+                                ? 94
+                                : group.image.length === 0 && restOfPeople === 0
+                                ? 68
+                                : 50,
                             left: group.image.length === 0 ? 78 : 83,
                           }}
                           className={feedStyles.groupName}
                         >
                           {group.last_message.author.id !== user?.id ? group.last_message.author.username : 'You'}:{' '}
-                          {group.last_message.body.length <= 31
+                          {group.last_message.body.includes('has left') && group.last_message.alert
+                            ? '(Left The Group)'
+                            : group.last_message.alert && group.last_message.body.includes('kicked')
+                            ? '(Kicked Member From Group)'
+                            : group.last_message.alert &&
+                              !group.last_message.body.includes('kicked') &&
+                              !group.last_message.body.includes('added')
+                            ? '(Changed The Group Name)'
+                            : group.last_message.body.includes('added') && group.last_message.alert
+                            ? '(Added Member To Group)'
+                            : group.last_message.body.length <= 31
                             ? group.last_message.body
                             : `${group.last_message.body.substr(0, 28)}...`}
                         </p>
@@ -1444,24 +1973,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                       return;
                     }
                     if (e.key === 'Enter') {
-                      if (!messageVal.replace(/\s/g, '').length) {
-                        await SetUserTyping({
-                          variables: {
-                            authorid: user.id,
-                            groupid: groupSelected,
-                            value: false,
-                          },
-                        });
-                        return e.preventDefault();
-                      }
-                      await SetUserTyping({
-                        variables: {
-                          authorid: user.id,
-                          groupid: groupSelected,
-                          value: false,
-                        },
-                      });
-                      const el = document.getElementById('chatDiv');
+                      e.preventDefault();
                       setMessages([
                         ...messages,
                         {
@@ -1478,12 +1990,39 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                           date: today,
                           time: Date.now(),
                           day,
+                          alert: false,
                         },
                       ]);
+                      if (!messageVal.replace(/\s/g, '').length) {
+                        await SetUserTyping({
+                          variables: {
+                            authorid: user.id,
+                            groupid: groupSelected,
+                            value: false,
+                          },
+                        });
+                        return e.preventDefault();
+                      }
+                      setMessageVal('');
+                      await SetUserTyping({
+                        variables: {
+                          authorid: user.id,
+                          groupid: groupSelected,
+                          value: false,
+                        },
+                      });
+                      await SetUserTyping({
+                        variables: {
+                          authorid: user.id,
+                          groupid: groupSelected,
+                          value: false,
+                        },
+                      });
+
+                      const el = document.getElementById('chatDiv');
 
                       if (el) el.scrollTop = el.scrollHeight - el.clientHeight;
                       e.preventDefault();
-                      setMessageVal('');
 
                       await SendMessage({
                         variables: {
@@ -1500,6 +2039,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                           time: formatAMPM(new Date()),
                           date: today,
                           day,
+                          alert: false,
                         },
                       });
                     }
@@ -1564,6 +2104,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                               time: formatAMPM(new Date()),
                               date: today,
                               day,
+                              alert: false,
                             },
                           });
                         } catch (err) {

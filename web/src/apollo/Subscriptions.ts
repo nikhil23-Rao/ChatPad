@@ -16,6 +16,7 @@ export const GET_ALL_MESSAGES = gql`
       time
       date
       read_by
+      alert
     }
   }
 `;

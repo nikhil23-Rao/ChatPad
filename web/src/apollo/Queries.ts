@@ -53,6 +53,7 @@ export const GET_INITIAL_MESSAGES = gql`
       time
       date
       read_by
+      alert
     }
   }
 `;
@@ -78,6 +79,7 @@ export const GET_GROUP_NAME = gql`
       name
       id
       image
+      dm
     }
   }
 `;
@@ -95,8 +97,10 @@ export const SEARCH_GROUPS = gql`
         typing
       }
       name
+      dm
       id
       last_message {
+        alert
         read_by
         body
         messageid

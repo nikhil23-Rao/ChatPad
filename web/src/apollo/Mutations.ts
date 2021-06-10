@@ -27,8 +27,8 @@ export const LOGIN = gql`
 `;
 
 export const CREATE_GROUP = gql`
-  mutation CreateGroup($id: String, $members: [User], $name: String, $image: String) {
-    CreateGroup(id: $id, members: $members, name: $name, image: $image)
+  mutation CreateGroup($id: String, $members: [User], $name: String, $image: String, $dm: Boolean) {
+    CreateGroup(id: $id, members: $members, name: $name, image: $image, dm: $dm)
   }
 `;
 
@@ -42,6 +42,7 @@ export const SEND_MESSAGE = gql`
     $time: String
     $date: String
     $day: String
+    $alert: Boolean
   ) {
     SendMessage(
       groupid: $groupid
@@ -52,6 +53,7 @@ export const SEND_MESSAGE = gql`
       time: $time
       day: $day
       date: $date
+      alert: $alert
     )
   }
 `;
@@ -95,5 +97,29 @@ export const SET_USER_TYPING = gql`
 export const ADD_READ_BY = gql`
   mutation AddReadBy($messageid: String, $member: String) {
     AddReadBy(messageid: $messageid, member: $member)
+  }
+`;
+
+export const CHANGE_GROUP_NAME = gql`
+  mutation ChangeGroupName($groupid: String, $value: String) {
+    ChangeGroupName(groupid: $groupid, value: $value)
+  }
+`;
+
+export const KICK_MEMBERS = gql`
+  mutation KickMembers($memberid: String, $groupid: String) {
+    KickMembers(memberid: $memberid, groupid: $groupid)
+  }
+`;
+
+export const ADD_MEMBERS = gql`
+  mutation AddMembers($members: [User], $groupid: String) {
+    AddMembers(members: $members, groupid: $groupid)
+  }
+`;
+
+export const DELETE_CONVERSATION = gql`
+  mutation DeleteConversation($groupid: String) {
+    DeleteConversation(groupid: $groupid)
   }
 `;

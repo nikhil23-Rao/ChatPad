@@ -2,23 +2,26 @@ import React, { useEffect, useState } from 'react';
 import { useCombobox, useMultipleSelection } from 'downshift';
 import { items, comboboxStyles, comboboxWrapperStyles } from './shared';
 import { Alert, AlertDescription, AlertIcon, AlertTitle, Button, Input, useToast } from '@chakra-ui/react';
-import { useQuery } from '@apollo/client';
+import { useMutation, useQuery } from '@apollo/client';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 import { Avatar, Chip } from '@material-ui/core';
-import { CREATE_GROUP } from '@/apollo/Mutations';
+import { ADD_MEMBERS, CREATE_GROUP, SEND_MESSAGE } from '@/apollo/Mutations';
 import { generateId } from '@/../utils/GenerateId';
 import client from '@/../apollo-client';
 import { useRouter } from 'next/dist/client/router';
 import { useSession } from 'next-auth/client';
-import { GET_GROUPS, GET_USER_ID } from '@/apollo/Queries';
+import { GET_GROUPS, GET_GROUP_NAME, GET_USER_ID } from '@/apollo/Queries';
+import { formatAMPM } from '@/../utils/formatTime';
 
-export const Search = () => {
+export const AddMembers = () => {
   const [session] = useSession();
   const [inputValue, setInputValue] = useState<any>('');
   const [error, setError] = useState(false);
   const [image, setImage] = useState<string | any>('');
   const [nameError, setNameError] = useState(false);
-  const [nameVal, setNameVal] = useState('');
+  const [nameVal, setNameVal] = useState('barf');
+  const [peopleAdded, setPeopleAdded] = useState('');
+  const [groupSelected, setGroupSelected] = useState('');
   const [user, setUser] = useState<{
     username: string | null | undefined;
     email: string | null | undefined;
@@ -32,7 +35,9 @@ export const Search = () => {
   const toast = useToast();
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-
+  const { data: GroupNameData, loading: GroupNameLoading, refetch: groupNameRefetch } = useQuery(GET_GROUP_NAME, {
+    variables: { groupid: groupSelected },
+  });
   const {
     getSelectedItemProps,
     getDropdownProps,
@@ -40,13 +45,26 @@ export const Search = () => {
     removeSelectedItem,
     selectedItems,
   } = useMultipleSelection({ initialSelectedItems: [] });
-  const getFilteredItems = (items) =>
-    items.filter(
-      (item) =>
-        selectedItems.indexOf(item as never) < 0 &&
-        item.email.toLowerCase().startsWith(inputValue.toLowerCase()) &&
-        item.id !== user?.id,
-    );
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setGroupSelected(window.location.href.substring(window.location.href.lastIndexOf('/') + 1));
+    }
+  }, [typeof window]);
+  const getFilteredItems: any = (items) => {
+    if (typeof GroupNameData !== 'undefined') {
+      const ids = [];
+      for (const member of GroupNameData.GetGroupName.members) {
+        ids.push(member.id as never);
+      }
+      return items.filter(
+        (item: any) =>
+          selectedItems.indexOf(item as never) < 0 &&
+          item.email.toLowerCase().startsWith(inputValue.toLowerCase()) &&
+          !ids.includes(item.id as never),
+      );
+    }
+  };
   const {
     isOpen,
     getMenuProps,
@@ -79,7 +97,28 @@ export const Search = () => {
     },
   });
 
+  useEffect(() => {
+    GetMembers();
+    if (GetMembers().length !== 0) {
+      for (const member of GetMembers()) {
+        setPeopleAdded(`${peopleAdded.trim() ? `${peopleAdded},` : ''} ${(member as any).username}`);
+      }
+    }
+  }, [selectedItems]);
+
   const { data: groupData, loading: groupLoading } = useQuery(GET_GROUPS, { variables: { authorid: user?.id } });
+  const [AddMembers] = useMutation(ADD_MEMBERS);
+  const [SendMessage] = useMutation(SEND_MESSAGE);
+
+  var today: any = new Date();
+  var dd = String(today.getDate()).padStart(2, '0');
+  var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+  var yyyy = today.getFullYear();
+  var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+  var day = days[new Date().getDay()];
+
+  today = mm + '/' + dd + '/' + yyyy;
 
   const GetMembers = () => {
     const members = [];
@@ -94,15 +133,7 @@ export const Search = () => {
         typing: false,
       } as never);
     }
-    members.push({
-      username: user?.username,
-      id: user?.id,
-      email: user?.email,
-      profile_picture: user?.profile_picture,
-      online: true,
-      chaton: '',
-      typing: false,
-    } as never);
+    console.log('MEMBERS', members);
     return members;
   };
 
@@ -153,57 +184,9 @@ export const Search = () => {
 
   return (
     <>
-      <input
-        type="file"
-        id="filepicker"
-        accept="image/x-png,image/gif,image/jpeg"
-        onChange={(e: any) => {
-          const file = e.target.files[0];
-          reader(file).then((res) => setImage(res));
-        }}
-        style={{ display: 'none' }}
-      />
-      {selectedItems.length > 1 ? (
-        <div
-          style={{
-            position: 'relative',
-            border: '3px dotted #add8e6',
-            width: 160,
-            height: 160,
-            left: 240,
-            bottom: 50,
-            cursor: 'pointer',
-          }}
-          onClick={() => document.getElementById('filepicker')?.click()}
-        >
-          {image.length === 0 ? (
-            <>
-              <i className="fa fa-camera fa-5x" style={{ top: 40, left: 40, position: 'relative' }}></i>
-              <p style={{ top: 50, left: 17, position: 'relative', fontFamily: 'Helvetica' }}>Add a group image</p>
-            </>
-          ) : (
-            <img src={image} alt="" style={{ width: '100%', height: '100%' }} />
-          )}
-        </div>
-      ) : null}
       <div>
         <div style={comboboxWrapperStyles as any}>
           <div style={comboboxStyles} {...getComboboxProps()}>
-            <div className="mb-3 ml-5">
-              <Input
-                disabled={selectedItems.length <= 1 ? true : false}
-                isInvalid={nameError}
-                style={{ color: user?.dark_theme === 'true' ? '#fff' : '#000' }}
-                placeholder="Group Name..."
-                value={nameVal}
-                onChange={(e) => setNameVal(e.currentTarget.value)}
-                size="lg"
-                color="gray.800"
-                required={true}
-              />
-
-              {nameError ? <p style={{ color: '#E53E3E' }}>Please Provide A Group Name</p> : null}
-            </div>
             {selectedItems.map((selectedItem, index) => (
               <React.Fragment key={(selectedItem as any).id}>
                 <div style={{ position: 'relative' }}>
@@ -231,13 +214,13 @@ export const Search = () => {
               required={true}
               color="gray.900"
             />
-            {error ? <p style={{ color: '#E53E3E' }}>To Create A Group Please Add Members</p> : null}
+            {error ? <p style={{ color: '#E53E3E' }}>Please Add Members</p> : null}
           </div>
         </div>
         <ul {...getMenuProps()}>
           {isOpen &&
             getFilteredItems(items)
-              .slice(0, 5)
+              .slice(0, 3)
               .map((item, index) => (
                 <li
                   key={`${index}`}
@@ -267,7 +250,7 @@ export const Search = () => {
                 </li>
               ))}
         </ul>
-        <div className="mt-4" style={{ marginLeft: '36%' }}>
+        <div className="mt-4" style={{ marginLeft: '26%', marginBottom: 80, position: 'relative', top: 10 }}>
           <Button
             style={{ width: 200 }}
             colorScheme="green"
@@ -275,49 +258,34 @@ export const Search = () => {
             onClick={async () => {
               try {
                 if (groupLoading) setLoading(true);
-                if (groupData) {
-                  for (const group of groupData.GetGroups) {
-                    if (group.members.length === 2 && selectedItems.length === 1) {
-                      if (group.members[0].id.includes((selectedItems[0] as any).id))
-                        return toast({
-                          status: 'error',
-                          title: 'You already have a DM with this person',
-                          position: 'top-left',
-                          isClosable: true,
-                        });
-                      if (group.members[1].id.includes((selectedItems[0] as any).id))
-                        return toast({
-                          status: 'error',
-                          title: 'You already have a DM with this person',
-                          position: 'top-left',
-                          isClosable: true,
-                        });
-                    }
-                  }
-                }
-                if (nameVal.length == 0 && selectedItems.length > 1) {
-                  return setNameError(true);
-                }
 
-                if (!nameVal.replace(/\s/g, '').length && selectedItems.length > 1) {
-                  return;
-                }
                 if (selectedItems.length === 0) {
                   return setError(true);
                 }
-                if (GetMembers() !== []) {
+                if (GetMembers() !== [] && typeof window !== 'undefined') {
                   setLoading(true);
-                  await client.mutate({
-                    mutation: CREATE_GROUP,
+                  await AddMembers({
                     variables: {
-                      id: generateId(24),
                       members: GetMembers(),
-                      name:
-                        selectedItems.length > 1
-                          ? nameVal
-                          : `DM: ${user?.username} ${(selectedItems[0] as any).username}`,
-                      image,
-                      dm: selectedItems.length >= 2 ? false : true,
+                      groupid: window.location.href.substring(window.location.href.lastIndexOf('/') + 1),
+                    },
+                  });
+                  SendMessage({
+                    variables: {
+                      groupid: window.location.href.substring(window.location.href.lastIndexOf('/') + 1),
+                      body: `added ${peopleAdded}`,
+                      author: {
+                        username: user?.username,
+                        email: user?.email,
+                        id: user?.id,
+                        profile_picture: user?.profile_picture,
+                      },
+                      image: false,
+                      messageid: generateId(24),
+                      time: formatAMPM(new Date()),
+                      date: today,
+                      day,
+                      alert: true,
                     },
                   });
                   window.location.reload(false);
@@ -330,7 +298,7 @@ export const Search = () => {
               }
             }}
           >
-            Create Chat
+            Add Members
           </Button>
         </div>
         {image.length !== 0 && (
