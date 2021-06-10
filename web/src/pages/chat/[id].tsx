@@ -125,6 +125,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
     profile_picture: string | null | undefined;
     iat?: string | null | undefined;
   } | null>(null);
+  const [conversationDeleted, setConversationDeleted] = useState(false);
 
   const GetUser = async () => {
     if (session) {
@@ -209,11 +210,14 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   const { data: GroupNameData, loading: GroupNameLoading, refetch: groupNameRefetch } = useQuery(GET_GROUP_NAME, {
     variables: { groupid: groupSelected },
   });
-  const { data: onlineData, loading: onlineLoading, refetch: onlineRefetch } = useQuery(GET_MEMBERS, {
-    variables: {
-      groupid: groupSelected,
+  const { data: onlineData, loading: onlineLoading, refetch: onlineRefetch, error: onlineError } = useQuery(
+    GET_MEMBERS,
+    {
+      variables: {
+        groupid: groupSelected,
+      },
     },
-  });
+  );
   const [AddReadBy] = useMutation(ADD_READ_BY);
   const [SwitchOnline] = useMutation(SWITCH_ONLINE);
   const [SetChatOn] = useMutation(SET_CHAT_ON);
@@ -229,6 +233,12 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
       (audio as HTMLMediaElement).play();
     }
   };
+
+  useEffect(() => {
+    if (onlineError) {
+      window.location.href = '/feed';
+    }
+  }, [onlineError]);
 
   useEffect(() => {
     if (typeof GroupNameData !== 'undefined') {
