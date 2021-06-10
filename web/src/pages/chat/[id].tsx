@@ -672,10 +672,9 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
               }}
               style={{
                 color: '#fff',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
+                position: 'relative',
                 marginTop: 70,
+                left: 1000,
               }}
               className={feedStyles.loadmorebtn}
               children={<EjectIcon style={{ width: '4vh', height: '4vh' }} />}
@@ -2044,6 +2043,8 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                           alert: false,
                         },
                       });
+                      await SwitchOnline({ variables: { authorid: user?.id, value: true } });
+                      await SetChatOn({ variables: { authorid: user?.id, value: groupSelected } });
                     }
                   }}
                   onChange={(e) => {

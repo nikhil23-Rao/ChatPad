@@ -31,7 +31,7 @@ export default function LandingPage() {
   }, [session]);
 
   if (splash) {
-    (document.body.style as any) = 'background-color: #FDFDFC';
+    (document.body.style as any) = 'background-color: #3D91E3';
     return (
       <>
         <div className="cover">
