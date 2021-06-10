@@ -263,33 +263,38 @@ export const AddMembers = () => {
                   return setError(true);
                 }
                 if (GetMembers() !== [] && typeof window !== 'undefined') {
-                  setLoading(true);
-                  await AddMembers({
-                    variables: {
-                      members: GetMembers(),
-                      groupid: window.location.href.substring(window.location.href.lastIndexOf('/') + 1),
-                    },
-                  });
-                  SendMessage({
-                    variables: {
-                      groupid: window.location.href.substring(window.location.href.lastIndexOf('/') + 1),
-                      body: `added ${peopleAdded}`,
-                      author: {
-                        username: user?.username,
-                        email: user?.email,
-                        id: user?.id,
-                        profile_picture: user?.profile_picture,
+                  try {
+                    setLoading(true);
+                    await AddMembers({
+                      variables: {
+                        members: GetMembers(),
+                        groupid: window.location.href.substring(window.location.href.lastIndexOf('/') + 1),
                       },
-                      image: false,
-                      messageid: generateId(24),
-                      time: formatAMPM(new Date()),
-                      date: today,
-                      day,
-                      alert: true,
-                    },
-                  });
-                  window.location.reload(false);
-                  setLoading(false);
+                    });
+
+                    await SendMessage({
+                      variables: {
+                        groupid: window.location.href.substring(window.location.href.lastIndexOf('/') + 1),
+                        body: `added ${peopleAdded}`,
+                        author: {
+                          username: user?.username,
+                          email: user?.email,
+                          id: user?.id,
+                          profile_picture: user?.profile_picture,
+                        },
+                        image: false,
+                        messageid: generateId(24),
+                        time: formatAMPM(new Date()),
+                        date: today,
+                        day,
+                        alert: true,
+                      },
+                    });
+                    window.location.reload(false);
+                    setLoading(false);
+                  } catch (err) {
+                    toast({ status: 'error', title: 'Oops! Something failed.' });
+                  }
                 } else if (GetMembers() === []) {
                   toast({ status: 'error', title: 'Oops! Something failed.' });
                 }

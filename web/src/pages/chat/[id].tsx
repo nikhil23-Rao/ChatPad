@@ -1975,6 +1975,17 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                     }
                     if (e.key === 'Enter') {
                       e.preventDefault();
+
+                      if (!messageVal.replace(/\s/g, '').length) {
+                        await SetUserTyping({
+                          variables: {
+                            authorid: user.id,
+                            groupid: groupSelected,
+                            value: false,
+                          },
+                        });
+                        return e.preventDefault();
+                      }
                       setMessages([
                         ...messages,
                         {
@@ -1994,16 +2005,6 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                           alert: false,
                         },
                       ]);
-                      if (!messageVal.replace(/\s/g, '').length) {
-                        await SetUserTyping({
-                          variables: {
-                            authorid: user.id,
-                            groupid: groupSelected,
-                            value: false,
-                          },
-                        });
-                        return e.preventDefault();
-                      }
                       setMessageVal('');
                       await SetUserTyping({
                         variables: {
