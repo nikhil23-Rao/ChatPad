@@ -7,11 +7,12 @@ import FeatureSection from '@/components/feature-section';
 import CasesSection from '@/components/cases-section';
 import PricingTable from '@/components/pricing-table';
 import Footer from '@/components/footer';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/client';
 import { useRouter } from 'next/dist/client/router';
 import { Spinner } from '@chakra-ui/react';
 import { tw } from 'twind';
+import { LinearProgress } from '@material-ui/core';
 
 export default function LandingPage() {
   const [splash, setSplash] = useState(false);
@@ -22,8 +23,9 @@ export default function LandingPage() {
     if (session || token) {
       setSplash(true);
       setTimeout(() => {
-        window.location.href = '/feed';
-      }, 500);
+        window.history.pushState('', '', `/feed`);
+        window.location.reload(false);
+      }, 3000);
     }
     (document.body.style as any) = 'overflow: scroll';
   }, [session]);
@@ -32,48 +34,13 @@ export default function LandingPage() {
     (document.body.style as any) = 'background-color: #FDFDFC';
     return (
       <>
-        <div style={{ backgroundColor: '#FCFDFC', flex: 1 }}>
-          <img
-            style={{ position: 'fixed', top: '46%', left: '50%', transform: 'translate(-50%, -50%)' }}
-            src="/images/people.png"
-            alt=""
-          />
-          <div
-            style={{
-              position: 'relative',
-              top:
-                (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
-                (typeof window !== 'undefined' && window.screen.availWidth) < 1800
-                  ? 540
-                  : 530,
-            }}
-          ></div>
-          <Spinner
-            thickness="4px"
-            style={{ position: 'fixed', top: '70%', left: '49%', transform: 'translate(-50%, -50%)' }}
-            speed="0.65s"
-            emptyColor="gray.200"
-            color="blue.500"
-            size="xl"
-          />
-          <p
-            className={tw('text-3xl text-primary-100 font-bold')}
-            style={{
-              color: 'gray',
-              fontSize: 27,
-              marginLeft: 'auto',
-              marginRight: 'auto',
-              top: 530,
-              left:
-                (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
-                (typeof window !== 'undefined' && window.screen.availWidth) < 1800
-                  ? 430
-                  : 650,
-              position: 'fixed',
-            }}
-          >
-            Chat With Friends And Family. Anytime, Anywhere.
-          </p>
+        <div className="cover">
+          <svg width="1792" height="1792" viewBox="0 0 1792 1792" id="icon" xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M1764 11q33 24 27 64l-256 1536q-5 29-32 45-14 8-31 8-11 0-24-5l-453-185-242 295q-18 23-49 23-13 0-22-4-19-7-30.5-23.5t-11.5-36.5v-349l864-1059-1069 925-395-162q-37-14-40-55-2-40 32-59l1664-960q15-9 32-9 20 0 36 11z"
+              fill="#fff"
+            />
+          </svg>
         </div>
       </>
     );
@@ -81,7 +48,7 @@ export default function LandingPage() {
 
   return (
     <Page>
-      <NextSeo title="ChatPad" description="An Advanced Chat App." />
+      <NextSeo title="ChatPad" description="A Simple Chat App." />
       <Header />
       <main style={{ overflow: 'scroll' }}>
         <VideoSection />

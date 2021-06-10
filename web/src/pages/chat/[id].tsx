@@ -425,10 +425,10 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
           <nav
             className="navbar navbar-light "
             style={{
-              background: darkMode ? '#1c1c1c' : '#fff',
+              background: darkMode ? '#000' : '#fff',
               position: 'relative',
               height: 100,
-              borderBottom: darkMode ? '1px solid #4E4F51' : ' 1px solid #eeeeee',
+              borderBottom: darkMode ? '1px solid #2F3336' : ' 1px solid #eeeeee',
             }}
           >
             <span
@@ -656,7 +656,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                 ? '69vh'
                 : '63vh', // Screen size monitor different height from laptop
             overflowX: 'hidden',
-            backgroundColor: darkMode ? '#1c1c1c' : '#fff',
+            backgroundColor: darkMode ? '#000' : '#fff',
           }}
           id="chatDiv"
           ref={chatRef as any}
@@ -682,7 +682,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
             ></IconButton>
           )}
           {loader && (
-            <div style={{ backgroundColor: darkMode ? '#1c1c1c' : '#fff' }}>
+            <div style={{ backgroundColor: darkMode ? '#000' : '#fff' }}>
               <Spinner
                 thickness="4px"
                 speed="0.65s"
@@ -836,6 +836,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                             marginBottom: 30,
                             marginTop: 70,
                             fontWeight: 500,
+                            color: darkMode ? '#fff' : '#000',
                           }}
                           className={feedStyles.groupNameChangeText}
                         >
@@ -1005,7 +1006,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
             </div>
 
             <div className="menu">
-              <div style={{ marginRight: '22%', backgroundColor: darkMode ? '#1C1C1C' : '' }}>
+              <div style={{ marginRight: '22%', backgroundColor: darkMode ? '#000' : '' }}>
                 <div>
                   <div className="mt-1" style={{ width: '300%', color: darkMode ? '#fff' : '#000' }}>
                     <Search />
@@ -1019,8 +1020,8 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
           <div
             className={feedStyles.leftsidebar}
             style={{
-              backgroundColor: darkMode ? '#1c1c1c' : '',
-              borderRightColor: darkMode ? '#4E4F51' : '',
+              backgroundColor: darkMode ? '#0A0514' : '',
+              borderRightColor: darkMode ? '#2F3336' : '',
               overflowY: 'auto',
               overflowX: 'hidden',
               height:
@@ -1044,7 +1045,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
 
             <div
               className="search-box"
-              style={{ backgroundColor: !darkMode ? '#F4F4F4' : '#3D3D3D', top: 86, outline: 'none' }}
+              style={{ backgroundColor: !darkMode ? '#F4F4F4' : '#202327', top: 86, outline: 'none' }}
             >
               <input
                 className="search-txt"
@@ -1055,7 +1056,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                 style={{ color: !darkMode ? '#000' : '', paddingRight: 40, outline: 'none' }}
                 onChange={(e) => setQuery(e.currentTarget.value)}
               />
-              <a className="search-btn" style={{ backgroundColor: !darkMode ? 'transparent' : '#3D3D3D' }}>
+              <a className="search-btn" style={{ backgroundColor: !darkMode ? 'transparent' : '#202327' }}>
                 <i className="fa fa-search" style={{ color: '#4097ff' }}></i>
               </a>
             </div>
@@ -1530,7 +1531,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                   return (
                     <div
                       style={{
-                        backgroundColor: group.id === groupSelected ? (!darkMode ? '#E9EAEB' : '#313131') : '',
+                        backgroundColor: group.id === groupSelected ? (!darkMode ? '#E9EAEB' : '#2D2835') : '',
                       }}
                       className={darkMode ? feedStyles.sidebarcontent : feedStyles.sidebarcontentlight}
                       key={group.id}
@@ -1656,7 +1657,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                   return (
                     <div
                       style={{
-                        backgroundColor: group.id === groupSelected ? (!darkMode ? '#E9EAEB' : '#313131') : '',
+                        backgroundColor: group.id === groupSelected ? (!darkMode ? '#E9EAEB' : '#2D2835') : '',
                       }}
                       className={darkMode ? feedStyles.sidebarcontent : feedStyles.sidebarcontentlight}
                       key={group.id}
@@ -1829,9 +1830,9 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
         <div
           className={feedStyles.profile}
           style={{
-            backgroundColor: darkMode ? '#1c1c1c' : '',
-            borderRightColor: darkMode ? '#4E4F51' : '',
-            borderBottomColor: !darkMode ? '#eeeeee' : '#4E4F51',
+            backgroundColor: darkMode ? '#0A0514' : '',
+            borderRightColor: darkMode ? '#2F3336' : '',
+            borderBottomColor: !darkMode ? '#eeeeee' : '#2F3336',
             display: !sidebarShown ? 'none' : '',
           }}
         >
@@ -1899,7 +1900,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                   (typeof window !== 'undefined' && window.screen.availWidth) < 1800
                 ? '32.9vh'
                 : '25vh',
-            backgroundColor: darkMode ? '#1c1c1c' : '#fff',
+            backgroundColor: darkMode ? '#000' : '#fff',
             overflow: 'hidden',
           }}
         ></div>
@@ -1959,7 +1960,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                     right: !sidebarShown ? 90 : '',
                     paddingRight: 100,
                     borderRadius: 10,
-                    backgroundColor: darkMode ? '#3D3D3D' : '#F4F4F4',
+                    backgroundColor: darkMode ? '#202327' : '#F4F4F4',
                     minHeight: messageVal.length <= 75 ? 10 : 140,
                     bottom: 10,
                     lineHeight: 1.8,

@@ -141,7 +141,7 @@ const Feed: React.FC<FeedProps> = ({}) => {
             (typeof window !== 'undefined' && window.screen.availWidth) < 1800
               ? '150vh'
               : '100vh',
-          backgroundColor: darkMode ? '#1c1c1c' : '',
+          backgroundColor: darkMode ? '#000' : '',
         }}
       ></div>
       <div>
@@ -154,20 +154,20 @@ const Feed: React.FC<FeedProps> = ({}) => {
                 left: '55%',
               }}
             >
-              <i className="fa fa-paper-plane fa-5x" style={{ color: darkMode ? '#fff' : 'gray' }}></i>
+              <i className="fa fa-paper-plane fa-5x icon-3d" style={{ color: darkMode ? '#fff' : 'gray' }}></i>
             </div>
             <p
               style={{
                 top:
                   (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
                   (typeof window !== 'undefined' && window.screen.availWidth) < 1800
-                    ? '62%'
+                    ? '60%'
                     : '58%',
                 position: 'fixed',
                 left:
                   (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
                   (typeof window !== 'undefined' && window.screen.availWidth) < 1800
-                    ? '44%'
+                    ? '44.7%'
                     : '46.2%',
                 color: darkMode ? '#fff' : '#000',
               }}
@@ -195,7 +195,7 @@ const Feed: React.FC<FeedProps> = ({}) => {
             </div>
 
             <div className="menu">
-              <div style={{ marginRight: '22%', backgroundColor: darkMode ? '#1C1C1C' : '' }}>
+              <div style={{ marginRight: '22%', backgroundColor: darkMode ? '#000' : '' }}>
                 <div>
                   <div className="mt-1" style={{ width: '300%', color: darkMode ? '#fff' : '#000' }}>
                     <Search />
@@ -213,7 +213,7 @@ const Feed: React.FC<FeedProps> = ({}) => {
         <div
           className={feedStyles.leftsidebar}
           style={{
-            backgroundColor: darkMode ? '#1c1c1c' : '',
+            backgroundColor: darkMode ? '#0A0514' : '',
             borderRightColor: darkMode ? '#4E4F51' : '',
             overflowY: 'auto',
             overflowX: 'hidden',
@@ -235,7 +235,7 @@ const Feed: React.FC<FeedProps> = ({}) => {
           >
             Your Chats
           </h1>
-          <div className="search-box" style={{ backgroundColor: !darkMode ? '#eeeeee' : '#3D3D3D', top: 86 }}>
+          <div className="search-box" style={{ backgroundColor: !darkMode ? '#eeeeee' : '#202327', top: 86 }}>
             <input
               className="search-txt"
               type="text"
@@ -245,7 +245,7 @@ const Feed: React.FC<FeedProps> = ({}) => {
               style={{ color: !darkMode ? '#000' : '', paddingRight: 40, outline: 'none' }}
               onChange={(e) => setQuery(e.currentTarget.value)}
             />
-            <a className="search-btn" style={{ backgroundColor: !darkMode ? 'transparent' : '#3D3D3D' }}>
+            <a className="search-btn" style={{ backgroundColor: !darkMode ? 'transparent' : '#202327' }}>
               <i className="fa fa-search" style={{ color: '#4097ff' }}></i>
             </a>
           </div>
@@ -560,7 +560,7 @@ const Feed: React.FC<FeedProps> = ({}) => {
         <div
           className={feedStyles.profile}
           style={{
-            backgroundColor: darkMode ? '#1c1c1c' : '',
+            backgroundColor: darkMode ? '#0A0514' : '',
             borderRightColor: darkMode ? '#4E4F51' : '',
             borderBottomColor: !darkMode ? '#EEEEEE' : '#4E4F51',
           }}
