@@ -126,7 +126,7 @@ export const Search = () => {
         dark_theme: result.data.GetUserId[1],
         online: true,
         profile_picture: session.user.image!,
-        chaton: result.data.GetUserId[3],
+        chaton: '',
         typing: false,
       };
       setUser(currentUser);

@@ -1930,6 +1930,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
               <InputGroup size="lg" style={{ width: '50%', top: -78, height: 60, left: 610 }}>
                 {onlineData &&
                   onlineData.GetMembers.map((member) => {
+                    console.log(member);
                     if (member.id !== user.id) {
                       return (
                         <div style={{ bottom: messageVal.length <= 75 ? '' : 94, position: 'relative' }}>
@@ -1941,7 +1942,10 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                                 width: 43,
                                 position: 'relative',
                                 bottom: 45,
-                                opacity: member.online && member.chaton === groupSelected ? 1 : 0.5,
+                                opacity:
+                                  (member.online && member.chaton === groupSelected) || member.chaton === null
+                                    ? 1
+                                    : 0.5,
                               }}
                               alt=""
                             />

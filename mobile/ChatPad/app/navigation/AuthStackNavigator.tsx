@@ -11,7 +11,7 @@ export const AuthStackNavigator = () => {
     <NavigationContainer>
       <AuthStack.Navigator>
         <AuthStack.Screen
-          name="ChatPad"
+          name="Back"
           options={{ headerShown: false }}
           component={WelcomeScreen}
         />
