@@ -88,7 +88,7 @@ const Navigation = () => {
         <div className={tw(`flex items-center justify-between h-24`)}>
           <div className={tw(`flex items-center`)}>
             <div className={tw(`flex-shrink-0`)}>
-              <img className={tw(`h-13 w-13`)} src="/images/chatpadlogo.png" alt="logo" width={90} />
+              <img className={tw(`h-13 w-13`)} src="/images/chatpadlogo.png" alt="logo" width={'20%'} />
             </div>
             <div className={tw(`hidden md:block`)}></div>
           </div>

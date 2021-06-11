@@ -13,9 +13,12 @@ import { useRouter } from 'next/dist/client/router';
 import { Spinner } from '@chakra-ui/react';
 import { tw } from 'twind';
 import { LinearProgress } from '@material-ui/core';
+import Feed from './feed';
 
 export default function LandingPage() {
   const [splash, setSplash] = useState(false);
+  const [splashDone, setSplashDone] = useState(false);
+  const [showContent, setShowContent] = useState(false);
   const [session] = useSession();
   const router = useRouter();
   useEffect(() => {
@@ -23,21 +26,24 @@ export default function LandingPage() {
     if (session || token) {
       setSplash(true);
       setTimeout(() => {
-        window.history.pushState('', '', `/feed`);
-        window.location.reload(false);
-      }, 3000);
+        setShowContent(true);
+      }, 3600);
     }
-    (document.body.style as any) = 'overflow: scroll';
+    (document.body.style as any) = 'overflow: hidden';
+    if (splash && document.visibilityState === 'visible') document.body.style.zoom = '80%';
   }, [session]);
 
   if (splash) {
-    (document.body.style as any) = 'background-color: #3D91E3';
+    console.log(showContent);
+    if (showContent) return <Feed />;
+  }
+  if (splash) {
     return (
       <>
-        <div className="cover">
-          <svg width="1792" height="1792" viewBox="0 0 1792 1792" id="icon" xmlns="http://www.w3.org/2000/svg">
+        <div className="cover" id="splash">
+          <svg width="1792" id="icon" height="1792" viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg">
             <path
-              d="M1764 11q33 24 27 64l-256 1536q-5 29-32 45-14 8-31 8-11 0-24-5l-453-185-242 295q-18 23-49 23-13 0-22-4-19-7-30.5-23.5t-11.5-36.5v-349l864-1059-1069 925-395-162q-37-14-40-55-2-40 32-59l1664-960q15-9 32-9 20 0 36 11z"
+              d="M1792 896q0 174-120 321.5t-326 233-450 85.5q-70 0-145-8-198 175-460 242-49 14-114 22-17 2-30.5-9t-17.5-29v-1q-3-4-.5-12t2-10 4.5-9.5l6-9 7-8.5 8-9q7-8 31-34.5t34.5-38 31-39.5 32.5-51 27-59 26-76q-157-89-247.5-220t-90.5-281q0-130 71-248.5t191-204.5 286-136.5 348-50.5q244 0 450 85.5t326 233 120 321.5z"
               fill="#fff"
             />
           </svg>

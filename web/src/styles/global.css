@@ -1332,13 +1332,17 @@ discussion {
   }
 }
 
+body {
+  margin: 0;
+  padding: 0;
+}
+
 .cover {
-  background: #3d91e3;
+  background: #0078fe;
   position: fixed;
   width: 100%;
   height: 100%;
   opacity: 0;
-
   animation: fade-out 4s /*infinite*/;
 }
 
@@ -1350,7 +1354,6 @@ discussion {
   transform: translate(-50%, -50%);
   width: var(--size);
   fill: white;
-
   animation: zoom-in 2s /*infinite*/;
   animation-delay: 2s;
 }
@@ -1379,7 +1382,6 @@ discussion {
 .content {
   width: 100%;
 }
-
 .icon-3d {
   padding: 10px;
   color: #fff;

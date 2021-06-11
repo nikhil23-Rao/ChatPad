@@ -1,147 +1,144 @@
-import React, { useContext, useState } from "react";
-import {
-  SafeAreaView,
-  StyleSheet,
-  View,
-  Text,
-  TouchableOpacity,
-  Image,
-} from "react-native";
-import TextField from "../components/TextField";
-import { Formik } from "formik";
-import { loginValidationSchema } from "../components/validation/LoginValidationSchema";
+import "react-native-gesture-handler";
+import React from "react";
+import { View, StyleSheet, TouchableOpacity, Text, Image } from "react-native";
+import * as Google from "expo-google-app-auth";
+import { AntDesign } from "@expo/vector-icons";
 import { client } from "../../App";
-import { LOGIN } from "../apollo/Mutations";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { AuthContext } from "../../context/AuthContext";
+import { LOGIN, REGISTER } from "../apollo/Mutations";
+import { generateId } from "../utils/generateId";
+import { storeUser } from "../auth/storage";
 
-interface IProps {}
+export default function LoginScreen({ navigation }: any) {
+  async function signInWithGoogleAsync() {
+    try {
+      const result = await Google.logInAsync({
+        behavior: "web",
+        iosClientId:
+          "145764687586-h86f2731jjct3l1p5lpq68g9vedp8vmn.apps.googleusercontent.com",
+        //androidClientId: AND_CLIENT_ID,
+        scopes: ["profile", "email"],
+      });
 
-const LoginScreen = ({}: IProps) => {
-  const authContext = useContext(AuthContext);
-  const [apolloError, setApolloError] = useState(false);
+      if (result.type === "success") {
+        try {
+          const id = generateId(24);
+          await client.mutate({
+            mutation: REGISTER,
+            variables: {
+              username: result.user.name,
+              email: result.user.email,
+              password: generateId(15),
+              profile_picture: result.user.photoUrl,
+              id,
+              oauth: true,
+            },
+          });
+          await storeUser({
+            username: result.user.name,
+            email: result.user.email,
+            password: "",
+            profile_picture: result.user.photoUrl,
+          });
+          navigation.navigate("ChatPad");
+        } catch (err) {
+          try {
+            await client.mutate({
+              mutation: LOGIN,
+              variables: {
+                email: result.user.email,
+              },
+            });
+            await storeUser({
+              username: result.user.name,
+              email: result.user.email,
+              password: "",
+              profile_picture: result.user.photoUrl,
+            });
+            navigation.navigate("ChatPad");
+          } catch (err) {
+            console.log(err);
+          }
+        }
+      } else {
+        return { cancelled: true };
+      }
+    } catch (e) {
+      return { error: true };
+    }
+  }
+  const signInWithGoogle = () => {
+    signInWithGoogleAsync();
+  };
   return (
-    <React.Fragment>
-      <View style={LoginScreenStyles.container}>
-        <Image
-          source={require("../assets/chatpadphonelogo.png")}
-          style={LoginScreenStyles.image}
-        />
-        <Formik
-          initialValues={{ email: "", password: "" }}
-          onSubmit={async (values, { setSubmitting }) => {
-            try {
-              setSubmitting(true);
-              const result = await client.mutate({
-                mutation: LOGIN,
-                variables: {
-                  email: values.email,
-                  password: values.password,
-                },
-              });
-              authContext.setUser(result.data.Login);
-            } catch (err) {
-              console.log(err);
-              setApolloError(true);
-            }
-          }}
-          validationSchema={loginValidationSchema}
-        >
-          {({ handleChange, handleSubmit, errors, touched, isSubmitting }) => {
-            const isInvalidEmail = errors.email && touched.email ? true : false;
-            const isInvalidPassword =
-              errors.password && touched.password ? true : false;
-            return (
-              <React.Fragment>
-                <SafeAreaView style={LoginScreenStyles.textFieldContainer}>
-                  <TextField
-                    isInvalid={isInvalidEmail || apolloError}
-                    onChangeText={handleChange("email")}
-                    icon="email"
-                    placeholder="Email Address..."
-                  />
-                  <Text style={LoginScreenStyles.errTxtEmail}>
-                    {(isInvalidEmail && errors.email) ||
-                      (apolloError && "Invalid Email Or Password.")}
-                  </Text>
-                </SafeAreaView>
-                <SafeAreaView style={LoginScreenStyles.textFieldContainer}>
-                  <TextField
-                    isInvalid={isInvalidPassword}
-                    onChangeText={handleChange("password")}
-                    icon="lock"
-                    placeholder="Password..."
-                  />
-                  <Text style={LoginScreenStyles.errTxtPassword}>
-                    {isInvalidPassword && errors.password}
-                  </Text>
-                </SafeAreaView>
-                <TouchableOpacity
-                  disabled={isSubmitting}
-                  style={LoginScreenStyles.loginButton}
-                  onPress={() => handleSubmit()}
-                >
-                  {!isSubmitting && (
-                    <Text style={LoginScreenStyles.buttonText}>Login</Text>
-                  )}
-                  {isSubmitting && (
-                    <MaterialCommunityIcons
-                      style={LoginScreenStyles.buttonText}
-                      name="loading"
-                      size={20}
-                    />
-                  )}
-                </TouchableOpacity>
-              </React.Fragment>
-            );
-          }}
-        </Formik>
-      </View>
-    </React.Fragment>
+    <View
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "#fff",
+      }}
+    >
+      <AntDesign
+        name="message1"
+        size={120}
+        style={{ top: 120 }}
+        color="#007bff"
+      />
+      <TouchableOpacity
+        style={[
+          LoginScreenStyles.button,
+          {
+            backgroundColor: "#de5246",
+            marginTop: 220,
+          },
+        ]}
+        onPress={() => signInWithGoogle()}
+      >
+        <Text style={LoginScreenStyles.buttonText}>
+          <View style={{ marginRight: 2, position: "relative" }}>
+            <AntDesign name="google" size={20} color="#fff" />
+          </View>{" "}
+          Continue With Google
+        </Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={[
+          LoginScreenStyles.button,
+          {
+            backgroundColor: "#000",
+            marginTop: 15,
+          },
+        ]}
+        onPress={() => signInWithGoogle()}
+      >
+        <Text style={LoginScreenStyles.buttonText}>
+          <View style={{ marginRight: 2, position: "relative" }}>
+            <AntDesign name="github" size={20} color="#fff" />
+          </View>{" "}
+          Continue With GitHub
+        </Text>
+      </TouchableOpacity>
+      <Image
+        source={require("../../assets/mobilewaveborder.png")}
+        style={{ width: 820, position: "relative", top: 120 }}
+      />
+    </View>
   );
-};
+}
 
 const LoginScreenStyles = StyleSheet.create({
-  container: {
-    backgroundColor: "#fff",
-    flex: 1,
-  },
-  textFieldContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-    top: 120,
-  },
-  loginButton: {
-    width: "80%",
-    alignSelf: "center",
+  button: {
+    width: "90%",
     height: 50,
     borderRadius: 25,
     padding: 12,
-    backgroundColor: "#89D5D2",
-    top: 150,
   },
   buttonText: {
-    alignSelf: "center",
+    marginRight: "auto",
+    marginLeft: "auto",
     textTransform: "uppercase",
     fontSize: 20,
     fontWeight: "bold",
     color: "#fff",
-    fontFamily: "Helvetica-Bold",
-  },
-  image: {
-    alignSelf: "center",
-    top: 50,
-  },
-  errTxtEmail: {
-    right: 80,
-    color: "red",
-    fontSize: 20,
-  },
-  errTxtPassword: {
-    right: 60,
-    color: "red",
-    fontSize: 20,
   },
 });
-
-export default LoginScreen;

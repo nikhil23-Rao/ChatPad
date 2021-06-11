@@ -41,7 +41,7 @@ const Login: React.FC<LoginProps> = ({ myproviders }: LoginProps) => {
           <div className="container">
             <Link href="/">
               <a className="navbar-brand">
-                <img src="/images/chatpadlogo.png" alt="logo" width="90" />
+                <img src="/images/chatpadlogo.png" alt="logo" width={'20%'} />
               </a>
             </Link>
           </div>

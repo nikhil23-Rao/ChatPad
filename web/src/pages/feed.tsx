@@ -154,7 +154,7 @@ const Feed: React.FC<FeedProps> = ({}) => {
                 left: '55%',
               }}
             >
-              <i className="fa fa-paper-plane fa-5x icon-3d" style={{ color: darkMode ? '#fff' : 'gray' }}></i>
+              <i className="fa fa-comment fa-5x icon-3d" style={{ color: darkMode ? '#fff' : 'gray' }}></i>
             </div>
             <p
               style={{

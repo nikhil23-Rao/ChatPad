@@ -1,36 +1,26 @@
 import React from "react";
+import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
-import LoginScreen from "../screens/LoginScreen";
-import RegisterScreen from "../screens/RegisterScreen";
 import WelcomeScreen from "../screens/WelcomeScreen";
-
-interface IProps {}
+import LoginScreen from "../screens/LoginScreen";
 
 const AuthStack = createStackNavigator();
-const AuthStackNavigator = ({}: IProps) => {
+
+export const AuthStackNavigator = () => {
   return (
-    <AuthStack.Navigator>
-      <AuthStack.Screen
-        name="WelcomeScreen"
-        component={WelcomeScreen}
-        options={{ headerShown: false, title: "Back" }}
-      />
-      <AuthStack.Screen
-        name="Login"
-        options={{
-          headerTintColor: "#245C60",
-        }}
-        component={LoginScreen}
-      />
-      <AuthStack.Screen
-        name="Register"
-        options={{
-          headerTintColor: "#245C60",
-        }}
-        component={RegisterScreen}
-      />
-    </AuthStack.Navigator>
+    <NavigationContainer>
+      <AuthStack.Navigator>
+        <AuthStack.Screen
+          name="ChatPad"
+          options={{ headerShown: false }}
+          component={WelcomeScreen}
+        />
+        <AuthStack.Screen
+          name="ChatPad Login"
+          options={{ headerTintColor: "#3D91E3" }}
+          component={LoginScreen}
+        />
+      </AuthStack.Navigator>
+    </NavigationContainer>
   );
 };
-
-export default AuthStackNavigator;

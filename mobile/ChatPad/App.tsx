@@ -1,41 +1,37 @@
-import React, { useState } from "react";
-import { NavigationContainer } from "@react-navigation/native";
-import AuthStackNavigator from "./app/navigation/AuthStackNavigator";
-import { ApolloClient, InMemoryCache } from "@apollo/client";
+import React from "react";
+import { AuthStackNavigator } from "./app/navigation/AuthStackNavigator";
+import WelcomeScreen from "./app/screens/WelcomeScreen";
 import { AppRegistry } from "react-native";
-import AppNavigator from "./app/navigation/AppStackNavigator";
-import storage from "./auth/storage";
-import AppLoading from "expo-app-loading";
-import { AuthContext } from "./context/AuthContext";
+import { ApolloClient, InMemoryCache, ApolloProvider } from "@apollo/client";
+import AnimatedSplash from "react-native-animated-splash-screen";
+import { useState } from "react";
+import { useEffect } from "react";
 
 export const client = new ApolloClient({
   uri: "http://localhost:4000/graphql",
   cache: new InMemoryCache(),
 });
-
 export default function App() {
-  const [user, setUser] = useState<string | null | undefined | unknown>("");
-  const [isReady, setIsReady] = useState(false);
-  const restoreUser = async () => {
-    const user = await storage.getUser();
-    setUser(user);
-  };
-  if (!isReady) {
-    return (
-      <AppLoading
-        startAsync={restoreUser}
-        onFinish={() => setIsReady(true)}
-        onError={(error) => console.log(error)}
-      />
-    );
-  }
+  const [isLoaded, setIsLoaded] = useState(false);
+  useEffect(() => {
+    setTimeout(() => {
+      setIsLoaded(true);
+    }, 3000);
+  }, []);
   return (
-    <AuthContext.Provider value={{ user, setUser }}>
-      <NavigationContainer>
-        {user ? <AppNavigator /> : <AuthStackNavigator />}
-      </NavigationContainer>
-    </AuthContext.Provider>
+    <ApolloProvider client={client}>
+      <AnimatedSplash
+        translucent={true}
+        isLoaded={isLoaded}
+        logoImage={require("./assets/mobilesplash.png")}
+        backgroundColor={"#0078fe"}
+        logoHeight={200}
+        logoWidth={200}
+      >
+        <AuthStackNavigator />
+      </AnimatedSplash>
+    </ApolloProvider>
   );
 }
 
-AppRegistry.registerComponent("App", () => App);
+AppRegistry.registerComponent("MyApplication", () => App);

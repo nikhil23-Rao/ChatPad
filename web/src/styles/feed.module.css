@@ -163,7 +163,7 @@
   left: -10px;
   width: 10px;
   height: 20px;
-  background: #1c1c1c;
+  background: #000;
   border-bottom-right-radius: 10px;
 }
 
@@ -203,7 +203,7 @@
   right: -10px;
   width: 10px;
   height: 20px;
-  background: #1c1c1c;
+  background: #000;
   border-bottom-left-radius: 20px;
 }
 
