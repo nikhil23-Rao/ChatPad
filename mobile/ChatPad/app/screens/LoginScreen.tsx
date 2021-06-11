@@ -7,14 +7,14 @@ import { client } from "../../App";
 import { LOGIN, REGISTER } from "../apollo/Mutations";
 import { generateId } from "../utils/generateId";
 import { storeUser } from "../auth/storage";
+import { IOS_CLIENT_ID } from "@env";
 
 export default function LoginScreen({ navigation }: any) {
   async function signInWithGoogleAsync() {
     try {
       const result = await Google.logInAsync({
         behavior: "web",
-        iosClientId:
-          "145764687586-h86f2731jjct3l1p5lpq68g9vedp8vmn.apps.googleusercontent.com",
+        iosClientId: IOS_CLIENT_ID,
         //androidClientId: AND_CLIENT_ID,
         scopes: ["profile", "email"],
       });
