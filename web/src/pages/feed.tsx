@@ -530,8 +530,9 @@ const Feed: React.FC<FeedProps> = ({}) => {
                           position: 'relative',
                           fontWeight:
                             user &&
+                            group.last_message.body !== null &&
+                            group.last_message.author.id &&
                             group.last_message.author.id !== user.id &&
-                            document.visibilityState === 'hidden' &&
                             !group.last_message.read_by.includes(user.id)
                               ? 'bold'
                               : 'normal',
