@@ -15,6 +15,7 @@ import AuthContext from "../auth/context";
 import { useQuery } from "@apollo/client";
 import { SEARCH_GROUPS } from "../apollo/Queries";
 import { useEffect } from "react";
+import Loader from "../components/Loader";
 
 interface IProps {
   navigation: any;
@@ -34,6 +35,7 @@ const ChatsScreen = ({ navigation }: IProps) => {
   return (
     <React.Fragment>
       <SafeAreaView style={ChatsScreenStyles.container}>
+        {loading && <Loader />}
         <Image
           source={{ uri: authContext.user.profile_picture }}
           style={{
