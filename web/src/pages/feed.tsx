@@ -268,7 +268,7 @@ const Feed: React.FC<FeedProps> = ({}) => {
                 return (
                   <div
                     style={{
-                      backgroundColor: group.id === groupSelected ? (!darkMode ? '#E9EAEB' : '#313131') : '',
+                      backgroundColor: group.id === groupSelected ? (!darkMode ? '#E9EAEB' : '#2D2835') : '',
                     }}
                     className={darkMode ? feedStyles.sidebarcontent : feedStyles.sidebarcontentlight}
                     key={group.id}
@@ -369,11 +369,14 @@ const Feed: React.FC<FeedProps> = ({}) => {
                             className={feedStyles.groupName}
                           >
                             {group.last_message.author.id !== user?.id ? group.last_message.author.username : 'You'}:{' '}
-                            {group.last_message.alert && group.last_message.body.includes('kicked')
+                            {group.last_message.body.includes('has left') && group.last_message.alert
+                              ? '(Left The Group)'
+                              : group.last_message.alert && group.last_message.body.includes('kicked')
                               ? '(Kicked Member From Group)'
                               : group.last_message.alert &&
                                 !group.last_message.body.includes('kicked') &&
-                                !group.last_message.body.includes('added')
+                                !group.last_message.body.includes('added') &&
+                                !group.last_message.body.includes('left')
                               ? '(Changed The Group Name)'
                               : group.last_message.body.includes('added') && group.last_message.alert
                               ? '(Added Member To Group)'
@@ -391,7 +394,7 @@ const Feed: React.FC<FeedProps> = ({}) => {
                 return (
                   <div
                     style={{
-                      backgroundColor: group.id === groupSelected ? (!darkMode ? '#E9EAEB' : '#313131') : '',
+                      backgroundColor: group.id === groupSelected ? (!darkMode ? '#E9EAEB' : '#2D2835') : '',
                     }}
                     className={darkMode ? feedStyles.sidebarcontent : feedStyles.sidebarcontentlight}
                     key={group.id}
@@ -420,6 +423,12 @@ const Feed: React.FC<FeedProps> = ({}) => {
                       // }, 1000);
                     }}
                   >
+                    {user &&
+                    group.last_message.body !== null &&
+                    group.last_message.author.id !== user.id &&
+                    !group.last_message.read_by.includes(user.id) ? (
+                      <div className="newmessagedot" style={{ top: 37, position: 'absolute', left: 380 }}></div>
+                    ) : null}
                     {group.image.length === 0 && user && group.members.length === 1 ? (
                       <img
                         src={user.profile_picture as any}
@@ -539,7 +548,9 @@ const Feed: React.FC<FeedProps> = ({}) => {
                         className={feedStyles.groupName}
                       >
                         {group.last_message.author.id !== user?.id ? group.last_message.author.username : 'You'}:{' '}
-                        {group.last_message.alert && group.last_message.body.includes('kicked')
+                        {group.last_message.body.includes('has left') && group.last_message.alert
+                          ? '(Left The Group)'
+                          : group.last_message.alert && group.last_message.body.includes('kicked')
                           ? '(Kicked Member From Group)'
                           : group.last_message.alert &&
                             !group.last_message.body.includes('kicked') &&

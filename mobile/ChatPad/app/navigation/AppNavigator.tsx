@@ -1,11 +1,14 @@
 import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
-import { createStackNavigator } from "@react-navigation/stack";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import ChatsScreen from "../screens/ChatsScreen";
 import { useEffect } from "react";
+import MeScreen from "../screens/MeScreen";
+import { AntDesign } from "@expo/vector-icons";
+import { MessageStackNavigator } from "./MessageNavigator";
 
-const AppStack = createStackNavigator();
+const AppTab = createBottomTabNavigator();
 
 export const AppNavigator = () => {
   const getUser = async () => {
@@ -17,13 +20,32 @@ export const AppNavigator = () => {
   }, []);
   return (
     <NavigationContainer>
-      <AppStack.Navigator>
-        <AppStack.Screen
-          name="Your Chats"
-          options={{ headerTintColor: "#3D91E3" }}
-          component={ChatsScreen}
+      <AppTab.Navigator
+        tabBarOptions={{
+          activeTintColor: "#000",
+        }}
+      >
+        <AppTab.Screen
+          name="Chats"
+          options={{
+            title: "Your Chats",
+            tabBarIcon: ({ color, size }) => (
+              <AntDesign color={color} size={size} name="message1" />
+            ),
+          }}
+          component={MessageStackNavigator}
         />
-      </AppStack.Navigator>
+        <AppTab.Screen
+          name="Me"
+          options={{
+            title: "My Account",
+            tabBarIcon: ({ color, size }) => (
+              <AntDesign color={color} size={size} name="user" />
+            ),
+          }}
+          component={MeScreen}
+        />
+      </AppTab.Navigator>
     </NavigationContainer>
   );
 };

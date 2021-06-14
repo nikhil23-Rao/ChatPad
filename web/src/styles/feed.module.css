@@ -383,3 +383,35 @@
 .sidebarcontent:last-of-type {
   border-bottom: none;
 }
+
+.bubble {
+  height: auto;
+  max-width: 60%;
+  background-color: #2962ff;
+  color: #fff;
+  margin: 5px 0;
+  padding: 10px 20px;
+  margin-left: 700px;
+}
+
+.bubble:nth-child(1) {
+  border-bottom-left-radius: 0.1em;
+}
+
+.bubble:first-of-child {
+  border-bottom-left-radius: 0.1em;
+}
+
+.bubble:not(:first-child) {
+  -webkit-border-radius: 5px 20px 20px 5px;
+  border-radius: 5px 20px 20px 5px;
+}
+
+.bubble:last-child {
+  -webkit-border-radius: 0 20px 20px 20px;
+  border-radius: 0 20px 20px 20px;
+}
+.bubble:only-of-type {
+  -webkit-border-radius: 20px;
+  border-radius: 20px;
+}

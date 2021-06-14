@@ -1695,6 +1695,12 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                         // }, 1000);
                       }}
                     >
+                      {user &&
+                      group.last_message.body !== null &&
+                      group.last_message.author.id !== user.id &&
+                      !group.last_message.read_by.includes(user.id) ? (
+                        <div className="newmessagedot" style={{ top: 37, position: 'absolute', left: 380 }}></div>
+                      ) : null}
                       {group.image.length === 0 && user && group.members.length === 1 ? (
                         <img
                           src={user.profile_picture as any}
@@ -1796,8 +1802,9 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                             position: 'relative',
                             fontWeight:
                               user &&
+                              group.last_message.body !== null &&
+                              group.last_message.author.id &&
                               group.last_message.author.id !== user.id &&
-                              document.visibilityState === 'hidden' &&
                               !group.last_message.read_by.includes(user.id)
                                 ? 'bold'
                                 : 'normal',
@@ -1930,7 +1937,6 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
               <InputGroup size="lg" style={{ width: '50%', top: -78, height: 60, left: 610 }}>
                 {onlineData &&
                   onlineData.GetMembers.map((member) => {
-                    console.log(member);
                     if (member.id !== user.id) {
                       return (
                         <div style={{ bottom: messageVal.length <= 75 ? '' : 94, position: 'relative' }}>
@@ -1943,7 +1949,8 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                                 position: 'relative',
                                 bottom: 45,
                                 opacity:
-                                  (member.online && member.chaton === groupSelected) || member.chaton === null
+                                  (member.online && member.chaton === groupSelected) ||
+                                  (member.online && member.chaton === null)
                                     ? 1
                                     : 0.5,
                               }}

@@ -1,5 +1,5 @@
 import "react-native-gesture-handler";
-import React from "react";
+import React, { useContext } from "react";
 import { View, StyleSheet, TouchableOpacity, Text, Image } from "react-native";
 import * as Google from "expo-google-app-auth";
 import { AntDesign } from "@expo/vector-icons";
@@ -8,8 +8,11 @@ import { LOGIN, REGISTER } from "../apollo/Mutations";
 import { generateId } from "../utils/generateId";
 import { storeUser } from "../auth/storage";
 import { IOS_CLIENT_ID } from "@env";
+import AuthContext from "../auth/context";
+import { GET_USER_ID } from "../apollo/Queries";
 
 export default function LoginScreen({ navigation }: any) {
+  const authContext = useContext(AuthContext);
   async function signInWithGoogleAsync() {
     try {
       const result = await Google.logInAsync({
@@ -33,13 +36,26 @@ export default function LoginScreen({ navigation }: any) {
               oauth: true,
             },
           });
+          const res = await client.query({
+            query: GET_USER_ID,
+            variables: { email: result.user.email },
+          });
           await storeUser({
             username: result.user.name,
             email: result.user.email,
             password: "",
             profile_picture: result.user.photoUrl,
+            id: res.data.GetUserId[0],
+            dark_theme: res.data.GetUserId[1],
           });
-          navigation.navigate("ChatPad");
+          authContext.setUser({
+            username: result.user.name,
+            email: result.user.email,
+            password: "",
+            profile_picture: result.user.photoUrl,
+            id: res.data.GetUserId[0],
+            dark_theme: res.data.GetUserId[1],
+          });
         } catch (err) {
           try {
             await client.mutate({
@@ -48,13 +64,26 @@ export default function LoginScreen({ navigation }: any) {
                 email: result.user.email,
               },
             });
+            const res = await client.query({
+              query: GET_USER_ID,
+              variables: { email: result.user.email },
+            });
             await storeUser({
               username: result.user.name,
               email: result.user.email,
               password: "",
               profile_picture: result.user.photoUrl,
+              id: res.data.GetUserId[0],
+              dark_theme: res.data.GetUserId[1],
             });
-            navigation.navigate("ChatPad");
+            authContext.setUser({
+              username: result.user.name,
+              email: result.user.email,
+              password: "",
+              profile_picture: result.user.photoUrl,
+              id: res.data.GetUserId[0],
+              dark_theme: res.data.GetUserId[1],
+            });
           } catch (err) {
             console.log(err);
           }
