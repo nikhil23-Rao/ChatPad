@@ -7,6 +7,8 @@ import { useEffect } from "react";
 import MeScreen from "../screens/MeScreen";
 import { AntDesign } from "@expo/vector-icons";
 import { MessageStackNavigator } from "./MessageNavigator";
+import { useContext } from "react";
+import AuthContext from "../auth/context";
 
 const AppTab = createBottomTabNavigator();
 
@@ -18,11 +20,20 @@ export const AppNavigator = () => {
   useEffect(() => {
     getUser();
   }, []);
+  const authContext = useContext(AuthContext);
   return (
     <NavigationContainer>
       <AppTab.Navigator
         tabBarOptions={{
-          activeTintColor: "#000",
+          style: {
+            backgroundColor: "transparent",
+            borderTopWidth: authContext.user.dark_theme === "true" ? 0.22 : 0.4,
+            position: "absolute",
+            left: 50,
+            right: 50,
+            bottom: 20,
+            height: 100,
+          },
         }}
       >
         <AppTab.Screen

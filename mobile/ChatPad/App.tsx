@@ -80,21 +80,12 @@ export default function App() {
   return (
     <AuthContext.Provider value={{ user, setUser }}>
       <ApolloProvider client={client}>
-        {/* <AnimatedSplash
-          translucent={false}
-          isLoaded={isLoaded}
-          logoImage={require("./assets/mobilesplash.png")}
-          backgroundColor={"#0078fe"}
-          logoHeight={200}
-          logoWidth={200}
-        > */}
         <Loader
           isLoaded={isLoaded}
           imageSource={require("./assets/mobilesplash.png")}
           backgroundStyle={{ backgroundColor: "#0078fe" }}
         >
           {user ? <AppNavigator /> : <AuthStackNavigator />}
-          {/* </AnimatedSplash> */}
         </Loader>
       </ApolloProvider>
     </AuthContext.Provider>

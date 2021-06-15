@@ -23,7 +23,6 @@ interface IProps {
 
 const ChatsScreen = ({ navigation }: IProps) => {
   const [query, setQuery] = useState("");
-  const [userId, setUserId] = useState("");
   const authContext = useContext(AuthContext);
   const { data, loading } = useQuery(SEARCH_GROUPS, {
     variables: {
@@ -32,9 +31,22 @@ const ChatsScreen = ({ navigation }: IProps) => {
     },
   });
 
+  useEffect(() => {
+    navigation.dangerouslyGetParent().setOptions({ tabBarVisible: true });
+  }, [navigation]);
+
+  const darkMode = authContext.user.dark_theme === "true";
+
   return (
     <React.Fragment>
-      <SafeAreaView style={ChatsScreenStyles.container}>
+      <SafeAreaView
+        style={[
+          ChatsScreenStyles.container,
+          {
+            backgroundColor: darkMode ? "#010001" : "#fff",
+          },
+        ]}
+      >
         {loading && <Loader />}
         <Image
           source={{ uri: authContext.user.profile_picture }}
@@ -55,8 +67,9 @@ const ChatsScreen = ({ navigation }: IProps) => {
           style={{
             position: "absolute",
             left: "84%",
-            top: "7.5%",
+            top: "7%",
             borderRadius: 100,
+            color: darkMode ? "#fff" : "#000",
           }}
         />
 
@@ -67,7 +80,16 @@ const ChatsScreen = ({ navigation }: IProps) => {
             position: "absolute",
           }}
         >
-          <Text style={ChatsScreenStyles.headerText}>Your Chats</Text>
+          <Text
+            style={[
+              ChatsScreenStyles.headerText,
+              {
+                color: darkMode ? "#fff" : "#000",
+              },
+            ]}
+          >
+            Your Chats
+          </Text>
         </SafeAreaView>
         <View
           style={{
@@ -79,7 +101,14 @@ const ChatsScreen = ({ navigation }: IProps) => {
           }}
         >
           <TextInput
-            style={ChatsScreenStyles.search}
+            style={[
+              ChatsScreenStyles.search,
+              {
+                backgroundColor: darkMode ? "#474648" : "#F1EFF2",
+                color: darkMode ? "#fff" : "#000",
+              },
+            ]}
+            placeholderTextColor={darkMode ? "#fff" : "#000"}
             placeholder="Search chats..."
             value={query}
             onChangeText={(text) => {
@@ -107,7 +136,19 @@ const ChatsScreen = ({ navigation }: IProps) => {
                       })
                     }
                   >
-                    <View style={ChatsScreenStyles.listitem}>
+                    <View
+                      style={[
+                        ChatsScreenStyles.listitem,
+                        {
+                          borderBottomColor: darkMode ? "#474648" : "#eeeeee",
+                          borderBottomWidth:
+                            data.SearchGroups[data.SearchGroups.length - 1] ===
+                            group
+                              ? 0
+                              : 1,
+                        },
+                      ]}
+                    >
                       {group.last_message.body !== null &&
                       group.last_message.author.id !== authContext.user.id &&
                       !group.last_message.read_by.includes(
@@ -218,6 +259,7 @@ const ChatsScreen = ({ navigation }: IProps) => {
                                 )
                                   ? "bold"
                                   : "normal",
+                              color: darkMode ? "#fff" : "#000",
                             },
                           ]}
                         >
@@ -244,6 +286,7 @@ const ChatsScreen = ({ navigation }: IProps) => {
                                   )
                                     ? "bold"
                                     : "normal",
+                                color: darkMode ? "#fff" : "#000",
                               },
                             ]}
                           >

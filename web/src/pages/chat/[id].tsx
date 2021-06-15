@@ -105,7 +105,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   const [query, setQuery] = useState('');
   const [sidebarShown, setSidebarShown] = useState(true);
   const [loader, setLoader] = useState(false);
-  const [tabClosed, setTabClosed] = useState(false);
+  const [pageLoading, setPageLoading] = useState(true);
   const [messages, setMessages] = useState<any[]>([]);
   const [showEmoji, setShowEmoji] = useState(false);
   const [limit, setLimit] = useState(9);
@@ -153,9 +153,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
       window.addEventListener('beforeunload', function (e) {
         SwitchOnline({ variables: { authorid: currentUser.id, value: false } });
         SwitchOnline({ variables: { authorid: currentUser.id, value: false } });
-        for (var i = 0; i < 10000; i++) {
-          console.log(true);
-        }
+        for (var i = 0; i < 10000; i++) {}
         return undefined;
       });
     }
@@ -238,6 +236,18 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   };
 
   useEffect(() => {
+    window.scrollTo(0, 0);
+    setTimeout(() => {
+      window.scrollTo(0, 0);
+      setPageLoading(false);
+    }, 1000);
+  }, []);
+
+  useEffect(() => {
+    if (pageLoading && typeof window !== 'undefined') window.scrollTo(0, 0);
+  }, [pageLoading, typeof window]);
+
+  useEffect(() => {
     if (onlineError) {
       window.location.href = '/feed';
     }
@@ -286,9 +296,9 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
 
   useEffect(() => {
     const el = document.getElementById('chatDiv');
-    if (el) el.scrollTop = el.scrollHeight;
+    if (el && !pageLoading) el.scrollTop = el.scrollHeight;
     searchDataRefetch();
-  }, [messages, realtimeData, messageData]);
+  }, [messages, realtimeData, messageData, pageLoading]);
 
   useEffect(() => {
     if (typeof messageData !== 'undefined') {
@@ -310,10 +320,15 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
 
   useEffect(() => {
     const el = document.getElementById('chatDiv');
-    if (el) {
+    if (el && !pageLoading && document.visibilityState === 'visible') {
       el.scrollTop = el.scrollHeight - el.clientHeight;
     }
-  }, [typeof messageData, loading, searchLoading, onlineLoading, GroupNameLoading, messageLoading, groupSelected]);
+    if (el && !pageLoading && el.scrollTop === 0) {
+      const btn = document.getElementById('loadmore');
+      console.log(btn);
+      btn?.click();
+    }
+  }, [typeof document, typeof window, typeof messageData, pageLoading]);
 
   const updateReadBy = async () => {
     if (
@@ -369,9 +384,9 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
     }
 
     const el = document.getElementById('chatDiv');
-    if (el) {
-      el.scrollTop = el.scrollHeight - el.clientHeight;
-    }
+    // if (el && !pageLoading) {
+    //   el.scrollTop = el.scrollHeight - el.clientHeight;
+    // }
 
     if (realtimeData && messages.includes(realtimeData.GetAllMessages[realtimeData.GetAllMessages.length - 1])) return;
     if (
@@ -403,7 +418,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
         groupNameRefetch();
       }
     }, 5000);
-  }, [session, messageData, realtimeData, user?.dark_theme, groupSelected]);
+  }, [session, messageData, realtimeData, user?.dark_theme, groupSelected, pageLoading]);
 
   var today: any = new Date();
   var dd = String(today.getDate()).padStart(2, '0');
@@ -425,226 +440,231 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
         <link rel="icon" href="/images/chatpadlogo.png" />
       </Head>
       <div>
-        {GroupNameData && groupSelected !== '' && groupSelected !== undefined && groupSelected !== null && (
-          <nav
-            className="navbar navbar-light "
-            style={{
-              background: darkMode ? '#000' : '#fff',
-              position: 'relative',
-              height: 100,
-              borderBottom: darkMode ? '1px solid #2F3336' : ' 1px solid #eeeeee',
-            }}
-          >
-            <span
-              className="navbar-brand mb-0 h1"
-              style={{ marginLeft: GroupNameData.GetGroupName.members.length === 2 ? 640 : 550, display: 'inline' }}
+        {GroupNameData &&
+          groupSelected !== '' &&
+          groupSelected !== undefined &&
+          groupSelected !== null &&
+          !pageLoading && (
+            <nav
+              className="navbar navbar-light "
+              style={{
+                background: darkMode ? '#000' : '#fff',
+                position: 'relative',
+                height: 100,
+                borderBottom: darkMode ? '1px solid #2F3336' : ' 1px solid #eeeeee',
+              }}
             >
-              {GroupNameData.GetGroupName.dm ? (
-                <>
-                  {GroupNameData.GetGroupName.members[0].id === user?.id ? (
-                    <img
-                      src={GroupNameData.GetGroupName.members[1].profile_picture}
-                      style={{ width: 54, height: 54, borderRadius: 100, display: 'inline' }}
-                      alt=""
-                    />
-                  ) : (
-                    <SkeletonCircle
-                      style={{ position: 'relative', display: 'inline', width: 100 }}
-                      isLoaded={!GroupNameLoading}
-                    >
+              <span
+                className="navbar-brand mb-0 h1"
+                style={{ marginLeft: GroupNameData.GetGroupName.members.length === 2 ? 640 : 550, display: 'inline' }}
+              >
+                {GroupNameData.GetGroupName.dm ? (
+                  <>
+                    {GroupNameData.GetGroupName.members[0].id === user?.id ? (
                       <img
-                        src={GroupNameData.GetGroupName.members[0].profile_picture}
+                        src={GroupNameData.GetGroupName.members[1].profile_picture}
+                        style={{ width: 54, height: 54, borderRadius: 100, display: 'inline' }}
+                        alt=""
+                      />
+                    ) : (
+                      <SkeletonCircle
+                        style={{ position: 'relative', display: 'inline', width: 100 }}
+                        isLoaded={!GroupNameLoading}
+                      >
+                        <img
+                          src={GroupNameData.GetGroupName.members[0].profile_picture}
+                          alt=""
+                          style={{ width: 54, height: 54, borderRadius: 125, display: 'inline' }}
+                        />
+                      </SkeletonCircle>
+                    )}
+                  </>
+                ) : !GroupNameData.GetGroupName.dm ? (
+                  <>
+                    {GroupNameData.GetGroupName.image.length === 0 &&
+                    GroupNameData.GetGroupName.members.length === 1 ? (
+                      <img
+                        src={user?.profile_picture as any}
                         alt=""
                         style={{ width: 54, height: 54, borderRadius: 125, display: 'inline' }}
                       />
-                    </SkeletonCircle>
-                  )}
-                </>
-              ) : !GroupNameData.GetGroupName.dm ? (
-                <>
-                  {GroupNameData.GetGroupName.image.length === 0 && GroupNameData.GetGroupName.members.length === 1 ? (
-                    <img
-                      src={user?.profile_picture as any}
-                      alt=""
-                      style={{ width: 54, height: 54, borderRadius: 125, display: 'inline' }}
-                    />
-                  ) : null}
-                  {GroupNameData.GetGroupName.image.length === 0 && GroupNameData.GetGroupName.members.length >= 2 ? (
-                    <div style={{ display: 'inline', position: 'relative', left: 50 }}>
-                      <img
-                        src={GroupNameData.GetGroupName.members[0].profile_picture}
-                        style={{
-                          width: 31,
-                          height: 31,
-                          borderRadius: 100,
-                          display: 'inline',
-                          position: 'relative',
-                          top: 8,
-                          left: 18,
-                        }}
-                        alt=""
-                      />{' '}
-                      <img
-                        src={GroupNameData.GetGroupName.members[1].profile_picture}
-                        style={{
-                          width: 31,
-                          height: 31,
-                          borderRadius: 100,
-                          display: 'inline',
-                          position: 'relative',
-                          top: -10,
-                          right: 5,
-                        }}
-                        alt=""
-                      />
-                      <div
-                        className={feedStyles.navdot}
-                        style={{
-                          position: 'relative',
-                          top: 10,
-                          right: 60,
-                          width: 30,
-                          height: 30,
-                          display: GroupNameData.GetGroupName.members.length <= 2 ? 'none' : '',
-                        }}
-                      >
-                        <p style={{ position: 'relative', left: 2, top: 2 }}>
-                          +{GroupNameData.GetGroupName.members.length - 2}
-                        </p>
+                    ) : null}
+                    {GroupNameData.GetGroupName.image.length === 0 && GroupNameData.GetGroupName.members.length >= 2 ? (
+                      <div style={{ display: 'inline', position: 'relative', left: 50 }}>
+                        <img
+                          src={GroupNameData.GetGroupName.members[0].profile_picture}
+                          style={{
+                            width: 31,
+                            height: 31,
+                            borderRadius: 100,
+                            display: 'inline',
+                            position: 'relative',
+                            top: 8,
+                            left: 18,
+                          }}
+                          alt=""
+                        />{' '}
+                        <img
+                          src={GroupNameData.GetGroupName.members[1].profile_picture}
+                          style={{
+                            width: 31,
+                            height: 31,
+                            borderRadius: 100,
+                            display: 'inline',
+                            position: 'relative',
+                            top: -10,
+                            right: 5,
+                          }}
+                          alt=""
+                        />
+                        <div
+                          className={feedStyles.navdot}
+                          style={{
+                            position: 'relative',
+                            top: 10,
+                            right: 60,
+                            width: 30,
+                            height: 30,
+                            display: GroupNameData.GetGroupName.members.length <= 2 ? 'none' : '',
+                          }}
+                        >
+                          <p style={{ position: 'relative', left: 2, top: 2 }}>
+                            +{GroupNameData.GetGroupName.members.length - 2}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  ) : GroupNameData.GetGroupName.image.length > 0 ? (
-                    <div style={{ display: 'inline', position: 'relative', left: 50 }}>
-                      <img
-                        src={GroupNameData.GetGroupName.image}
-                        style={{
-                          width: 71,
-                          height: 71,
-                          borderRadius: 100,
-                          display: 'inline',
-                          position: 'relative',
-                          top: 0,
-                          right: 5,
-                        }}
-                        alt=""
-                      />
-                    </div>
-                  ) : null}
-                </>
-              ) : null}
-              {GroupNameData.GetGroupName.dm ? (
-                <p
-                  style={{
-                    display: 'inline',
-                    fontFamily: 'Lato',
-                    fontWeight: 'bold',
-                    fontSize: 28,
-                    marginLeft: GroupNameData.GetGroupName.members.length === 2 ? 10 : '',
-                    color: darkMode ? '#fff' : '#000',
-                  }}
-                >
-                  {GroupNameData.GetGroupName.members[0].id === user?.id
-                    ? GroupNameData.GetGroupName.members[1].username
-                    : GroupNameData.GetGroupName.members[0].username}
-                </p>
-              ) : null}
-              {!GroupNameData.GetGroupName.dm && (
-                <p
-                  style={{
-                    display: 'inline',
-                    fontFamily: 'Lato',
-                    fontWeight: 'bold',
-                    fontSize: 28,
-                    marginLeft:
-                      !GroupNameData.GetGroupName.dm && GroupNameData.GetGroupName.members.length === 2
-                        ? 70
-                        : GroupNameData.GetGroupName.members.length === 1 &&
-                          GroupNameData.GetGroupName.image.length === 0
-                        ? 20
-                        : GroupNameData.GetGroupName.members.length === 2
-                        ? 10
-                        : GroupNameData.GetGroupName.image.length > 0
-                        ? 60
-                        : '',
-                    color: darkMode ? '#fff' : '#000',
-                  }}
-                >
-                  {GroupNameData.GetGroupName.name}
-                </p>
-              )}
-              {(messageData && messageData.GetInitialMessages.length === 0) ||
-              (realtimeData && realtimeData.GetAllMessages.length === 0) ? null : (
-                <p
-                  style={{
-                    fontSize: 12,
-                    fontFamily: 'Lato',
-                    position: 'relative',
-                    textAlign: 'left',
-                    color: darkMode ? '#fff' : '#000',
-                    bottom:
-                      !GroupNameData.GetGroupName.dm &&
-                      GroupNameData.GetGroupName.members.length === 2 &&
-                      GroupNameData.GetGroupName.image.length === 0
-                        ? 2
-                        : GroupNameData.GetGroupName.members.length === 1 &&
-                          GroupNameData.GetGroupName.image.length === 0
-                        ? 13
-                        : GroupNameData.GetGroupName.members.length === 2 &&
-                          GroupNameData.GetGroupName.image.length === 0
-                        ? 15
-                        : GroupNameData.GetGroupName.image.length > 0
-                        ? 20
-                        : 5,
-                    marginLeft:
-                      !GroupNameData.GetGroupName.dm && GroupNameData.GetGroupName.members.length === 2
-                        ? 140
-                        : GroupNameData.GetGroupName.image.length > 0
-                        ? 137
-                        : GroupNameData.GetGroupName.members.length === 1 &&
-                          GroupNameData.GetGroupName.image.length === 0
-                        ? 78
-                        : GroupNameData.GetGroupName.members.length === 2
-                        ? 66
-                        : GroupNameData.GetGroupName.members.length > 2
-                        ? 137
-                        : 20,
-                  }}
-                >
-                  {messages && messages[messages.length - 1] && messages[messages.length - 1].time
-                    ? Math.round((Date.now() - messages[messages.length - 1].time) / 60000) >= 1 &&
-                      Math.round((Date.now() - messages[messages.length - 1].time) / 60000) < 2
-                      ? 'Last active ' +
-                        Math.round((Date.now() - messages[messages.length - 1].time) / 60000) +
-                        ' minute ago'
-                      : Math.round((Date.now() - messages[messages.length - 1].time) / 60000) > 0 &&
-                        Math.round((Date.now() - messages[messages.length - 1].time) / 60000) < 60
-                      ? 'Last active ' +
-                        Math.round((Date.now() - messages[messages.length - 1].time) / 60000) +
-                        ' minutes ago'
-                      : Math.round((Date.now() - messages[messages.length - 1].time) / 60000) >= 60 &&
-                        Math.round((Date.now() - messages[messages.length - 1].time) / 60000) < 1440
-                      ? `Last active ${
-                          day === messages[messages.length - 1].date[2]
-                            ? 'today'
-                            : `on ${messages[messages.length - 1].date[2]}`
-                        } at ` + messages[messages.length - 1].date[1]
-                      : Math.round((Date.now() - messages[messages.length - 1].time) / 60000) > 1440 &&
-                        Math.round((Date.now() - messages[messages.length - 1].time) / 60000) < 10080
-                      ? 'Last active on ' +
-                        messages[messages.length - 1].date[2] +
-                        ' at ' +
-                        messages[messages.length - 1].date[1]
-                      : Math.round((Date.now() - messages[messages.length - 1].time) / 60000) >= 10080
-                      ? `Last active on ${messages[messages.length - 1].date[0]} at ${
+                    ) : GroupNameData.GetGroupName.image.length > 0 ? (
+                      <div style={{ display: 'inline', position: 'relative', left: 50 }}>
+                        <img
+                          src={GroupNameData.GetGroupName.image}
+                          style={{
+                            width: 71,
+                            height: 71,
+                            borderRadius: 100,
+                            display: 'inline',
+                            position: 'relative',
+                            top: 0,
+                            right: 5,
+                          }}
+                          alt=""
+                        />
+                      </div>
+                    ) : null}
+                  </>
+                ) : null}
+                {GroupNameData.GetGroupName.dm ? (
+                  <p
+                    style={{
+                      display: 'inline',
+                      fontFamily: 'Lato',
+                      fontWeight: 'bold',
+                      fontSize: 28,
+                      marginLeft: GroupNameData.GetGroupName.members.length === 2 ? 10 : '',
+                      color: darkMode ? '#fff' : '#000',
+                    }}
+                  >
+                    {GroupNameData.GetGroupName.members[0].id === user?.id
+                      ? GroupNameData.GetGroupName.members[1].username
+                      : GroupNameData.GetGroupName.members[0].username}
+                  </p>
+                ) : null}
+                {!GroupNameData.GetGroupName.dm && (
+                  <p
+                    style={{
+                      display: 'inline',
+                      fontFamily: 'Lato',
+                      fontWeight: 'bold',
+                      fontSize: 28,
+                      marginLeft:
+                        !GroupNameData.GetGroupName.dm && GroupNameData.GetGroupName.members.length === 2
+                          ? 70
+                          : GroupNameData.GetGroupName.members.length === 1 &&
+                            GroupNameData.GetGroupName.image.length === 0
+                          ? 20
+                          : GroupNameData.GetGroupName.members.length === 2
+                          ? 10
+                          : GroupNameData.GetGroupName.image.length > 0
+                          ? 60
+                          : '',
+                      color: darkMode ? '#fff' : '#000',
+                    }}
+                  >
+                    {GroupNameData.GetGroupName.name}
+                  </p>
+                )}
+                {(messageData && messageData.GetInitialMessages.length === 0) ||
+                (realtimeData && realtimeData.GetAllMessages.length === 0) ? null : (
+                  <p
+                    style={{
+                      fontSize: 12,
+                      fontFamily: 'Lato',
+                      position: 'relative',
+                      textAlign: 'left',
+                      color: darkMode ? '#fff' : '#000',
+                      bottom:
+                        !GroupNameData.GetGroupName.dm &&
+                        GroupNameData.GetGroupName.members.length === 2 &&
+                        GroupNameData.GetGroupName.image.length === 0
+                          ? 2
+                          : GroupNameData.GetGroupName.members.length === 1 &&
+                            GroupNameData.GetGroupName.image.length === 0
+                          ? 13
+                          : GroupNameData.GetGroupName.members.length === 2 &&
+                            GroupNameData.GetGroupName.image.length === 0
+                          ? 15
+                          : GroupNameData.GetGroupName.image.length > 0
+                          ? 20
+                          : 5,
+                      marginLeft:
+                        !GroupNameData.GetGroupName.dm && GroupNameData.GetGroupName.members.length === 2
+                          ? 140
+                          : GroupNameData.GetGroupName.image.length > 0
+                          ? 137
+                          : GroupNameData.GetGroupName.members.length === 1 &&
+                            GroupNameData.GetGroupName.image.length === 0
+                          ? 78
+                          : GroupNameData.GetGroupName.members.length === 2
+                          ? 66
+                          : GroupNameData.GetGroupName.members.length > 2
+                          ? 137
+                          : 20,
+                    }}
+                  >
+                    {messages && messages[messages.length - 1] && messages[messages.length - 1].time
+                      ? Math.round((Date.now() - messages[messages.length - 1].time) / 60000) >= 1 &&
+                        Math.round((Date.now() - messages[messages.length - 1].time) / 60000) < 2
+                        ? 'Chat last active ' +
+                          Math.round((Date.now() - messages[messages.length - 1].time) / 60000) +
+                          ' minute ago'
+                        : Math.round((Date.now() - messages[messages.length - 1].time) / 60000) > 0 &&
+                          Math.round((Date.now() - messages[messages.length - 1].time) / 60000) < 60
+                        ? 'Chat last active ' +
+                          Math.round((Date.now() - messages[messages.length - 1].time) / 60000) +
+                          ' minutes ago'
+                        : Math.round((Date.now() - messages[messages.length - 1].time) / 60000) >= 60 &&
+                          Math.round((Date.now() - messages[messages.length - 1].time) / 60000) < 1440
+                        ? `Chat last active ${
+                            day === messages[messages.length - 1].date[2]
+                              ? 'today'
+                              : `on ${messages[messages.length - 1].date[2]}`
+                          } at ` + messages[messages.length - 1].date[1]
+                        : Math.round((Date.now() - messages[messages.length - 1].time) / 60000) > 1440 &&
+                          Math.round((Date.now() - messages[messages.length - 1].time) / 60000) < 10080
+                        ? 'Chat last active on ' +
+                          messages[messages.length - 1].date[2] +
+                          ' at ' +
                           messages[messages.length - 1].date[1]
-                        }`
-                      : ' Currently active'
-                    : null}
-                </p>
-              )}
-            </span>
-          </nav>
-        )}
+                        : Math.round((Date.now() - messages[messages.length - 1].time) / 60000) >= 10080
+                        ? `Chat last active on ${messages[messages.length - 1].date[0]} at ${
+                            messages[messages.length - 1].date[1]
+                          }`
+                        : ' Chat currently active'
+                      : null}
+                  </p>
+                )}
+              </span>
+            </nav>
+          )}
         <div
           onClick={() => setShowEmoji(false)}
           style={{
@@ -665,7 +685,18 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
           id="chatDiv"
           ref={chatRef as any}
         >
-          {messages.length !== 0 && loadMoreData && loadMoreData.LoadMore.length !== 0 && (
+          {pageLoading ? (
+            <Spinner
+              thickness="4px"
+              speed="0.65s"
+              emptyColor="gray.200"
+              color="blue.500"
+              size="xl"
+              className={feedStyles.centered}
+              style={{ marginLeft: 150, marginTop: -25 }}
+            />
+          ) : null}
+          {messages.length !== 0 && loadMoreData && loadMoreData.LoadMore.length !== 0 && !pageLoading && (
             <IconButton
               onClick={() => {
                 if (!loadMoreData || loadMoreLoading) return setLoader(true);
@@ -679,7 +710,9 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                 position: 'relative',
                 marginTop: 70,
                 left: 1000,
+                display: 'none',
               }}
+              id="loadmore"
               className={feedStyles.loadmorebtn}
               children={<EjectIcon style={{ width: '4vh', height: '4vh' }} />}
             ></IconButton>
@@ -688,6 +721,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
           {groupSelected !== '' &&
             messageData &&
             user &&
+            !pageLoading &&
             messages.map((message, idx) => {
               return (
                 <React.Fragment key={message.messageid}>
@@ -878,135 +912,140 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
             })}
         </div>
 
-        <div
-          style={{
-            position: 'absolute',
-            top: 20,
-            right: 165,
-          }}
-        >
-          <Menu>
-            <MenuButton px={4} py={2} transition="all 0.2s" _focus={{ outline: 'none' }}>
-              <i
-                className="fa fa-cog fa-3x"
-                ref={btnRef as any}
-                style={{ color: darkMode ? '#4097FF' : '', cursor: 'pointer' }}
-              ></i>
-            </MenuButton>
-            <MenuList
-              style={{
-                marginRight:
-                  (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
-                  (typeof window !== 'undefined' && window.screen.availWidth) < 1800
-                    ? -25
-                    : 25,
-                position: 'relative',
-                bottom: 14,
-              }}
-            >
-              <>
-                {GroupNameData && GroupNameData.GetGroupName && !GroupNameData.GetGroupName.name.includes('DM:') ? (
-                  <>
-                    <MenuItem
-                      onClick={() => {
-                        (document.body.style as any) = 'zoom: 1';
-                        editGroupNameModalOnOpen();
-                      }}
-                    >
-                      {' '}
-                      <i className="fa fa-pencil" style={{ marginRight: 10 }}></i> Edit Group Name
-                    </MenuItem>
-                    <MenuItem
-                      onClick={() => {
-                        (document.body.style as any) = 'zoom: 1';
-                        viewMembersModalOnOpen();
-                      }}
-                    >
-                      {' '}
-                      <i className="fa fa-users" style={{ marginRight: 10 }}></i> View Members
-                    </MenuItem>
-                    <MenuItem
-                      onClick={() => {
-                        (document.body.style as any) = 'zoom: 1';
-                        addMembersModalOnOpen();
-                      }}
-                    >
-                      {' '}
-                      <i className="fa fa-user-plus" style={{ marginRight: 10 }}></i> Add Members
-                    </MenuItem>
-                    <MenuItem
-                      onClick={() => {
-                        (document.body.style as any) = 'zoom: 1';
-                        leaveGroupModalOnOpen();
-                      }}
-                    >
-                      {' '}
-                      <i className="fa fa-sign-out" style={{ marginRight: 10, marginTop: 2 }}></i> Leave Group
-                    </MenuItem>
-                  </>
-                ) : (
-                  <MenuItem
-                    onClick={() => {
-                      (document.body.style as any) = 'zoom: 1';
-                      deleteConversationModalOnOpen();
-                    }}
-                  >
-                    {' '}
-                    <i className="fa fa-trash" style={{ marginRight: 10, marginTop: 0 }}></i> Delete Conversation
-                  </MenuItem>
-                )}
-              </>
-            </MenuList>
-          </Menu>
-        </div>
-
-        <div
-          style={{
-            position: 'absolute',
-            top: 28,
-            right: 120,
-          }}
-        >
-          <i
-            className="fa fa-info-circle fa-3x"
-            ref={btnRef as any}
-            onClick={() => {
-              (document.body.style as any) = 'zoom: 1';
-              onOpen();
+        {!pageLoading && (
+          <div
+            style={{
+              position: 'absolute',
+              top: 20,
+              right: 165,
             }}
-            style={{ color: darkMode ? '#4097FF' : '', cursor: 'pointer' }}
-          ></i>
-        </div>
-
-        <div
-          style={{
-            position: 'absolute',
-            top: -3,
-            right: 100,
-          }}
-        >
-          <div className="outer-menu">
-            <input className="checkbox-toggle" type="checkbox" onChange={() => setVisible(!visible)} />
-            <div className="hamburger rainbow-box" style={{ borderRadius: 50, backgroundColor: 'transparent' }}>
-              <div>
+          >
+            <Menu>
+              <MenuButton px={4} py={2} transition="all 0.2s" _focus={{ outline: 'none' }}>
                 <i
-                  className={`fa fa-${visible ? 'user-plus' : 'plus'} fa-3x`}
-                  style={{ color: darkMode ? '#4097FF' : '' }}
+                  className="fa fa-cog fa-3x"
+                  ref={btnRef as any}
+                  style={{ color: darkMode ? '#4097FF' : '', cursor: 'pointer' }}
                 ></i>
-              </div>
-            </div>
+              </MenuButton>
+              <MenuList
+                style={{
+                  marginRight:
+                    (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
+                    (typeof window !== 'undefined' && window.screen.availWidth) < 1800
+                      ? -25
+                      : 25,
+                  position: 'relative',
+                  bottom: 14,
+                }}
+              >
+                <>
+                  {GroupNameData && GroupNameData.GetGroupName && !GroupNameData.GetGroupName.name.includes('DM:') ? (
+                    <>
+                      <MenuItem
+                        onClick={() => {
+                          (document.body.style as any) = 'zoom: 1';
+                          editGroupNameModalOnOpen();
+                        }}
+                      >
+                        {' '}
+                        <i className="fa fa-pencil" style={{ marginRight: 10 }}></i> Edit Group Name
+                      </MenuItem>
+                      <MenuItem
+                        onClick={() => {
+                          (document.body.style as any) = 'zoom: 1';
+                          viewMembersModalOnOpen();
+                        }}
+                      >
+                        {' '}
+                        <i className="fa fa-users" style={{ marginRight: 10 }}></i> View Members
+                      </MenuItem>
+                      <MenuItem
+                        onClick={() => {
+                          (document.body.style as any) = 'zoom: 1';
+                          addMembersModalOnOpen();
+                        }}
+                      >
+                        {' '}
+                        <i className="fa fa-user-plus" style={{ marginRight: 10 }}></i> Add Members
+                      </MenuItem>
+                      <MenuItem
+                        onClick={() => {
+                          (document.body.style as any) = 'zoom: 1';
+                          leaveGroupModalOnOpen();
+                        }}
+                      >
+                        {' '}
+                        <i className="fa fa-sign-out" style={{ marginRight: 10, marginTop: 2 }}></i> Leave Group
+                      </MenuItem>
+                    </>
+                  ) : (
+                    <MenuItem
+                      onClick={() => {
+                        (document.body.style as any) = 'zoom: 1';
+                        deleteConversationModalOnOpen();
+                      }}
+                    >
+                      {' '}
+                      <i className="fa fa-trash" style={{ marginRight: 10, marginTop: 0 }}></i> Delete Conversation
+                    </MenuItem>
+                  )}
+                </>
+              </MenuList>
+            </Menu>
+          </div>
+        )}
+        {!pageLoading && (
+          <div
+            style={{
+              position: 'absolute',
+              top: 28,
+              right: 120,
+            }}
+          >
+            <i
+              className="fa fa-info-circle fa-3x"
+              ref={btnRef as any}
+              onClick={() => {
+                (document.body.style as any) = 'zoom: 1';
+                onOpen();
+              }}
+              style={{ color: darkMode ? '#4097FF' : '', cursor: 'pointer' }}
+            ></i>
+          </div>
+        )}
 
-            <div className="menu">
-              <div style={{ marginRight: '22%', backgroundColor: darkMode ? '#000' : '' }}>
+        {!pageLoading && (
+          <div
+            style={{
+              position: 'absolute',
+              top: -3,
+              right: 100,
+            }}
+          >
+            <div className="outer-menu">
+              <input className="checkbox-toggle" type="checkbox" onChange={() => setVisible(!visible)} />
+              <div className="hamburger rainbow-box" style={{ borderRadius: 50, backgroundColor: 'transparent' }}>
                 <div>
-                  <div className="mt-1" style={{ width: '300%', color: darkMode ? '#fff' : '#000' }}>
-                    <Search />
+                  <i
+                    className={`fa fa-${visible ? 'user-plus' : 'plus'} fa-3x`}
+                    style={{ color: darkMode ? '#4097FF' : '' }}
+                  ></i>
+                </div>
+              </div>
+
+              <div className="menu">
+                <div style={{ marginRight: '22%', backgroundColor: darkMode ? '#000' : '' }}>
+                  <div>
+                    <div className="mt-1" style={{ width: '300%', color: darkMode ? '#fff' : '#000' }}>
+                      <Search />
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
         {sidebarShown ? (
           <div
             className={feedStyles.leftsidebar}
@@ -1790,7 +1829,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                         <p
                           style={{
                             fontFamily: 'Lato',
-                            color: darkMode ? '#fff' : '#000',
+                            color: darkMode ? '#D9D9D9' : '#000',
                             position: 'relative',
                             fontWeight:
                               user &&
@@ -1801,7 +1840,9 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                                 ? 'bold'
                                 : 'normal',
                             bottom:
-                              group.image.length === 0 && group.members.length === 1
+                              group.image.length === 0 && group.members.length === 2
+                                ? 64
+                                : group.image.length === 0 && group.members.length === 1
                                 ? 47
                                 : group.image.length === 0 && restOfPeople !== 0
                                 ? 94
@@ -1838,7 +1879,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
         <div
           className={feedStyles.profile}
           style={{
-            backgroundColor: darkMode ? '#0A0514' : '',
+            backgroundColor: darkMode ? '#0B0617' : '',
             borderRightColor: darkMode ? '#2F3336' : '',
             borderBottomColor: !darkMode ? '#eeeeee' : '#2F3336',
             display: !sidebarShown ? 'none' : '',
@@ -1899,19 +1940,29 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
             />
           </div>
         </div>
-        <div
-          style={{
-            height:
-              messageVal.length <= 75
-                ? '20vh'
-                : (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
-                  (typeof window !== 'undefined' && window.screen.availWidth) < 1800
-                ? '32.9vh'
-                : '25vh',
-            backgroundColor: darkMode ? '#000' : '#fff',
-            overflow: 'hidden',
-          }}
-        ></div>
+        {!pageLoading ? (
+          <div
+            style={{
+              height:
+                messageVal.length <= 75
+                  ? '20vh'
+                  : (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
+                    (typeof window !== 'undefined' && window.screen.availWidth) < 1800
+                  ? '32.9vh'
+                  : '25vh',
+              backgroundColor: darkMode ? '#000' : '#fff',
+              overflow: 'hidden',
+            }}
+          ></div>
+        ) : (
+          <div
+            style={{
+              height: '100vh',
+              backgroundColor: darkMode ? '#000' : '#fff',
+              overflow: 'hidden',
+            }}
+          ></div>
+        )}
 
         {groupSelected !== '' && user ? (
           <div
@@ -1928,6 +1979,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
             >
               <InputGroup size="lg" style={{ width: '50%', top: -78, height: 60, left: 610 }}>
                 {onlineData &&
+                  !pageLoading &&
                   onlineData.GetMembers.map((member) => {
                     if (member.id !== user.id) {
                       return (
@@ -1965,30 +2017,60 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                     }
                   })}
 
-                <Textarea
-                  placeholder="Send a message..."
-                  style={{
-                    color: darkMode ? '#fff' : '#000',
-                    right: !sidebarShown ? 90 : '',
-                    paddingRight: 100,
-                    borderRadius: 10,
-                    backgroundColor: darkMode ? '#202327' : '#F4F4F4',
-                    minHeight: messageVal.length <= 75 ? 10 : 140,
-                    bottom: 10,
-                    lineHeight: 1.8,
-                    position: 'absolute',
-                  }}
-                  resize="none"
-                  value={messageVal}
-                  _placeholder={{ color: darkMode ? '#fff' : '#7c7c82' }}
-                  onKeyPress={async (e) => {
-                    if (e.shiftKey) {
-                      return;
-                    }
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
+                {!pageLoading && (
+                  <Textarea
+                    placeholder="Send a message..."
+                    style={{
+                      color: darkMode ? '#fff' : '#000',
+                      right: !sidebarShown ? 90 : '',
+                      paddingRight: 100,
+                      borderRadius: 10,
+                      backgroundColor: darkMode ? '#202327' : '#F4F4F4',
+                      minHeight: messageVal.length <= 75 ? 10 : 140,
+                      bottom: 10,
+                      lineHeight: 1.8,
+                      position: 'absolute',
+                    }}
+                    resize="none"
+                    value={messageVal}
+                    _placeholder={{ color: darkMode ? '#fff' : '#7c7c82' }}
+                    onKeyPress={async (e) => {
+                      if (e.shiftKey) {
+                        return;
+                      }
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
 
-                      if (!messageVal.replace(/\s/g, '').length) {
+                        if (!messageVal.replace(/\s/g, '').length) {
+                          await SetUserTyping({
+                            variables: {
+                              authorid: user.id,
+                              groupid: groupSelected,
+                              value: false,
+                            },
+                          });
+                          return e.preventDefault();
+                        }
+                        setMessages([
+                          ...messages,
+                          {
+                            groupid: groupSelected,
+                            body: messageVal,
+                            author: {
+                              username: user.username,
+                              email: user.email,
+                              id: user.id,
+                              profile_picture: user.profile_picture,
+                            },
+                            image: false,
+                            messageid: generateId(24),
+                            date: today,
+                            time: Date.now(),
+                            day,
+                            alert: false,
+                          },
+                        ]);
+                        setMessageVal('');
                         await SetUserTyping({
                           variables: {
                             authorid: user.id,
@@ -1996,147 +2078,118 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                             value: false,
                           },
                         });
-                        return e.preventDefault();
-                      }
-                      setMessages([
-                        ...messages,
-                        {
-                          groupid: groupSelected,
-                          body: messageVal,
-                          author: {
-                            username: user.username,
-                            email: user.email,
-                            id: user.id,
-                            profile_picture: user.profile_picture,
+                        await SetUserTyping({
+                          variables: {
+                            authorid: user.id,
+                            groupid: groupSelected,
+                            value: false,
                           },
-                          image: false,
-                          messageid: generateId(24),
-                          date: today,
-                          time: Date.now(),
-                          day,
-                          alert: false,
-                        },
-                      ]);
-                      setMessageVal('');
-                      await SetUserTyping({
-                        variables: {
-                          authorid: user.id,
-                          groupid: groupSelected,
-                          value: false,
-                        },
-                      });
-                      await SetUserTyping({
-                        variables: {
-                          authorid: user.id,
-                          groupid: groupSelected,
-                          value: false,
-                        },
-                      });
+                        });
 
-                      const el = document.getElementById('chatDiv');
+                        e.preventDefault();
 
-                      if (el) el.scrollTop = el.scrollHeight - el.clientHeight;
-                      e.preventDefault();
-
-                      await SendMessage({
-                        variables: {
-                          groupid: groupSelected,
-                          body: messageVal,
-                          author: {
-                            username: user.username,
-                            email: user.email,
-                            id: user.id,
-                            profile_picture: user.profile_picture,
-                          },
-                          image: false,
-                          messageid: generateId(24),
-                          time: formatAMPM(new Date()),
-                          date: today,
-                          day,
-                          alert: false,
-                        },
-                      });
-                      await SwitchOnline({ variables: { authorid: user?.id, value: true } });
-                      await SetChatOn({ variables: { authorid: user?.id, value: groupSelected } });
-                    }
-                  }}
-                  onChange={(e) => {
-                    setMessageVal(e.currentTarget.value);
-                  }}
-                  onClick={() => showEmoji && setShowEmoji(false)}
-                />
-                <InputRightElement
-                  style={{
-                    top: 2,
-                    backgroundColor: 'transparent',
-                    right: !sidebarShown ? 115 : 24,
-                    cursor: 'pointer',
-                  }}
-                >
-                  {visible && (
-                    <>
-                      <InsertPhotoIcon
-                        onClick={() => {
-                          document.getElementById('filepicker')?.click();
-                        }}
-                        fontSize="large"
-                        style={{
-                          color: darkMode ? '#4097FF' : 'gray',
-                        }}
-                      />
-
-                      <EmojiEmotionsIcon
-                        onClick={() => setShowEmoji(!showEmoji)}
-                        fontSize="large"
-                        style={{
-                          color: darkMode ? '#4097FF' : 'gray',
-                        }}
-                      />
-                    </>
-                  )}
-
-                  <input
-                    type="file"
-                    id="filepicker"
-                    accept="image/x-png,image/gif,image/jpeg"
-                    onChange={(e: any) => {
-                      const file = e.target.files[0];
-
-                      const reader = new FileReader();
-                      reader.onloadend = async () => {
-                        try {
-                          await SendMessage({
-                            variables: {
-                              groupid: groupSelected,
-                              body: messageVal,
-                              author: {
-                                username: user.username,
-                                email: user.email,
-                                id: user.id,
-                                profile_picture: user.profile_picture,
-                              },
-                              image: true,
-                              messageid: generateId(24),
-                              time: formatAMPM(new Date()),
-                              date: today,
-                              day,
-                              alert: false,
+                        await SendMessage({
+                          variables: {
+                            groupid: groupSelected,
+                            body: messageVal,
+                            author: {
+                              username: user.username,
+                              email: user.email,
+                              id: user.id,
+                              profile_picture: user.profile_picture,
                             },
-                          });
-                        } catch (err) {
-                          toast({
-                            status: 'error',
-                            title: 'This image is too big! Please choose a smaller image.',
-                            position: 'top-right',
-                            isClosable: true,
-                          });
-                        }
-                      };
-                      reader.readAsDataURL(file);
+                            image: false,
+                            messageid: generateId(24),
+                            time: formatAMPM(new Date()),
+                            date: today,
+                            day,
+                            alert: false,
+                          },
+                        });
+                        await SwitchOnline({ variables: { authorid: user?.id, value: true } });
+                        await SetChatOn({ variables: { authorid: user?.id, value: groupSelected } });
+                      }
                     }}
-                    style={{ display: 'none' }}
+                    onChange={(e) => {
+                      setMessageVal(e.currentTarget.value);
+                    }}
+                    onClick={() => showEmoji && setShowEmoji(false)}
                   />
-                </InputRightElement>
+                )}
+                {!pageLoading && (
+                  <InputRightElement
+                    style={{
+                      top: 2,
+                      backgroundColor: 'transparent',
+                      right: !sidebarShown ? 115 : 24,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {visible && (
+                      <>
+                        <InsertPhotoIcon
+                          onClick={() => {
+                            document.getElementById('filepicker')?.click();
+                          }}
+                          fontSize="large"
+                          style={{
+                            color: darkMode ? '#4097FF' : 'gray',
+                          }}
+                        />
+
+                        <EmojiEmotionsIcon
+                          onClick={() => setShowEmoji(!showEmoji)}
+                          fontSize="large"
+                          style={{
+                            color: darkMode ? '#4097FF' : 'gray',
+                          }}
+                        />
+                      </>
+                    )}
+
+                    <input
+                      type="file"
+                      id="filepicker"
+                      accept="image/x-png,image/gif,image/jpeg"
+                      onChange={(e: any) => {
+                        const file = e.target.files[0];
+
+                        const reader = new FileReader();
+                        reader.onloadend = async () => {
+                          try {
+                            await SendMessage({
+                              variables: {
+                                groupid: groupSelected,
+                                body: messageVal,
+                                author: {
+                                  username: user.username,
+                                  email: user.email,
+                                  id: user.id,
+                                  profile_picture: user.profile_picture,
+                                },
+                                image: true,
+                                messageid: generateId(24),
+                                time: formatAMPM(new Date()),
+                                date: today,
+                                day,
+                                alert: false,
+                              },
+                            });
+                          } catch (err) {
+                            toast({
+                              status: 'error',
+                              title: 'This image is too big! Please choose a smaller image.',
+                              position: 'top-right',
+                              isClosable: true,
+                            });
+                          }
+                        };
+                        reader.readAsDataURL(file);
+                      }}
+                      style={{ display: 'none' }}
+                    />
+                  </InputRightElement>
+                )}
               </InputGroup>
             </div>
             {showEmoji && (

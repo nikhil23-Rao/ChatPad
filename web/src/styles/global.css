@@ -47,11 +47,13 @@ textarea {
   resize: none;
 }
 
+html {
+  overflow: hidden;
+}
 body {
+  overflow: hidden;
   margin: 0;
   padding: 0;
-  overflow-y: hidden;
-  overflow-x: hidden;
   font-family: 'Helvetica Neue', Helvetica, sans-serif;
 }
 
@@ -1408,4 +1410,40 @@ body {
   100% {
     text-shadow: -5px 0 #f44336, 5px -4px #2196f3;
   }
+}
+
+.conversation-list-item {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+}
+
+.conversation-list-item:hover {
+  background: #eeeef1;
+  cursor: pointer;
+}
+
+.conversation-photo {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 10px;
+}
+
+.conversation-title {
+  font-size: 14px;
+  font-weight: bold;
+  text-transform: capitalize;
+  margin: 0;
+}
+
+.conversation-snippet {
+  font-size: 14px;
+  color: #888;
+  margin: 0;
+}
+.conversation-list {
+  display: flex;
+  flex-direction: column;
 }
