@@ -261,24 +261,32 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
 
   useEffect(() => {
     if (messageVal.replace(/\s/g, '').length && user) {
-      SetUserTyping({
-        variables: {
-          authorid: user.id,
-          groupid: groupSelected,
-          value: true,
-        },
-      });
-      onlineRefetch();
+      try {
+        SetUserTyping({
+          variables: {
+            authorid: user.id,
+            groupid: groupSelected,
+            value: true,
+          },
+        });
+        onlineRefetch();
+      } catch (err) {
+        window.location.href = '/feed';
+      }
     }
     if (!messageVal.replace(/\s/g, '').length && user) {
-      SetUserTyping({
-        variables: {
-          authorid: user.id,
-          groupid: groupSelected,
-          value: false,
-        },
-      });
-      onlineRefetch();
+      try {
+        SetUserTyping({
+          variables: {
+            authorid: user.id,
+            groupid: groupSelected,
+            value: false,
+          },
+        });
+        onlineRefetch();
+      } catch (err) {
+        window.location.href = '/feed';
+      }
     }
   }, [user, messageVal, messages]);
 
