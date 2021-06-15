@@ -105,7 +105,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   const [query, setQuery] = useState('');
   const [sidebarShown, setSidebarShown] = useState(true);
   const [loader, setLoader] = useState(false);
-  const [messageLoader, setMessageLoader] = useState(false);
+  const [tabClosed, setTabClosed] = useState(false);
   const [messages, setMessages] = useState<any[]>([]);
   const [showEmoji, setShowEmoji] = useState(false);
   const [limit, setLimit] = useState(9);
@@ -151,9 +151,12 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
       SetChatOn({ variables: { authorid: currentUser.id, value: groupSelected } });
 
       window.addEventListener('beforeunload', function (e) {
-        e.preventDefault();
         SwitchOnline({ variables: { authorid: currentUser.id, value: false } });
-        SetChatOn({ variables: { authorid: currentUser.id, value: '' } });
+        SwitchOnline({ variables: { authorid: currentUser.id, value: false } });
+        for (var i = 0; i < 10000; i++) {
+          console.log(true);
+        }
+        return undefined;
       });
     }
   };
