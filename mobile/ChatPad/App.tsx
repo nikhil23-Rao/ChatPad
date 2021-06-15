@@ -3,6 +3,9 @@ import { AuthStackNavigator } from "./app/navigation/AuthStackNavigator";
 import WelcomeScreen from "./app/screens/WelcomeScreen";
 import { AppRegistry } from "react-native";
 import { ApolloClient, InMemoryCache, ApolloProvider } from "@apollo/client";
+import { split, HttpLink } from "@apollo/client";
+import { getMainDefinition } from "@apollo/client/utilities";
+import { WebSocketLink } from "@apollo/client/link/ws";
 import AnimatedSplash from "react-native-animated-splash-screen";
 import { useState } from "react";
 import { useEffect } from "react";
@@ -30,6 +33,50 @@ export default function App() {
       setIsLoaded(true);
     }, 3000);
   }, []);
+
+  const wsLink = new WebSocketLink({
+    // if you instantiate in the server, the error will be thrown
+    uri: `wss://chatpad-server.herokuapp.com/subscriptions`,
+    // uri: 'ws://localhost:4000/subscriptions',
+    options: {
+      reconnect: true,
+      timeout: 60000,
+      lazy: true,
+    },
+  });
+
+  const httplink = new HttpLink({
+    uri: "https://chatpad-server.herokuapp.com/graphql",
+    // uri: 'http://localhost:4000/graphql',
+    credentials: "same-origin",
+  });
+
+  const link = split(
+    ({ query }) => {
+      const { kind, operation }: any = getMainDefinition(query);
+      return kind === "OperationDefinition" && operation === "subscription";
+    },
+    wsLink as any,
+    httplink
+  );
+
+  const client = new ApolloClient({
+    link,
+    cache: new InMemoryCache({
+      typePolicies: {
+        Query: {
+          fields: {
+            GetMembers: {
+              merge(existing, incoming) {
+                return incoming;
+              },
+            },
+          },
+        },
+      },
+    }),
+  });
+
   return (
     <AuthContext.Provider value={{ user, setUser }}>
       <ApolloProvider client={client}>

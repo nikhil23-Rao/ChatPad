@@ -27,12 +27,12 @@ export const AppNavigator = () => {
       >
         <AppTab.Screen
           name="Chats"
-          options={{
+          options={({ navigation }) => ({
             title: "Your Chats",
             tabBarIcon: ({ color, size }) => (
               <AntDesign color={color} size={size} name="message1" />
             ),
-          }}
+          })}
           component={MessageStackNavigator}
         />
         <AppTab.Screen

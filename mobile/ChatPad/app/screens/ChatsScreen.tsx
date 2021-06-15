@@ -97,7 +97,7 @@ const ChatsScreen = ({ navigation }: IProps) => {
           {data &&
             data.SearchGroups.map((group: any) => {
               return (
-                <>
+                <React.Fragment key={group.id}>
                   <TouchableOpacity
                     key={group.id}
                     onPress={() =>
@@ -253,24 +253,24 @@ const ChatsScreen = ({ navigation }: IProps) => {
                               ? "(Left The Group)"
                               : group.last_message.alert &&
                                 group.last_message.body.includes("kicked")
-                              ? "(Kicked Member From Group)"
+                              ? "(Kicked Member)"
                               : group.last_message.alert &&
                                 !group.last_message.body.includes("kicked") &&
                                 !group.last_message.body.includes("added") &&
                                 !group.last_message.body.includes("left")
-                              ? "(Changed The Group Name)"
+                              ? "(Changed Group...)"
                               : group.last_message.body.includes("added") &&
                                 group.last_message.alert
-                              ? "(Added Member To Group)"
+                              ? "(Added Member)"
                               : group.last_message.body.length <= 13
                               ? group.last_message.body
-                              : `${group.last_message.body.substr(0, 15)}...`}
+                              : `${group.last_message.body.substr(0, 8)}...`}
                           </Text>
                         )}
                       </View>
                     </View>
                   </TouchableOpacity>
-                </>
+                </React.Fragment>
               );
             })}
         </View>

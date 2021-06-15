@@ -272,6 +272,13 @@ export const AddMembers = () => {
                       },
                     });
 
+                    await AddMembers({
+                      variables: {
+                        members: GetMembers(),
+                        groupid: window.location.href.substring(window.location.href.lastIndexOf('/') + 1),
+                      },
+                    });
+
                     await SendMessage({
                       variables: {
                         groupid: window.location.href.substring(window.location.href.lastIndexOf('/') + 1),

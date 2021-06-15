@@ -306,13 +306,11 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   }, [GroupNameData]);
 
   useEffect(() => {
-    setTimeout(() => {
-      const el = document.getElementById('chatDiv');
-      if (el) {
-        el.scrollTop = el.scrollHeight - el.clientHeight;
-      }
-    }, 800); // Load time
-  }, []);
+    const el = document.getElementById('chatDiv');
+    if (el) {
+      el.scrollTop = el.scrollHeight - el.clientHeight;
+    }
+  }, [typeof messageData, loading, searchLoading, onlineLoading, GroupNameLoading, messageLoading, groupSelected]);
 
   const updateReadBy = async () => {
     if (
@@ -413,13 +411,6 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   var day = days[new Date().getDay()];
 
   today = mm + '/' + dd + '/' + yyyy;
-
-  if (router.isFallback || loading)
-    return (
-      <div className={feedStyles.centered}>
-        <Spinner thickness="4px" speed="0.95s" emptyColor="gray.200" color="blue.500" size="xl" />
-      </div>
-    );
 
   return (
     <>
@@ -689,18 +680,6 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
               className={feedStyles.loadmorebtn}
               children={<EjectIcon style={{ width: '4vh', height: '4vh' }} />}
             ></IconButton>
-          )}
-          {loader && (
-            <div style={{ backgroundColor: darkMode ? '#000' : '#fff' }}>
-              <Spinner
-                thickness="4px"
-                speed="0.65s"
-                emptyColor="gray.200"
-                color="blue.500"
-                size="xl"
-                style={{ left: 1000, position: 'relative', top: 10 }}
-              />
-            </div>
           )}
 
           {groupSelected !== '' &&
@@ -1534,6 +1513,16 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
               </Drawer>
             ) : null}
 
+            {searchLoading && (
+              <Spinner
+                thickness="4px"
+                speed="0.65s"
+                emptyColor="gray.200"
+                color="blue.500"
+                size="xl"
+                style={{ left: 200, top: 200, position: 'relative' }}
+              />
+            )}
             {searchData &&
               searchData.SearchGroups.map((group) => {
                 if (group.dm) {
