@@ -137,7 +137,8 @@ const Me: React.FC<MeProps> = ({}) => {
                 </li>
                 <li
                   style={{ color: '#F56565', textDecoration: 'none' }}
-                  onClick={() => {
+                  onClick={async () => {
+                    await SwitchOnline({ variables: { authorid: user.id, value: false } });
                     setTab('logout');
                     signOut({ callbackUrl: '/login' });
                   }}

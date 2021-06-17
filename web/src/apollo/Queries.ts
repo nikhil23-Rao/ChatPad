@@ -144,6 +144,8 @@ export const LOAD_MORE = gql`
       image
       time
       date
+      read_by
+      alert
     }
   }
 `;

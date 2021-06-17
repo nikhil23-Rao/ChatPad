@@ -12,6 +12,7 @@ const wsLink = process.browser
         reconnect: true,
         timeout: 60000,
         lazy: true,
+        minTimeout: 60000,
       },
     })
   : null;

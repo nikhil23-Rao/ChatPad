@@ -108,7 +108,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   const [pageLoading, setPageLoading] = useState(true);
   const [messages, setMessages] = useState<any[]>([]);
   const [showEmoji, setShowEmoji] = useState(false);
-  const [limit, setLimit] = useState(9);
+  const [limit, setLimit] = useState(10);
   const [offset, setOffset] = useState(10);
   const router = useRouter();
   const [visible, setVisible] = useState(true);
@@ -116,6 +116,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   const [messageVal, setMessageVal] = useState('');
   const [session] = useSession();
   const chatRef = useRef<null | HTMLElement>();
+  const [screenHeight, setScreenHeight] = useState('');
   const [darkMode, setDarkMode] = useState(false);
   const [user, setUser] = useState<{
     username: string | null | undefined;
@@ -291,6 +292,20 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   }, [user, messageVal, messages]);
 
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      if (screen.width <= 1440 && messageVal.length <= 75) {
+        setScreenHeight('90vh');
+      } else if (screen.width > 1440 && messageVal.length <= 75) {
+        setScreenHeight('70vh');
+      } else if (screen.width <= 1440 && messageVal.length >= 75) {
+        setScreenHeight('79vh');
+      } else if (screen.width > 1440 && messageVal.length >= 75) {
+        setScreenHeight('60vh');
+      }
+    }
+  }, [typeof window, pageLoading, messageVal]);
+
+  useEffect(() => {
     if (user && typeof window !== 'undefined') {
       SwitchOnline({ variables: { authorid: user.id, value: true } });
       SetChatOn({
@@ -304,7 +319,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
 
   useEffect(() => {
     const el = document.getElementById('chatDiv');
-    if (el && !pageLoading) el.scrollTop = el.scrollHeight;
+    // if (el && !pageLoading) el.scrollTop = el.scrollHeight;
     searchDataRefetch();
   }, [messages, realtimeData, messageData, pageLoading]);
 
@@ -331,12 +346,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
     if (el && !pageLoading && document.visibilityState === 'visible') {
       el.scrollTop = el.scrollHeight - el.clientHeight;
     }
-    if (el && !pageLoading && el.scrollTop === 0) {
-      const btn = document.getElementById('loadmore');
-      console.log(btn);
-      btn?.click();
-    }
-  }, [typeof document, typeof window, typeof messageData, pageLoading]);
+  }, [typeof document, typeof window, typeof messageData, pageLoading, messages]);
 
   const updateReadBy = async () => {
     if (
@@ -363,6 +373,16 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
       console.log('SENT');
     }
   };
+
+  useEffect(() => {
+    const el = document.getElementById('chatDiv');
+    setInterval(() => {
+      if (el && !pageLoading && el.scrollTop <= 5) {
+        document.getElementById('loadmore')?.click();
+        el.scrollTop = 0;
+      }
+    }, 1000);
+  }, [pageLoading, typeof window]);
 
   useEffect(() => {
     setGroupSelected(currId);
@@ -392,9 +412,9 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
     }
 
     const el = document.getElementById('chatDiv');
-    // if (el && !pageLoading) {
-    //   el.scrollTop = el.scrollHeight - el.clientHeight;
-    // }
+    if (el && !pageLoading) {
+      el.scrollTop = el.scrollHeight - el.clientHeight;
+    }
 
     if (realtimeData && messages.includes(realtimeData.GetAllMessages[realtimeData.GetAllMessages.length - 1])) return;
     if (
@@ -678,21 +698,23 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
           style={{
             overflowY: 'auto',
             flexDirection: 'column',
-            height:
-              (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
-              (typeof window !== 'undefined' && window.screen.availWidth) < 1800
-                ? messageVal.length <= 75
-                  ? '90vh'
-                  : '77vh'
-                : messageVal.length <= 75
-                ? '69vh'
-                : '63vh', // Screen size monitor different height from laptop
+            height: screenHeight,
             overflowX: 'hidden',
             backgroundColor: darkMode ? '#000' : '#fff',
           }}
           id="chatDiv"
           ref={chatRef as any}
         >
+          {loader ? (
+            <Spinner
+              thickness="4px"
+              speed="0.65s"
+              emptyColor="gray.200"
+              color="blue.500"
+              size="xl"
+              style={{ left: 1000, top: 15, position: 'relative' }}
+            />
+          ) : null}
           {pageLoading ? (
             <Spinner
               thickness="4px"
@@ -704,10 +726,10 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
               style={{ marginLeft: 150, marginTop: -25 }}
             />
           ) : null}
-          {messages.length !== 0 && loadMoreData && loadMoreData.LoadMore.length !== 0 && !pageLoading && (
+          {messages.length !== 0 && loadMoreData && !pageLoading && (
             <IconButton
               onClick={() => {
-                if (!loadMoreData || loadMoreLoading) return setLoader(true);
+                setLoader(true);
                 setOffset(offset + 10);
                 const dataLoadMore = [...loadMoreData.LoadMore];
                 setMessages([...dataLoadMore.reverse(), ...messages]);
@@ -730,7 +752,9 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
             messageData &&
             user &&
             !pageLoading &&
-            messages.map((message, idx) => {
+            messages.map((message, idx, arr) => {
+              const prev = arr[idx - 1];
+              const next = arr[idx + 1];
               return (
                 <React.Fragment key={message.messageid}>
                   <div style={{ position: 'relative', top: 30 }}>
@@ -741,15 +765,34 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                         top: 75,
                       }}
                     >
-                      {message.author.id !== user.id && !message.alert ? (
+                      {(!next && message.author.id !== user.id && !message.alert) ||
+                      (prev &&
+                        next &&
+                        message.author.id !== user.id &&
+                        message.author.id === prev.author.id && // ENDS SEQUENCE
+                        message.author.id !== next.author.id) ||
+                      (prev &&
+                        next &&
+                        message.author.id !== user.id &&
+                        message.author.id !== prev.author.id && // MIDDLE OF SEQUENCE
+                        message.author.id !== next.author.id &&
+                        !message.alert) ? (
                         <img
                           style={{
                             width: 50,
                             height: 50,
                             borderRadius: 100,
                             left: 129,
-                            top: 8,
-                            position: 'relative',
+                            top:
+                              prev &&
+                              next &&
+                              message.author.id !== user.id &&
+                              message.author.id !== prev.author.id && // MIDDLE OF SEQUENCE
+                              message.author.id !== next.author.id &&
+                              !message.alert
+                                ? -44
+                                : -73,
+                            position: 'absolute',
                           }}
                           src={message.author.profile_picture}
                           alt=""
@@ -757,7 +800,21 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                       ) : null}
                     </div>
 
-                    {message.author.id !== user.id && !message.alert ? (
+                    {(prev &&
+                      next &&
+                      message.author.id !== user.id &&
+                      !message.alert &&
+                      !message.alert &&
+                      !prev.alert &&
+                      !next.alert &&
+                      message.author.id !== prev.author.id) ||
+                    (!prev &&
+                      next &&
+                      message.author.id !== user.id &&
+                      !message.alert &&
+                      !message.alert &&
+                      !next.alert && // STARTS SEQUENACE
+                      message.author.id === next.author.id) ? (
                       <p
                         style={{
                           color: darkMode ? '#ebeef0' : '#000',
@@ -786,8 +843,14 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                           : ' Now'}
                       </p>
                     ) : (
+                      prev &&
+                      next &&
+                      message.author.id === user.id &&
                       !message.alert &&
-                      message.author.id === user.id && (
+                      !message.alert &&
+                      !prev.alert &&
+                      !next.alert &&
+                      message.author.id !== prev.author.id && (
                         <p
                           style={{
                             color: darkMode ? '#ebeef0' : '#000',
@@ -796,13 +859,13 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                             left:
                               Math.round((Date.now() - message.time) / 60000) > 0 &&
                               Math.round((Date.now() - message.time) / 60000) < 60
-                                ? 1575
+                                ? 1560
                                 : Math.round((Date.now() - message.time) / 60000) >= 60 &&
                                   Math.round((Date.now() - message.time) / 60000) < 1440
-                                ? 1610
+                                ? 1585
                                 : Math.round((Date.now() - message.time) / 60000) > 1440
-                                ? 1535
-                                : 1625,
+                                ? 1500
+                                : 1595,
                             top: 10,
                             fontSize: 14,
                           }}
@@ -840,25 +903,63 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                           : ''
                       }
                       style={{
-                        marginBottom: message.author.id !== user.id ? -40 : -4,
+                        marginBottom:
+                          next &&
+                          prev &&
+                          !message.alert &&
+                          !prev.alert &&
+                          !next.alert &&
+                          message.author.id === prev.author.id && // ENDS SEQUENCE
+                          message.author.id !== next.author.id &&
+                          next.author.id !== user.id
+                            ? 100
+                            : -5,
                         marginLeft: !sidebarShown ? -100 : '',
                         color: message.author.id !== user.id && user.dark_theme === 'false' ? '' : '#fff',
+                        borderRadius: !next
+                          ? message.author.id === user.id
+                            ? '50px 0px 50px 50px'
+                            : '0px 50px 50px 50px'
+                          : !prev
+                          ? message.author.id === user.id
+                            ? '50px 50px 0px 50px'
+                            : '50px 50px 50px 0px'
+                          : prev && next
+                          ? !message.alert &&
+                            !prev.alert &&
+                            !next.alert &&
+                            message.author.id !== prev.author.id && // MIDDLE OF SEQUENCE
+                            message.author.id !== next.author.id
+                            ? message.author.id === user.id
+                              ? '4em 4em 4em 4em'
+                              : '4em 4em 4em 4em'
+                            : !prev.alert &&
+                              !next.alert &&
+                              message.author.id === prev.author.id && // MIDDLE OF SEQUENCE
+                              message.author.id === next.author.id
+                            ? message.author.id === user.id
+                              ? '2em 0em 0em 2em'
+                              : '0em 2em 2em 0em'
+                            : (!message.alert &&
+                                !prev.alert &&
+                                !next.alert &&
+                                message.author.id === prev.author.id && // ENDS SEQUENCE
+                                message.author.id !== next.author.id) ||
+                              !next
+                            ? message.author.id === user.id
+                              ? '50px 0px 50px 50px'
+                              : '0px 50px 50px 50px'
+                            : (!message.alert && !prev.alert && !next.alert && message.author.id !== prev.author.id) ||
+                              (!prev && // STARTS SEQUENACE
+                                message.author.id === next.author.id)
+                            ? message.author.id === user.id
+                              ? '50px 50px 0px 50px'
+                              : '50px 50px 50px 0px'
+                            : ''
+                          : '',
                       }}
                     >
-                      {message.image ? (
-                        <img
-                          style={{
-                            marginLeft: 5,
-                            marginTop: 10,
-                            fontSize: 20,
-                            width: 900,
-                            borderRadius: 50,
-                            height: '100%',
-                          }}
-                          src={message.body}
-                          className={feedStyles.text}
-                        />
-                      ) : message.alert ? (
+                      {message.alert ? (
                         <div
                           style={{
                             display: 'flex',
@@ -887,6 +988,19 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                             ? `You have ${message.body}`
                             : `${message.author.username} has ${message.body}`}
                         </div>
+                      ) : message.image ? (
+                        <img
+                          style={{
+                            marginLeft: 5,
+                            marginTop: 10,
+                            fontSize: 20,
+                            width: 900,
+                            borderRadius: 50,
+                            height: '100%',
+                          }}
+                          src={message.body}
+                          className={feedStyles.text}
+                        />
                       ) : isUrl(message.body) ? (
                         <p
                           style={{
@@ -1999,7 +2113,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                                 borderRadius: 100,
                                 width: 43,
                                 position: 'relative',
-                                bottom: 45,
+                                bottom: screenHeight === '70vh' ? 76 : screenHeight === '60vh' ? 15 : 45,
                                 opacity:
                                   (member.online && member.chaton === groupSelected) ||
                                   (member.online && member.chaton === null)
@@ -2010,7 +2124,14 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                             />
                             {member.typing &&
                             member.chaton === window.location.href.substr(window.location.href.lastIndexOf('/') + 1) ? (
-                              <div className="chat-bubble" style={{ marginLeft: 46, top: -84, position: 'relative' }}>
+                              <div
+                                className="chat-bubble"
+                                style={{
+                                  marginLeft: 46,
+                                  top: screenHeight === '70vh' ? -114 : screenHeight === '60vh' ? -53 : -84,
+                                  position: 'relative',
+                                }}
+                              >
                                 <div className="typing">
                                   <div className="dot"></div>
                                   <div className="dot"></div>
@@ -2035,7 +2156,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                       borderRadius: 10,
                       backgroundColor: darkMode ? '#202327' : '#F4F4F4',
                       minHeight: messageVal.length <= 75 ? 10 : 140,
-                      bottom: 10,
+                      bottom: screenHeight === '70vh' ? 40 : screenHeight === '60vh' ? -20 : 10,
                       lineHeight: 1.8,
                       position: 'absolute',
                     }}
@@ -2127,7 +2248,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                 {!pageLoading && (
                   <InputRightElement
                     style={{
-                      top: 2,
+                      top: screenHeight === '70vh' ? -27 : 2,
                       backgroundColor: 'transparent',
                       right: !sidebarShown ? 115 : 24,
                       cursor: 'pointer',
