@@ -729,6 +729,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
           {messages.length !== 0 && loadMoreData && !pageLoading && (
             <IconButton
               onClick={() => {
+                if (loadMoreData && loadMoreData.LoadMore.length === 0) return;
                 setLoader(true);
                 setOffset(offset + 10);
                 const dataLoadMore = [...loadMoreData.LoadMore];
@@ -776,6 +777,11 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                         message.author.id !== user.id &&
                         message.author.id !== prev.author.id && // MIDDLE OF SEQUENCE
                         message.author.id !== next.author.id &&
+                        !message.alert) ||
+                      (!prev &&
+                        next &&
+                        message.author.id !== user.id &&
+                        message.author.id !== next.author.id &&
                         !message.alert) ? (
                         <img
                           style={{
@@ -783,15 +789,16 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                             height: 50,
                             borderRadius: 100,
                             left: 129,
-                            top:
-                              prev &&
-                              next &&
-                              message.author.id !== user.id &&
-                              message.author.id !== prev.author.id && // MIDDLE OF SEQUENCE
-                              message.author.id !== next.author.id &&
-                              !message.alert
-                                ? -44
-                                : -73,
+                            top: !prev
+                              ? -43
+                              : prev &&
+                                next &&
+                                message.author.id !== user.id &&
+                                message.author.id !== prev.author.id && // MIDDLE OF SEQUENCE
+                                message.author.id !== next.author.id &&
+                                !message.alert
+                              ? -44
+                              : -73,
                             position: 'absolute',
                           }}
                           src={message.author.profile_picture}
@@ -814,7 +821,12 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                       !message.alert &&
                       !message.alert &&
                       !next.alert && // STARTS SEQUENACE
-                      message.author.id === next.author.id) ? (
+                      message.author.id === next.author.id) ||
+                    (!prev &&
+                      next &&
+                      message.author.id !== user.id &&
+                      message.author.id !== next.author.id &&
+                      !message.alert) ? (
                       <p
                         style={{
                           color: darkMode ? '#ebeef0' : '#000',
@@ -843,51 +855,56 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                           : ' Now'}
                       </p>
                     ) : (
-                      prev &&
-                      next &&
-                      message.author.id === user.id &&
-                      !message.alert &&
-                      !message.alert &&
-                      !prev.alert &&
-                      !next.alert &&
-                      message.author.id !== prev.author.id && (
-                        <p
-                          style={{
-                            color: darkMode ? '#ebeef0' : '#000',
-                            position: 'relative',
-                            fontFamily: 'Lato',
-                            left:
-                              Math.round((Date.now() - message.time) / 60000) > 0 &&
-                              Math.round((Date.now() - message.time) / 60000) < 60
-                                ? 1560
-                                : Math.round((Date.now() - message.time) / 60000) >= 60 &&
-                                  Math.round((Date.now() - message.time) / 60000) < 1440
-                                ? 1585
-                                : Math.round((Date.now() - message.time) / 60000) > 1440
-                                ? 1500
-                                : 1595,
-                            top: 10,
-                            fontSize: 14,
-                          }}
-                        >
-                          You •{' '}
-                          {Math.round((Date.now() - message.time) / 60000) >= 1 &&
-                          Math.round((Date.now() - message.time) / 60000) < 2
-                            ? Math.round((Date.now() - message.time) / 60000) + ' minute ago'
-                            : Math.round((Date.now() - message.time) / 60000) > 0 &&
-                              Math.round((Date.now() - message.time) / 60000) < 60
-                            ? Math.round((Date.now() - message.time) / 60000) + ' minutes ago'
-                            : Math.round((Date.now() - message.time) / 60000) >= 60 &&
-                              Math.round((Date.now() - message.time) / 60000) < 1440
-                            ? message.date[1]
-                            : Math.round((Date.now() - message.time) / 60000) > 1440 &&
-                              Math.round((Date.now() - message.time) / 60000) < 10080
-                            ? message.date[2] + ', ' + message.date[1]
-                            : Math.round((Date.now() - message.time) / 60000) > 1440
-                            ? message.date[1] + ' ' + message.date[0]
-                            : ' Now'}
-                        </p>
-                      )
+                      (prev &&
+                        next &&
+                        message.author.id === user.id &&
+                        !message.alert &&
+                        !message.alert &&
+                        !prev.alert &&
+                        !next.alert &&
+                        message.author.id !== prev.author.id) ||
+                      (!prev &&
+                        next &&
+                        message.author.id === user.id &&
+                        message.author.id !== next.author.id &&
+                        !message.alert && (
+                          <p
+                            style={{
+                              color: darkMode ? '#ebeef0' : '#000',
+                              position: 'relative',
+                              fontFamily: 'Lato',
+                              left:
+                                Math.round((Date.now() - message.time) / 60000) > 0 &&
+                                Math.round((Date.now() - message.time) / 60000) < 60
+                                  ? 1560
+                                  : Math.round((Date.now() - message.time) / 60000) >= 60 &&
+                                    Math.round((Date.now() - message.time) / 60000) < 1440
+                                  ? 1585
+                                  : Math.round((Date.now() - message.time) / 60000) > 1440
+                                  ? 1500
+                                  : 1595,
+                              top: 10,
+                              fontSize: 14,
+                            }}
+                          >
+                            You •{' '}
+                            {Math.round((Date.now() - message.time) / 60000) >= 1 &&
+                            Math.round((Date.now() - message.time) / 60000) < 2
+                              ? Math.round((Date.now() - message.time) / 60000) + ' minute ago'
+                              : Math.round((Date.now() - message.time) / 60000) > 0 &&
+                                Math.round((Date.now() - message.time) / 60000) < 60
+                              ? Math.round((Date.now() - message.time) / 60000) + ' minutes ago'
+                              : Math.round((Date.now() - message.time) / 60000) >= 60 &&
+                                Math.round((Date.now() - message.time) / 60000) < 1440
+                              ? message.date[1]
+                              : Math.round((Date.now() - message.time) / 60000) > 1440 &&
+                                Math.round((Date.now() - message.time) / 60000) < 10080
+                              ? message.date[2] + ', ' + message.date[1]
+                              : Math.round((Date.now() - message.time) / 60000) > 1440
+                              ? message.date[1] + ' ' + message.date[0]
+                              : ' Now'}
+                          </p>
+                        ))
                     )}
 
                     <div
