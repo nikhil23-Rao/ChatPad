@@ -24,10 +24,8 @@ export const GET_ALL_MESSAGES = gql`
 export const GET_USERS_TYPING = gql`
   subscription GetUsersTyping {
     GetUsersTyping {
-      username
       typing
-      email
-      dark_theme
+      profile_picture
       online
       id
       chaton

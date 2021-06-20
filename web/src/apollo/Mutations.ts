@@ -83,8 +83,8 @@ export const SWITCH_ONLINE = gql`
 `;
 
 export const SET_CHAT_ON = gql`
-  mutation SetChatOn($authorid: String, $groupid: String) {
-    SetChatOn(authorid: $authorid, groupid: $groupid)
+  mutation SetChatOn($authorid: String, $groupid: String, $currentGroupid: String) {
+    SetChatOn(authorid: $authorid, groupid: $groupid, currentGroupid: $currentGroupid)
   }
 `;
 

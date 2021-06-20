@@ -41,6 +41,7 @@ import {
   GET_GROUP_NAME,
   GET_INITIAL_MESSAGES,
   GET_MEMBERS,
+  GET_NOT_READ,
   GET_USER_ID,
   LOAD_MORE,
   SEARCH_GROUPS,
@@ -108,7 +109,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   const [pageLoading, setPageLoading] = useState(true);
   const [messages, setMessages] = useState<any[]>([]);
   const [showEmoji, setShowEmoji] = useState(false);
-  const [limit, setLimit] = useState(10);
+  const [limit, setLimit] = useState(100);
   const [offset, setOffset] = useState(10);
   const router = useRouter();
   const [visible, setVisible] = useState(true);
@@ -118,6 +119,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   const chatRef = useRef<null | HTMLElement>();
   const [screenHeight, setScreenHeight] = useState('');
   const [darkMode, setDarkMode] = useState(false);
+  const [membersOfGroup, setMembersOfGroup] = useState([]);
   const [user, setUser] = useState<{
     username: string | null | undefined;
     email: string | null | undefined;
@@ -148,13 +150,13 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
       };
       setDarkMode(currentUser.dark_theme === 'true' ? true : false);
       setUser(currentUser);
-      SwitchOnline({ variables: { authorid: currentUser.id, value: true } });
-      SetChatOn({ variables: { authorid: currentUser.id, value: groupSelected } });
+      SwitchOnline({ variables: { authorid: currentUser.id, value: true, groupid: groupSelected } });
+      SetChatOn({ variables: { authorid: currentUser.id, groupid: groupSelected, currentGroupid: groupSelected } });
 
       window.addEventListener('beforeunload', function (e) {
-        SwitchOnline({ variables: { authorid: currentUser.id, value: false } });
-        SwitchOnline({ variables: { authorid: currentUser.id, value: false } });
-        for (var i = 0; i < 10000; i++) {}
+        SwitchOnline({ variables: { authorid: currentUser.id, value: false, groupid: groupSelected } });
+        SwitchOnline({ variables: { authorid: currentUser.id, value: false, groupid: groupSelected } });
+        for (var i = 0; i < 100000; i++) {}
         return undefined;
       });
     }
@@ -208,18 +210,17 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   });
   const [SendMessage] = useMutation(SEND_MESSAGE);
   const { data: realtimeData } = useSubscription(GET_ALL_MESSAGES);
-  const { data: typingData } = useSubscription(GET_USERS_TYPING);
+  const { data: GetMembers } = useSubscription(GET_USERS_TYPING);
   const { data: GroupNameData, loading: GroupNameLoading, refetch: groupNameRefetch } = useQuery(GET_GROUP_NAME, {
     variables: { groupid: groupSelected },
   });
-  const { data: onlineData, loading: onlineLoading, refetch: onlineRefetch, error: onlineError } = useQuery(
-    GET_MEMBERS,
-    {
-      variables: {
-        groupid: groupSelected,
-      },
+  const { data: unreadData, loading: unreadLoading, refetch: unreadRefetch } = useQuery(GET_NOT_READ, {
+    variables: {
+      authorid: user?.id,
+      groupid: groupSelected,
     },
-  );
+  });
+
   const [AddReadBy] = useMutation(ADD_READ_BY);
   const [SwitchOnline] = useMutation(SWITCH_ONLINE);
   const [SetChatOn] = useMutation(SET_CHAT_ON);
@@ -249,10 +250,31 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   }, [pageLoading, typeof window]);
 
   useEffect(() => {
-    if (onlineError) {
-      window.location.href = '/feed';
-    }
-  }, [onlineError]);
+    window.addEventListener('visibilitychange', () => {
+      if (user) {
+        if (document.hidden === true) {
+          SetChatOn({
+            variables: {
+              authorid: user?.id,
+              groupid: '',
+              currentGroupid: groupSelected,
+            },
+          });
+          SwitchOnline({ variables: { authorid: user?.id, value: false, groupid: groupSelected } });
+        }
+        if (document.hidden === false) {
+          SetChatOn({
+            variables: {
+              authorid: user?.id,
+              groupid: groupSelected,
+              currentGroupid: groupSelected,
+            },
+          });
+          SwitchOnline({ variables: { authorid: user?.id, value: true, groupid: groupSelected } });
+        }
+      }
+    });
+  }, [user, typeof window]);
 
   useEffect(() => {
     if (typeof GroupNameData !== 'undefined') {
@@ -261,35 +283,37 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   }, [typeof GroupNameData]);
 
   useEffect(() => {
-    if (messageVal.replace(/\s/g, '').length && user) {
-      try {
-        SetUserTyping({
-          variables: {
-            authorid: user.id,
-            groupid: groupSelected,
-            value: true,
-          },
-        });
-        onlineRefetch();
-      } catch (err) {
-        window.location.href = '/feed';
+    if (messageVal.length > 0 && user) {
+      SetUserTyping({
+        variables: {
+          authorid: user.id,
+          groupid: groupSelected,
+          value: true,
+        },
+      });
+    }
+    if (messageVal.length <= 0 && user) {
+      SetUserTyping({
+        variables: {
+          authorid: user.id,
+          groupid: groupSelected,
+          value: false,
+        },
+      });
+    }
+  }, [user, messageVal, messages, messageVal.length]);
+
+  useEffect(() => {
+    if (typeof GetMembers !== 'undefined') {
+      if (GetMembers.GetUsersTyping[GetMembers.GetUsersTyping.length - 1].id === groupSelected) {
+        setMembersOfGroup(GetMembers.GetUsersTyping);
       }
     }
-    if (!messageVal.replace(/\s/g, '').length && user) {
-      try {
-        SetUserTyping({
-          variables: {
-            authorid: user.id,
-            groupid: groupSelected,
-            value: false,
-          },
-        });
-        onlineRefetch();
-      } catch (err) {
-        window.location.href = '/feed';
-      }
-    }
-  }, [user, messageVal, messages]);
+  }, [GetMembers]);
+
+  useEffect(() => {
+    console.log('MEMBERS OF GROUP', membersOfGroup);
+  }, [membersOfGroup]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -307,11 +331,12 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
 
   useEffect(() => {
     if (user && typeof window !== 'undefined') {
-      SwitchOnline({ variables: { authorid: user.id, value: true } });
+      SwitchOnline({ variables: { authorid: user.id, value: true, groupid: groupSelected } });
       SetChatOn({
         variables: {
           authorid: user.id,
           groupid: window.location.href.substr(window.location.href.lastIndexOf('/') + 1),
+          currentGroupid: groupSelected,
         },
       });
     }
@@ -319,7 +344,6 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
 
   useEffect(() => {
     const el = document.getElementById('chatDiv');
-    // if (el && !pageLoading) el.scrollTop = el.scrollHeight;
     searchDataRefetch();
   }, [messages, realtimeData, messageData, pageLoading]);
 
@@ -332,9 +356,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
 
   useEffect(() => {
     if (GroupNameData && user) {
-      console.log('HERE');
       const arr = GroupNameData.GetGroupName.members.filter((member) => member.id === user?.id);
-      console.log('ARR', arr);
       if (arr.length === 0) {
         window.location.href = '/feed';
       }
@@ -343,34 +365,30 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
 
   useEffect(() => {
     const el = document.getElementById('chatDiv');
-    if (el && !pageLoading && document.visibilityState === 'visible') {
+    const breakpoint = document.getElementById('breakpoint');
+    if (breakpoint && el) {
+      const topPos = breakpoint?.offsetTop - 310;
+      el.scrollTop = topPos;
+    }
+    if (el && !breakpoint) {
       el.scrollTop = el.scrollHeight - el.clientHeight;
     }
-  }, [typeof document, typeof window, typeof messageData, pageLoading, messages]);
+  }, [typeof document, typeof window, typeof messageData, pageLoading, messages, realtimeData]);
 
   const updateReadBy = async () => {
-    if (
-      user &&
-      messages.length > 0 &&
-      messages[messages.length - 1].author.id !== user.id &&
-      messages[messages.length - 1].read_by.includes(user.id)
-    )
-      return console.log('NOT SENDING REQUEST');
-    if (
-      document.visibilityState === 'visible' &&
-      user &&
-      messages.length > 0 &&
-      messages[messages.length - 1].author.id !== user.id
-    ) {
-      console.log('SENDING');
-      await AddReadBy({
-        variables: {
-          member: user.id,
-          messageid: messages[messages.length - 1].messageid,
-        },
-      });
+    if (document.visibilityState === 'visible' && user && messages.length > 0) {
+      for (const message of messages) {
+        if (message.author.id !== user.id && !message.read_by.includes(user.id)) {
+          console.log('adding readby');
+          await AddReadBy({
+            variables: {
+              member: user.id,
+              messageid: message.messageid,
+            },
+          });
+        }
+      }
       await searchDataRefetch({ authorid: user.id, query });
-      console.log('SENT');
     }
   };
 
@@ -379,7 +397,6 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
     setInterval(() => {
       if (el && !pageLoading && el.scrollTop <= 5) {
         document.getElementById('loadmore')?.click();
-        el.scrollTop = 0;
       }
     }, 1000);
   }, [pageLoading, typeof window]);
@@ -410,12 +427,6 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
     if (window.screen.availHeight < 863 || window.screen.availWidth < 1800) {
       document.body.style.zoom = '80%';
     }
-
-    const el = document.getElementById('chatDiv');
-    if (el && !pageLoading) {
-      el.scrollTop = el.scrollHeight - el.clientHeight;
-    }
-
     if (realtimeData && messages.includes(realtimeData.GetAllMessages[realtimeData.GetAllMessages.length - 1])) return;
     if (
       document.visibilityState === 'hidden' &&
@@ -423,34 +434,31 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
       realtimeData.GetAllMessages[realtimeData.GetAllMessages.length - 1].author.id !== user?.id &&
       !messages.includes(realtimeData.GetAllMessages[realtimeData.GetAllMessages.length - 1])
     ) {
+      SwitchOnline({ variables: { authorid: user?.id, value: false, groupid: groupSelected } });
+      SetChatOn({
+        variables: { authorid: user?.id, groupid: '', currentGroupid: groupSelected },
+      });
       playSound();
     }
 
     if (
-      realtimeData &&
-      realtimeData.GetAllMessages[realtimeData.GetAllMessages.length - 1].author.id !== user?.id &&
-      realtimeData.GetAllMessages[realtimeData.GetAllMessages.length - 1].groupid === groupSelected
+      (realtimeData &&
+        realtimeData.GetAllMessages[realtimeData.GetAllMessages.length - 1].author.id !== user?.id &&
+        realtimeData.GetAllMessages[realtimeData.GetAllMessages.length - 1].groupid === groupSelected) ||
+      (realtimeData &&
+        realtimeData.GetAllMessages[realtimeData.GetAllMessages.length - 1].alert &&
+        realtimeData.GetAllMessages[realtimeData.GetAllMessages.length - 1].body.includes('added'))
     ) {
-      setMessages([...messages, realtimeData.GetAllMessages[realtimeData.GetAllMessages.length - 1]]);
+      setMessages((oldMessages) => [
+        ...oldMessages,
+        realtimeData.GetAllMessages[realtimeData.GetAllMessages.length - 1],
+      ]);
     }
-
-    setInterval(() => {
-      if (document.visibilityState === 'hidden' && user) {
-        SetChatOn({ variables: { groupid: '', authorid: user.id } });
-        onlineRefetch({ groupid: groupSelected });
-        groupNameRefetch();
-      }
-      if (document.visibilityState !== 'hidden' && user) {
-        SetChatOn({ variables: { groupid: groupSelected, authorid: user.id } });
-        onlineRefetch({ groupid: groupSelected });
-        groupNameRefetch();
-      }
-    }, 5000);
-  }, [session, messageData, realtimeData, user?.dark_theme, groupSelected, pageLoading]);
+  }, [session, messageData, realtimeData, user?.dark_theme, groupSelected]);
 
   var today: any = new Date();
   var dd = String(today.getDate()).padStart(2, '0');
-  var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+  var mm = String(today.getMonth() + 1).padStart(2, '0');
   var yyyy = today.getFullYear();
   var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
@@ -729,12 +737,14 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
           {messages.length !== 0 && loadMoreData && !pageLoading && (
             <IconButton
               onClick={() => {
+                const el = document.getElementById('chatDiv');
                 if (loadMoreData && loadMoreData.LoadMore.length === 0) return;
                 setLoader(true);
                 setOffset(offset + 10);
                 const dataLoadMore = [...loadMoreData.LoadMore];
                 setMessages([...dataLoadMore.reverse(), ...messages]);
                 setLoader(false);
+                if (el) el.scrollTop = 100;
               }}
               style={{
                 color: '#fff',
@@ -753,59 +763,85 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
             messageData &&
             user &&
             !pageLoading &&
+            unreadData &&
             messages.map((message, idx, arr) => {
               const prev = arr[idx - 1];
               const next = arr[idx + 1];
               return (
-                <React.Fragment key={message.messageid}>
+                <React.Fragment key={idx}>
+                  {/* {console.log(JSON.parse(unreadData.GetNotRead[1]).messageid)} */}
+                  {unreadData && unreadData.GetNotRead && !realtimeData ? (
+                    parseInt(unreadData.GetNotRead[0]) > 0 &&
+                    message.messageid === JSON.parse(unreadData.GetNotRead[1]).messageid ? (
+                      <div
+                        className="unreadcontainer"
+                        style={{ top: 35, position: 'relative', marginTop: 50, marginBottom: 50 }}
+                        id="breakpoint"
+                      >
+                        <div className="unreadline">&nbsp;</div>
+                        <div className="unreadtext">
+                          {parseInt(unreadData.GetNotRead[0]) > 1
+                            ? parseInt(unreadData.GetNotRead[0]) + ' new messages'
+                            : parseInt(unreadData.GetNotRead[0]) + ' new message'}
+                        </div>
+                        <div className="unreadline">&nbsp;</div>
+                      </div>
+                    ) : null
+                  ) : null}
                   <div style={{ position: 'relative', top: 30 }}>
-                    <div
-                      style={{
-                        position: 'relative',
-                        left: 372,
-                        top: 75,
-                      }}
-                    >
-                      {(!next && message.author.id !== user.id && !message.alert) ||
-                      (prev &&
-                        next &&
-                        message.author.id !== user.id &&
-                        message.author.id === prev.author.id && // ENDS SEQUENCE
-                        message.author.id !== next.author.id) ||
-                      (prev &&
-                        next &&
-                        message.author.id !== user.id &&
-                        message.author.id !== prev.author.id && // MIDDLE OF SEQUENCE
-                        message.author.id !== next.author.id &&
-                        !message.alert) ||
-                      (!prev &&
-                        next &&
-                        message.author.id !== user.id &&
-                        message.author.id !== next.author.id &&
-                        !message.alert) ? (
-                        <img
-                          style={{
-                            width: 50,
-                            height: 50,
-                            borderRadius: 100,
-                            left: 129,
-                            top: !prev
-                              ? -43
-                              : prev &&
-                                next &&
-                                message.author.id !== user.id &&
-                                message.author.id !== prev.author.id && // MIDDLE OF SEQUENCE
-                                message.author.id !== next.author.id &&
-                                !message.alert
-                              ? -44
-                              : -73,
-                            position: 'absolute',
-                          }}
-                          src={message.author.profile_picture}
-                          alt=""
-                        />
-                      ) : null}
-                    </div>
+                    {!message.alert ? (
+                      <div
+                        style={{
+                          position: 'relative',
+                          left: 372,
+                          top: 75,
+                        }}
+                      >
+                        {(next && next.alert && next.author.id !== user.id) ||
+                        (!next && message.author.id !== user.id && !message.alert) ||
+                        (prev &&
+                          next &&
+                          message.author.id !== user.id &&
+                          message.author.id === prev.author.id && // ENDS SEQUENCE
+                          message.author.id !== next.author.id) ||
+                        (prev &&
+                          next &&
+                          message.author.id !== user.id &&
+                          message.author.id !== prev.author.id && // MIDDLE OF SEQUENCE
+                          message.author.id !== next.author.id &&
+                          !message.alert) ||
+                        (!prev &&
+                          next &&
+                          message.author.id !== user.id &&
+                          message.author.id !== next.author.id &&
+                          !message.alert) ? (
+                          <img
+                            style={{
+                              width: 50,
+                              height: 50,
+                              borderRadius: 100,
+                              left: 129,
+                              top:
+                                prev && prev.alert
+                                  ? -74
+                                  : !prev
+                                  ? -43
+                                  : prev &&
+                                    next &&
+                                    message.author.id !== user.id &&
+                                    message.author.id !== prev.author.id && // MIDDLE OF SEQUENCE
+                                    message.author.id !== next.author.id &&
+                                    !message.alert
+                                  ? -44
+                                  : -73,
+                              position: 'absolute',
+                            }}
+                            src={message.author.profile_picture}
+                            alt=""
+                          />
+                        ) : null}
+                      </div>
+                    ) : null}
 
                     {(prev &&
                       next &&
@@ -837,74 +873,72 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                           fontFamily: 'Lato',
                         }}
                       >
-                        {message.author.username} •{' '}
-                        {Math.round((Date.now() - message.time) / 60000) >= 1 &&
-                        Math.round((Date.now() - message.time) / 60000) < 2
-                          ? Math.round((Date.now() - message.time) / 60000) + ' minute ago'
-                          : Math.round((Date.now() - message.time) / 60000) > 0 &&
-                            Math.round((Date.now() - message.time) / 60000) < 60
-                          ? Math.round((Date.now() - message.time) / 60000) + ' minutes ago'
-                          : Math.round((Date.now() - message.time) / 60000) > 60 &&
-                            Math.round((Date.now() - message.time) / 60000) < 1440
-                          ? message.date[1]
-                          : Math.round((Date.now() - message.time) / 60000) > 1440 &&
-                            Math.round((Date.now() - message.time) / 60000) < 10080
-                          ? message.date[2] + ', ' + message.date[1]
-                          : Math.round((Date.now() - message.time) / 60000) > 1440
-                          ? message.date[1] + ' ' + message.date[0]
+                        {next.author.username} •{' '}
+                        {Math.round((Date.now() - next.time) / 60000) >= 1 &&
+                        Math.round((Date.now() - next.time) / 60000) < 2
+                          ? Math.round((Date.now() - next.time) / 60000) + ' minute ago'
+                          : Math.round((Date.now() - next.time) / 60000) > 0 &&
+                            Math.round((Date.now() - next.time) / 60000) < 60
+                          ? Math.round((Date.now() - next.time) / 60000) + ' minutes ago'
+                          : Math.round((Date.now() - next.time) / 60000) > 60 &&
+                            Math.round((Date.now() - next.time) / 60000) < 1440
+                          ? next.date[1]
+                          : Math.round((Date.now() - next.time) / 60000) > 1440 &&
+                            Math.round((Date.now() - next.time) / 60000) < 10080
+                          ? next.date[2] + ', ' + next.date[1]
+                          : Math.round((Date.now() - next.time) / 60000) > 1440
+                          ? next.date[1] + ' ' + next.date[0]
                           : ' Now'}
                       </p>
                     ) : (
-                      (prev &&
+                      ((prev &&
                         next &&
                         message.author.id === user.id &&
                         !message.alert &&
                         !message.alert &&
-                        !prev.alert &&
-                        !next.alert &&
                         message.author.id !== prev.author.id) ||
-                      (!prev &&
-                        next &&
-                        message.author.id === user.id &&
-                        message.author.id !== next.author.id &&
-                        !message.alert && (
-                          <p
-                            style={{
-                              color: darkMode ? '#ebeef0' : '#000',
-                              position: 'relative',
-                              fontFamily: 'Lato',
-                              left:
-                                Math.round((Date.now() - message.time) / 60000) > 0 &&
-                                Math.round((Date.now() - message.time) / 60000) < 60
-                                  ? 1560
-                                  : Math.round((Date.now() - message.time) / 60000) >= 60 &&
-                                    Math.round((Date.now() - message.time) / 60000) < 1440
-                                  ? 1585
-                                  : Math.round((Date.now() - message.time) / 60000) > 1440
-                                  ? 1500
-                                  : 1595,
-                              top: 10,
-                              fontSize: 14,
-                            }}
-                          >
-                            You •{' '}
-                            {Math.round((Date.now() - message.time) / 60000) >= 1 &&
-                            Math.round((Date.now() - message.time) / 60000) < 2
-                              ? Math.round((Date.now() - message.time) / 60000) + ' minute ago'
-                              : Math.round((Date.now() - message.time) / 60000) > 0 &&
-                                Math.round((Date.now() - message.time) / 60000) < 60
-                              ? Math.round((Date.now() - message.time) / 60000) + ' minutes ago'
-                              : Math.round((Date.now() - message.time) / 60000) >= 60 &&
-                                Math.round((Date.now() - message.time) / 60000) < 1440
-                              ? message.date[1]
-                              : Math.round((Date.now() - message.time) / 60000) > 1440 &&
-                                Math.round((Date.now() - message.time) / 60000) < 10080
-                              ? message.date[2] + ', ' + message.date[1]
-                              : Math.round((Date.now() - message.time) / 60000) > 1440
-                              ? message.date[1] + ' ' + message.date[0]
-                              : ' Now'}
-                          </p>
-                        ))
+                        (!prev &&
+                          next &&
+                          message.author.id === user.id &&
+                          message.author.id !== next.author.id &&
+                          !message.alert)) && (
+                        <p
+                          style={{
+                            color: darkMode ? '#ebeef0' : '#000',
+                            position: 'relative',
+                            fontFamily: 'Lato',
+                            left:
+                              Math.round((Date.now() - next.time) / 60000) > 0 &&
+                              Math.round((Date.now() - next.time) / 60000) < 60
+                                ? 1560
+                                : Math.round((Date.now() - next.time) / 60000) >= 60 &&
+                                  Math.round((Date.now() - next.time) / 60000) < 1440
+                                ? 1585
+                                : Math.round((Date.now() - next.time) / 60000) > 1440
+                                ? 1500
+                                : 1595,
+                            top: 10,
+                            fontSize: 14,
+                          }}
+                        >
+                          You •{' '}
+                          {Math.round((Date.now() - next.time) / 60000) >= 1 &&
+                          Math.round((Date.now() - next.time) / 60000) < 2
+                            ? Math.round((Date.now() - next.time) / 60000) + ' minute ago'
+                            : Math.round((Date.now() - next.time) / 60000) > 0 &&
+                              Math.round((Date.now() - next.time) / 60000) < 60
+                            ? Math.round((Date.now() - next.time) / 60000) + ' minutes ago'
+                            : Math.round((Date.now() - next.time) / 60000) >= 60 &&
+                              Math.round((Date.now() - next.time) / 60000) < 1440
+                            ? next.date[1]
+                            : Math.round((Date.now() - next.time) / 60000) > 1440 &&
+                              Math.round((Date.now() - next.time) / 60000) < 10080
+                            ? next.date[2] + ', ' + next.date[1]
+                            : Math.round((Date.now() - next.time) / 60000) > 1440
+                            ? next.date[1] + ' ' + next.date[0]
+                            : ' Now'}
+                        </p>
+                      )
                     )}
 
                     <div
@@ -942,11 +976,12 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                             ? '50px 50px 0px 50px'
                             : '50px 50px 50px 0px'
                           : prev && next
-                          ? !message.alert &&
-                            !prev.alert &&
-                            !next.alert &&
-                            message.author.id !== prev.author.id && // MIDDLE OF SEQUENCE
-                            message.author.id !== next.author.id
+                          ? (!message.alert &&
+                              !prev.alert &&
+                              !next.alert &&
+                              message.author.id !== prev.author.id && // MIDDLE OF SEQUENCE
+                              message.author.id !== next.author.id) ||
+                            (next.alert && prev.alert)
                             ? message.author.id === user.id
                               ? '4em 4em 4em 4em'
                               : '4em 4em 4em 4em'
@@ -959,16 +994,18 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                               : '0em 2em 2em 0em'
                             : (!message.alert &&
                                 !prev.alert &&
-                                !next.alert &&
                                 message.author.id === prev.author.id && // ENDS SEQUENCE
                                 message.author.id !== next.author.id) ||
+                              next.alert ||
                               !next
                             ? message.author.id === user.id
                               ? '50px 0px 50px 50px'
                               : '0px 50px 50px 50px'
                             : (!message.alert && !prev.alert && !next.alert && message.author.id !== prev.author.id) ||
                               (!prev && // STARTS SEQUENACE
-                                message.author.id === next.author.id)
+                                message.author.id === next.author.id) ||
+                              (next && prev.alert && next.author.id === message.author.id) ||
+                              !prev
                             ? message.author.id === user.id
                               ? '50px 50px 0px 50px'
                               : '50px 50px 50px 0px'
@@ -1380,7 +1417,14 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                   <Button
                     colorScheme="red"
                     onClick={async () => {
-                      await KickMembers({ variables: { memberid: user?.id, groupid: groupSelected } });
+                      try {
+                        await KickMembers({ variables: { memberid: user?.id, groupid: groupSelected } });
+                        await KickMembers({ variables: { memberid: user?.id, groupid: groupSelected } });
+                        await KickMembers({ variables: { memberid: user?.id, groupid: groupSelected } });
+                        await KickMembers({ variables: { memberid: user?.id, groupid: groupSelected } });
+                      } catch (err) {
+                        console.log(err);
+                      }
                       await SendMessage({
                         variables: {
                           groupid: groupSelected,
@@ -1717,24 +1761,13 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                       onClick={(e: any) => {
                         e.preventDefault();
                         delete e['returnValue'];
-                        // setTimeout(() => {
-                        //   setMessageLoader(true);
-                        //   window.history.pushState('', '', `/chat/${group.id}`);
-                        //   const url = window.location.href;
-                        //   const id = url.substring(url.lastIndexOf('/') + 1);
-                        //   setGroupSelected(id);
-                        //   GetInitalMessagesRefetch({ groupid: id, offset: 0, limit });
-                        //   onlineRefetch({ groupid: id });
-                        // }, 100);
+
                         window.addEventListener('beforeunload', (e) => {
                           e.preventDefault();
                           delete e['returnValue'];
                         });
                         window.history.pushState('', '', `/chat/${group.id}`);
                         window.location.reload(true);
-                        // setTimeout(() => {
-                        //   setMessageLoader(false);
-                        // }, 1000);
                       }}
                     >
                       {user &&
@@ -1822,9 +1855,9 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                                 ? '(Changed The Group Name)'
                                 : group.last_message.body.includes('added') && group.last_message.alert
                                 ? '(Added Member To Group)'
-                                : group.last_message.body.length <= 31
+                                : group.last_message.body.length <= 18
                                 ? group.last_message.body
-                                : `${group.last_message.body.substr(0, 28)}...`}
+                                : `${group.last_message.body.substr(0, 12)}...`}
                             </p>
                           )}
                         </>
@@ -1840,10 +1873,6 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                       }}
                       className={darkMode ? feedStyles.sidebarcontent : feedStyles.sidebarcontentlight}
                       key={group.id}
-                      // onClick={() => {
-                      //   window.history.pushState('', '', `/chat/${group.id}`);
-                      //   window.location.reload(true);
-                      // }}
                       onClick={(e: any) => {
                         window.addEventListener('beforeunload', (e) => {
                           e.preventDefault();
@@ -1851,18 +1880,6 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                         });
                         window.history.pushState('', '', `/chat/${group.id}`);
                         window.location.reload(true);
-                        // setTimeout(() => {
-                        //   setMessageLoader(true);
-                        //   window.history.pushState('', '', `/chat/${group.id}`);
-                        //   const url = window.location.href;
-                        //   const id = url.substring(url.lastIndexOf('/') + 1);
-                        //   setGroupSelected(id);
-                        //   GetInitalMessagesRefetch({ groupid: id, offset: 0, limit });
-                        //   onlineRefetch({ groupid: id });
-                        // }, 100);
-                        // setTimeout(() => {
-                        //   setMessageLoader(false);
-                        // }, 1000);
                       }}
                     >
                       {user &&
@@ -2003,9 +2020,9 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                             ? '(Changed The Group Name)'
                             : group.last_message.body.includes('added') && group.last_message.alert
                             ? '(Added Member To Group)'
-                            : group.last_message.body.length <= 31
+                            : group.last_message.body.length <= 15
                             ? group.last_message.body
-                            : `${group.last_message.body.substr(0, 28)}...`}
+                            : `${group.last_message.body.substr(0, 17)}...`}
                         </p>
                       )}
                     </div>
@@ -2117,51 +2134,56 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
               }}
             >
               <InputGroup size="lg" style={{ width: '50%', top: -78, height: 60, left: 610 }}>
-                {onlineData &&
+                {GetMembers &&
                   !pageLoading &&
-                  onlineData.GetMembers.map((member) => {
-                    if (member.id !== user.id) {
-                      return (
-                        <div style={{ bottom: messageVal.length <= 75 ? '' : 94, position: 'relative' }}>
-                          <div>
-                            <img
-                              src={member.profile_picture}
-                              style={{
-                                borderRadius: 100,
-                                width: 43,
-                                position: 'relative',
-                                bottom: screenHeight === '70vh' ? 76 : screenHeight === '60vh' ? 15 : 45,
-                                opacity:
-                                  (member.online && member.chaton === groupSelected) ||
-                                  (member.online && member.chaton === null)
-                                    ? 1
-                                    : 0.5,
-                              }}
-                              alt=""
-                            />
-                            {member.typing &&
-                            member.chaton === window.location.href.substr(window.location.href.lastIndexOf('/') + 1) ? (
-                              <div
-                                className="chat-bubble"
+                  membersOfGroup.map(
+                    (member: {
+                      id: string;
+                      profile_picture: string;
+                      online: boolean;
+                      chaton: string;
+                      typing: boolean;
+                    }) => {
+                      if (member.id !== user.id) {
+                        return (
+                          <div style={{ bottom: messageVal.length <= 75 ? '' : 94, position: 'relative' }}>
+                            <div>
+                              <img
+                                src={member.profile_picture}
                                 style={{
-                                  marginLeft: 46,
-                                  top: screenHeight === '70vh' ? -114 : screenHeight === '60vh' ? -53 : -84,
+                                  borderRadius: 100,
+                                  width: 43,
                                   position: 'relative',
+                                  bottom: screenHeight === '70vh' ? 76 : screenHeight === '60vh' ? 15 : 45,
+                                  opacity: member.online && member.chaton === groupSelected ? 1 : 0.5,
                                 }}
-                              >
-                                <div className="typing">
-                                  <div className="dot"></div>
-                                  <div className="dot"></div>
-                                  <div className="dot"></div>
+                                alt=""
+                              />
+                              {member.typing &&
+                              member.chaton ===
+                                window.location.href.substr(window.location.href.lastIndexOf('/') + 1) ? (
+                                <div
+                                  className="chat-bubble"
+                                  style={{
+                                    marginLeft: 46,
+                                    top: screenHeight === '70vh' ? -114 : screenHeight === '60vh' ? -53 : -84,
+                                    position: 'relative',
+                                  }}
+                                >
+                                  <div className="typing">
+                                    <div className="dot"></div>
+                                    <div className="dot"></div>
+                                    <div className="dot"></div>
+                                  </div>
                                 </div>
-                              </div>
-                            ) : null}
+                              ) : null}
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'row' }}></div>
                           </div>
-                          <div style={{ display: 'flex', flexDirection: 'row' }}></div>
-                        </div>
-                      );
-                    }
-                  })}
+                        );
+                      }
+                    },
+                  )}
 
                 {!pageLoading && (
                   <Textarea
@@ -2181,22 +2203,38 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                     value={messageVal}
                     _placeholder={{ color: darkMode ? '#fff' : '#7c7c82' }}
                     onKeyPress={async (e) => {
+                      const el = document.getElementById('chatDiv');
                       if (e.shiftKey) {
                         return;
                       }
                       if (e.key === 'Enter') {
                         e.preventDefault();
-
                         if (!messageVal.replace(/\s/g, '').length) {
-                          await SetUserTyping({
-                            variables: {
-                              authorid: user.id,
-                              groupid: groupSelected,
-                              value: false,
-                            },
-                          });
                           return e.preventDefault();
                         }
+                        SetUserTyping({
+                          variables: {
+                            authorid: user.id,
+                            groupid: groupSelected,
+                            value: false,
+                          },
+                        });
+                        SetUserTyping({
+                          variables: {
+                            authorid: user.id,
+                            groupid: groupSelected,
+                            value: false,
+                          },
+                        });
+                        SetUserTyping({
+                          variables: {
+                            authorid: user.id,
+                            groupid: groupSelected,
+                            value: false,
+                          },
+                        });
+
+                        setMessageVal('');
                         setMessages([
                           ...messages,
                           {
@@ -2216,24 +2254,6 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                             alert: false,
                           },
                         ]);
-                        setMessageVal('');
-                        await SetUserTyping({
-                          variables: {
-                            authorid: user.id,
-                            groupid: groupSelected,
-                            value: false,
-                          },
-                        });
-                        await SetUserTyping({
-                          variables: {
-                            authorid: user.id,
-                            groupid: groupSelected,
-                            value: false,
-                          },
-                        });
-
-                        e.preventDefault();
-
                         await SendMessage({
                           variables: {
                             groupid: groupSelected,
@@ -2252,8 +2272,25 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                             alert: false,
                           },
                         });
-                        await SwitchOnline({ variables: { authorid: user?.id, value: true } });
-                        await SetChatOn({ variables: { authorid: user?.id, value: groupSelected } });
+                        await unreadRefetch();
+                        SetUserTyping({
+                          variables: {
+                            authorid: user.id,
+                            groupid: groupSelected,
+                            value: false,
+                          },
+                        });
+                        SwitchOnline({ variables: { authorid: user?.id, value: true, groupid: groupSelected } });
+                        SetChatOn({
+                          variables: { authorid: user?.id, groupid: groupSelected, currentGroupid: groupSelected },
+                        });
+
+                        e.preventDefault();
+
+                        await SwitchOnline({ variables: { authorid: user?.id, value: true, groupid: groupSelected } });
+                        await SetChatOn({
+                          variables: { authorid: user?.id, groupid: groupSelected, currentGroupid: groupSelected },
+                        });
                       }
                     }}
                     onChange={(e) => {

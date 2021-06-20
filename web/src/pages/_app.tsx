@@ -4,7 +4,6 @@ import '@fontsource/inter';
 import 'bootstrap/dist/css/bootstrap.css';
 import 'font-awesome/css/font-awesome.min.css';
 import 'emoji-mart/css/emoji-mart.css';
-import '@blueprintjs/core/lib/css/blueprint.css';
 import 'react-toastify/dist/ReactToastify.css';
 
 import { ChakraProvider } from '@chakra-ui/react';

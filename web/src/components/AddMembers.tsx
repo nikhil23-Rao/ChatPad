@@ -265,12 +265,34 @@ export const AddMembers = () => {
                 if (GetMembers() !== [] && typeof window !== 'undefined') {
                   try {
                     setLoading(true);
-                    await AddMembers({
-                      variables: {
-                        members: GetMembers(),
-                        groupid: window.location.href.substring(window.location.href.lastIndexOf('/') + 1),
-                      },
-                    });
+                    try {
+                      await AddMembers({
+                        variables: {
+                          members: GetMembers(),
+                          groupid: window.location.href.substring(window.location.href.lastIndexOf('/') + 1),
+                        },
+                      });
+                      await AddMembers({
+                        variables: {
+                          members: GetMembers(),
+                          groupid: window.location.href.substring(window.location.href.lastIndexOf('/') + 1),
+                        },
+                      });
+                      await AddMembers({
+                        variables: {
+                          members: GetMembers(),
+                          groupid: window.location.href.substring(window.location.href.lastIndexOf('/') + 1),
+                        },
+                      });
+                      await AddMembers({
+                        variables: {
+                          members: GetMembers(),
+                          groupid: window.location.href.substring(window.location.href.lastIndexOf('/') + 1),
+                        },
+                      });
+                    } catch (err) {
+                      console.log(err);
+                    }
 
                     await SendMessage({
                       variables: {
@@ -290,7 +312,7 @@ export const AddMembers = () => {
                         alert: true,
                       },
                     });
-                    window.location.reload(false);
+                    // window.location.reload(false);
                     setLoading(false);
                   } catch (err) {
                     toast({ status: 'error', title: 'Oops! Something failed.' });

@@ -119,8 +119,6 @@ export const SEARCH_GROUPS = gql`
 export const GET_MEMBERS = gql`
   query GetMembers($groupid: String) {
     GetMembers(groupid: $groupid) {
-      username
-      email
       profile_picture
       id
       online
@@ -147,5 +145,11 @@ export const LOAD_MORE = gql`
       read_by
       alert
     }
+  }
+`;
+
+export const GET_NOT_READ = gql`
+  query GetNotRead($authorid: String, $groupid: String) {
+    GetNotRead(authorid: $authorid, groupid: $groupid)
   }
 `;

@@ -1356,8 +1356,6 @@ body {
   transform: translate(-50%, -50%);
   width: var(--size);
   fill: white;
-  animation: zoom-in 2s /*infinite*/;
-  animation-delay: 2s;
 }
 
 @keyframes zoom-in {
@@ -1446,4 +1444,48 @@ body {
 .conversation-list {
   display: flex;
   flex-direction: column;
+}
+
+::selection {
+  background: #f81ce5; /* WebKit/Blink Browsers */
+}
+::-moz-selection {
+  background: #f81ce5; /* Gecko Browsers */
+}
+
+.unreadcontainer {
+  color: #0098fd;
+  cursor: default;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-direction: row;
+  flex-direction: row;
+  -webkit-justify-content: center;
+  justify-content: center;
+  padding: 8px 0;
+  -webkit-user-select: none;
+  margin-left: 400px;
+  overflow: hidden;
+}
+
+.unreadline {
+  -webkit-align-self: center;
+  align-self: center;
+  background-color: #0098fd;
+  -webkit-box-flex: 1;
+  box-flex: 1;
+  height: 1px;
+  width: 550px;
+}
+
+.unreadtext {
+  -webkit-box-flex: 0;
+  box-flex: 0;
+  -webkit-flex-grow: 0;
+  flex-grow: 0;
+  font-size: 11px;
+  line-height: 14px;
+  margin: 0 10px;
+  font-weight: 800;
 }

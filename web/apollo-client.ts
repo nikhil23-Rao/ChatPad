@@ -6,8 +6,8 @@ import { WebSocketLink } from '@apollo/client/link/ws';
 const wsLink = process.browser
   ? new WebSocketLink({
       // if you instantiate in the server, the error will be thrown
-      uri: `wss://chatpad-server.herokuapp.com/subscriptions`,
-      // uri: 'ws://localhost:4000/subscriptions',
+      // uri: `wss://chatpad-server.herokuapp.com/subscriptions`,
+      uri: 'ws://localhost:4000/subscriptions',
       options: {
         reconnect: true,
         timeout: 60000,
@@ -18,8 +18,8 @@ const wsLink = process.browser
   : null;
 
 const httplink = new HttpLink({
-  uri: 'https://chatpad-server.herokuapp.com/graphql',
-  // uri: 'http://localhost:4000/graphql',
+  // uri: 'https://chatpad-server.herokuapp.com/graphql',
+  uri: 'http://localhost:4000/graphql',
   credentials: 'same-origin',
 });
 
@@ -38,10 +38,31 @@ const client = new ApolloClient({
   link,
   cache: new InMemoryCache({
     typePolicies: {
+      Group: {
+        fields: {
+          members: {
+            merge(existing, incoming) {
+              // Equivalent to what happens if there is no custom merge function.
+              return incoming;
+            },
+          },
+        },
+      },
+      Subscription: {
+        fields: {
+          GetUsersTyping: {
+            merge(existing, incoming) {
+              // Equivalent to what happens if there is no custom merge function.
+              return incoming;
+            },
+          },
+        },
+      },
       Query: {
         fields: {
           GetMembers: {
             merge(existing, incoming) {
+              // Equivalent to what happens if there is no custom merge function.
               return incoming;
             },
           },

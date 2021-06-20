@@ -53,7 +53,6 @@ const Me: React.FC<MeProps> = ({}) => {
   };
   const [ToggleTheme] = useMutation(TOGGLE_THEME);
   const [UpdateTime] = useMutation(UPDATE_TIME);
-  const [SwitchOnline] = useMutation(SWITCH_ONLINE);
   useEffect(() => {
     GetUser();
     if (user && user.dark_theme == 'true') {
@@ -71,10 +70,6 @@ const Me: React.FC<MeProps> = ({}) => {
         setClosed(true);
       });
       if (user.dark_theme === 'true') (document.body.style as any) = 'background-color: #0B0E11';
-      if (closed === true) {
-        SwitchOnline({ variables: { authorid: user?.id, value: false } });
-      }
-      SwitchOnline({ variables: { authorid: user?.id, value: true } });
     }
   }, [user, closed, session]);
   if (!user)
@@ -138,7 +133,6 @@ const Me: React.FC<MeProps> = ({}) => {
                 <li
                   style={{ color: '#F56565', textDecoration: 'none' }}
                   onClick={async () => {
-                    await SwitchOnline({ variables: { authorid: user.id, value: false } });
                     setTab('logout');
                     signOut({ callbackUrl: '/login' });
                   }}

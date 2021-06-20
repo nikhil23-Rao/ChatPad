@@ -133,11 +133,11 @@
 
 .yourmessage {
   position: relative;
-  width: 506px;
+  max-width: 506px;
   left: 1200px;
   margin-bottom: 10px;
-  display: block;
   background-attachment: fixed;
+
   background-image: linear-gradient(#009afe 0%, rgb(146, 0, 255) 50%, rgb(255, 46, 25) 100%);
   /* background-color: #009afe; */
   color: #fff;

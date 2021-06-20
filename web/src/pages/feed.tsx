@@ -53,16 +53,6 @@ const Feed: React.FC<FeedProps> = ({}) => {
       };
       setDarkMode(currentUser.dark_theme === 'true' ? true : false);
       setUser(currentUser);
-      await SwitchOnline({ variables: { authorid: currentUser.id, value: true } });
-      await SetChatOn({ variables: { authorid: currentUser.id, groupid: '' } });
-      window.addEventListener('beforeunload', function (e) {
-        SwitchOnline({ variables: { authorid: currentUser.id, value: false } });
-        window.addEventListener('beforeunload', async function (e) {
-          SwitchOnline({ variables: { authorid: currentUser.id, value: false } });
-          for (var i = 0; i < 5000000; i++) {}
-          return undefined;
-        });
-      });
     }
     if (token) {
       const currentUser: {
@@ -373,9 +363,9 @@ const Feed: React.FC<FeedProps> = ({}) => {
                               ? '(Changed The Group Name)'
                               : group.last_message.body.includes('added') && group.last_message.alert
                               ? '(Added Member To Group)'
-                              : group.last_message.body.length <= 31
+                              : group.last_message.body.length <= 17
                               ? group.last_message.body
-                              : `${group.last_message.body.substr(0, 28)}...`}
+                              : `${group.last_message.body.substr(0, 10)}...`}
                           </p>
                         )}
                       </>
@@ -552,9 +542,9 @@ const Feed: React.FC<FeedProps> = ({}) => {
                           ? '(Changed The Group Name)'
                           : group.last_message.body.includes('added') && group.last_message.alert
                           ? '(Added Member To Group)'
-                          : group.last_message.body.length <= 31
+                          : group.last_message.body.length <= 10
                           ? group.last_message.body
-                          : `${group.last_message.body.substr(0, 28)}...`}
+                          : `${group.last_message.body.substr(0, 17)}...`}
                       </p>
                     )}
                   </div>
