@@ -72,6 +72,10 @@ import { formatAMPM } from '@/../utils/formatTime';
 import { tw } from 'twind';
 import { isUrl } from '@/../utils/isUrl';
 import { AddMembers } from '@/components/AddMembers';
+import { BURNING_SUN, DARK_NIGHT, LIGHT_RAINBOW, LINEAR_MAGIC } from '@/constants/vars/messageColors';
+import { Tooltip } from '@material-ui/core';
+import Lightbox from 'react-awesome-lightbox';
+
 interface ChatProps {
   currId: string;
 }
@@ -109,7 +113,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   const [pageLoading, setPageLoading] = useState(true);
   const [messages, setMessages] = useState<any[]>([]);
   const [showEmoji, setShowEmoji] = useState(false);
-  const [limit, setLimit] = useState(100);
+  const [limit, setLimit] = useState(10);
   const [offset, setOffset] = useState(10);
   const router = useRouter();
   const [visible, setVisible] = useState(true);
@@ -120,6 +124,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   const [screenHeight, setScreenHeight] = useState('');
   const [darkMode, setDarkMode] = useState(false);
   const [membersOfGroup, setMembersOfGroup] = useState([]);
+  const [imgPreview, setImgPreview] = useState('');
   const [user, setUser] = useState<{
     username: string | null | undefined;
     email: string | null | undefined;
@@ -127,8 +132,16 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
     dark_theme: string | null | undefined;
     profile_picture: string | null | undefined;
     iat?: string | null | undefined;
+    message_color:
+      | 'Dark Night'
+      | 'Linear Magic'
+      | 'Light Rainbow'
+      | 'Burning Sun'
+      | 'Ocean Blue'
+      | ''
+      | undefined
+      | null;
   } | null>(null);
-  const [conversationDeleted, setConversationDeleted] = useState(false);
 
   const GetUser = async () => {
     if (session) {
@@ -140,6 +153,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
         profile_picture: string;
         dark_theme: string;
         online: boolean;
+        message_color: 'Dark Night' | 'Linear Magic' | 'Light Rainbow' | 'Burning Sun' | 'Ocean Blue' | '' | null;
       } = {
         username: session.user.name!,
         email: session.user.email!,
@@ -147,6 +161,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
         dark_theme: result.data.GetUserId[1],
         online: true,
         profile_picture: session.user.image!,
+        message_color: result.data.GetUserId[4],
       };
       setDarkMode(currentUser.dark_theme === 'true' ? true : false);
       setUser(currentUser);
@@ -163,6 +178,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   };
 
   const toast = useToast();
+  const { isOpen: imageModalIsOpen, onOpen: imageModalOnOpen, onClose: imageModalOnClose } = useDisclosure();
   const {
     isOpen: editGroupNameModalIsOpen,
     onOpen: editGroupNameModalOnOpen,
@@ -242,7 +258,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
     setTimeout(() => {
       window.scrollTo(0, 0);
       setPageLoading(false);
-    }, 1000);
+    }, 2000);
   }, []);
 
   useEffect(() => {
@@ -312,10 +328,6 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   }, [GetMembers]);
 
   useEffect(() => {
-    console.log('MEMBERS OF GROUP', membersOfGroup);
-  }, [membersOfGroup]);
-
-  useEffect(() => {
     if (typeof window !== 'undefined') {
       if (screen.width <= 1440 && messageVal.length <= 75) {
         setScreenHeight('90vh');
@@ -367,7 +379,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
     const el = document.getElementById('chatDiv');
     const breakpoint = document.getElementById('breakpoint');
     if (breakpoint && el) {
-      const topPos = breakpoint?.offsetTop - 310;
+      const topPos = breakpoint?.offsetTop - 310; // Height That Reaches Breakpoint
       el.scrollTop = topPos;
     }
     if (el && !breakpoint) {
@@ -396,7 +408,12 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
     const el = document.getElementById('chatDiv');
     setInterval(() => {
       if (el && !pageLoading && el.scrollTop <= 5) {
+        setLoader(true);
         document.getElementById('loadmore')?.click();
+        el.scrollTop = 500;
+        el.scrollTop = 500;
+        el.scrollTop = 500;
+        setLoader(false);
       }
     }, 1000);
   }, [pageLoading, typeof window]);
@@ -417,6 +434,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
       : 'overflow: hidden; zoom: 1;';
 
     onClose();
+    imageModalOnClose();
     addMembersModalOnClose();
     viewMembersModalOnClose();
     editGroupNameModalOnClose();
@@ -466,8 +484,30 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
 
   today = mm + '/' + dd + '/' + yyyy;
 
+  const reader = (file) => {
+    return new Promise((resolve, reject) => {
+      const fileReader = new FileReader();
+      fileReader.onload = () => resolve(fileReader.result);
+      fileReader.readAsDataURL(file);
+    });
+  };
+
   return (
     <>
+      {imageModalIsOpen ? (
+        <Lightbox
+          image={imgPreview}
+          title=""
+          onClose={() => {
+            (document.body.style as any) =
+              (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
+              (typeof window !== 'undefined' && window.screen.availWidth) < 1800
+                ? 'zoom: 0.8'
+                : 'zoom: 1';
+            imageModalOnClose();
+          }}
+        />
+      ) : null}
       <audio className="audio-element" id="sound">
         <source src="/sound/chatpadsound.mp3"></source>
       </audio>
@@ -709,6 +749,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
             height: screenHeight,
             overflowX: 'hidden',
             backgroundColor: darkMode ? '#000' : '#fff',
+            display: 'flex',
           }}
           id="chatDiv"
           ref={chatRef as any}
@@ -720,7 +761,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
               emptyColor="gray.200"
               color="blue.500"
               size="xl"
-              style={{ left: 1000, top: 15, position: 'relative' }}
+              style={{ left: 1000, top: 45, position: 'relative' }}
             />
           ) : null}
           {pageLoading ? (
@@ -742,9 +783,13 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                 setLoader(true);
                 setOffset(offset + 10);
                 const dataLoadMore = [...loadMoreData.LoadMore];
+                if (el) el.scrollTop = 500;
                 setMessages([...dataLoadMore.reverse(), ...messages]);
+                if (el) el.scrollTop = 500;
+                if (el) el.scrollTop = 500;
+                if (el) el.scrollTop = 500;
                 setLoader(false);
-                if (el) el.scrollTop = 100;
+                if (el) el.scrollTop = 500;
               }}
               style={{
                 color: '#fff',
@@ -873,215 +918,202 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                           fontFamily: 'Lato',
                         }}
                       >
-                        {next.author.username} •{' '}
-                        {Math.round((Date.now() - next.time) / 60000) >= 1 &&
-                        Math.round((Date.now() - next.time) / 60000) < 2
-                          ? Math.round((Date.now() - next.time) / 60000) + ' minute ago'
-                          : Math.round((Date.now() - next.time) / 60000) > 0 &&
-                            Math.round((Date.now() - next.time) / 60000) < 60
-                          ? Math.round((Date.now() - next.time) / 60000) + ' minutes ago'
-                          : Math.round((Date.now() - next.time) / 60000) > 60 &&
-                            Math.round((Date.now() - next.time) / 60000) < 1440
-                          ? next.date[1]
-                          : Math.round((Date.now() - next.time) / 60000) > 1440 &&
-                            Math.round((Date.now() - next.time) / 60000) < 10080
-                          ? next.date[2] + ', ' + next.date[1]
-                          : Math.round((Date.now() - next.time) / 60000) > 1440
-                          ? next.date[1] + ' ' + next.date[0]
-                          : ' Now'}
+                        {message.author.username}
                       </p>
-                    ) : (
-                      ((prev &&
-                        next &&
-                        message.author.id === user.id &&
-                        !message.alert &&
-                        !message.alert &&
-                        message.author.id !== prev.author.id) ||
-                        (!prev &&
-                          next &&
-                          message.author.id === user.id &&
-                          message.author.id !== next.author.id &&
-                          !message.alert)) && (
-                        <p
-                          style={{
-                            color: darkMode ? '#ebeef0' : '#000',
-                            position: 'relative',
-                            fontFamily: 'Lato',
-                            left:
-                              Math.round((Date.now() - next.time) / 60000) > 0 &&
-                              Math.round((Date.now() - next.time) / 60000) < 60
-                                ? 1560
-                                : Math.round((Date.now() - next.time) / 60000) >= 60 &&
-                                  Math.round((Date.now() - next.time) / 60000) < 1440
-                                ? 1585
-                                : Math.round((Date.now() - next.time) / 60000) > 1440
-                                ? 1500
-                                : 1595,
-                            top: 10,
-                            fontSize: 14,
-                          }}
-                        >
-                          You •{' '}
-                          {Math.round((Date.now() - next.time) / 60000) >= 1 &&
-                          Math.round((Date.now() - next.time) / 60000) < 2
-                            ? Math.round((Date.now() - next.time) / 60000) + ' minute ago'
-                            : Math.round((Date.now() - next.time) / 60000) > 0 &&
-                              Math.round((Date.now() - next.time) / 60000) < 60
-                            ? Math.round((Date.now() - next.time) / 60000) + ' minutes ago'
-                            : Math.round((Date.now() - next.time) / 60000) >= 60 &&
-                              Math.round((Date.now() - next.time) / 60000) < 1440
-                            ? next.date[1]
-                            : Math.round((Date.now() - next.time) / 60000) > 1440 &&
-                              Math.round((Date.now() - next.time) / 60000) < 10080
-                            ? next.date[2] + ', ' + next.date[1]
-                            : Math.round((Date.now() - next.time) / 60000) > 1440
-                            ? next.date[1] + ' ' + next.date[0]
-                            : ' Now'}
-                        </p>
-                      )
-                    )}
+                    ) : null}
 
-                    <div
-                      className={
-                        !message.alert
-                          ? message.author.id === user.id && user.dark_theme === 'true'
-                            ? feedStyles.yourmessage
-                            : message.author.id === user.id && user.dark_theme === 'false'
-                            ? feedStyles.yourmessagelight
-                            : message.author.id !== user.id && user.dark_theme === 'true'
-                            ? feedStyles.message
-                            : feedStyles.messagelight
-                          : ''
+                    <Tooltip
+                      placement={message.author.id === user.id ? 'left' : 'right'}
+                      title={
+                        <h1 style={{ fontSize: 15 }}>
+                          {' '}
+                          {Math.round((Date.now() - message.time) / 60000) >= 1 &&
+                          Math.round((Date.now() - message.time) / 60000) < 2
+                            ? Math.round((Date.now() - message.time) / 60000) + ' minute ago'
+                            : Math.round((Date.now() - message.time) / 60000) > 0 &&
+                              Math.round((Date.now() - message.time) / 60000) < 60
+                            ? Math.round((Date.now() - message.time) / 60000) + ' minutes ago'
+                            : Math.round((Date.now() - message.time) / 60000) > 60 &&
+                              Math.round((Date.now() - message.time) / 60000) < 1440
+                            ? message.date[1]
+                            : Math.round((Date.now() - message.time) / 60000) > 1440 &&
+                              Math.round((Date.now() - message.time) / 60000) < 10080
+                            ? message.date[2] + ', ' + message.date[1]
+                            : Math.round((Date.now() - message.time) / 60000) > 1440
+                            ? message.date[1] + ' ' + message.date[0]
+                            : ' Now'}
+                        </h1>
                       }
-                      style={{
-                        marginBottom:
-                          next &&
-                          prev &&
-                          !message.alert &&
-                          !prev.alert &&
-                          !next.alert &&
-                          message.author.id === prev.author.id && // ENDS SEQUENCE
-                          message.author.id !== next.author.id &&
-                          next.author.id !== user.id
-                            ? 100
-                            : -5,
-                        marginLeft: !sidebarShown ? -100 : '',
-                        color: message.author.id !== user.id && user.dark_theme === 'false' ? '' : '#fff',
-                        borderRadius: !next
-                          ? message.author.id === user.id
-                            ? '50px 0px 50px 50px'
-                            : '0px 50px 50px 50px'
-                          : !prev
-                          ? message.author.id === user.id
-                            ? '50px 50px 0px 50px'
-                            : '50px 50px 50px 0px'
-                          : prev && next
-                          ? (!message.alert &&
-                              !prev.alert &&
-                              !next.alert &&
-                              message.author.id !== prev.author.id && // MIDDLE OF SEQUENCE
-                              message.author.id !== next.author.id) ||
-                            (next.alert && prev.alert)
-                            ? message.author.id === user.id
-                              ? '4em 4em 4em 4em'
-                              : '4em 4em 4em 4em'
-                            : !prev.alert &&
-                              !next.alert &&
-                              message.author.id === prev.author.id && // MIDDLE OF SEQUENCE
-                              message.author.id === next.author.id
-                            ? message.author.id === user.id
-                              ? '2em 0em 0em 2em'
-                              : '0em 2em 2em 0em'
-                            : (!message.alert &&
-                                !prev.alert &&
-                                message.author.id === prev.author.id && // ENDS SEQUENCE
-                                message.author.id !== next.author.id) ||
-                              next.alert ||
-                              !next
+                      arrow
+                    >
+                      <div
+                        className={
+                          !message.alert
+                            ? message.author.id === user.id && user.dark_theme === 'true'
+                              ? feedStyles.yourmessage
+                              : message.author.id === user.id && user.dark_theme === 'false'
+                              ? feedStyles.yourmessagelight
+                              : message.author.id !== user.id && user.dark_theme === 'true'
+                              ? feedStyles.message
+                              : feedStyles.messagelight
+                            : ''
+                        }
+                        style={{
+                          backgroundImage:
+                            user.id === message.author.id
+                              ? user.message_color === 'Ocean Blue'
+                                ? ''
+                                : user.message_color === 'Linear Magic'
+                                ? LINEAR_MAGIC
+                                : user.message_color === 'Light Rainbow'
+                                ? LIGHT_RAINBOW
+                                : user.message_color === 'Burning Sun'
+                                ? BURNING_SUN
+                                : DARK_NIGHT
+                              : '',
+                          marginBottom:
+                            next &&
+                            prev &&
+                            !message.alert &&
+                            !prev.alert &&
+                            !next.alert &&
+                            message.author.id === prev.author.id && // ENDS SEQUENCE
+                            message.author.id !== next.author.id &&
+                            next.author.id !== user.id
+                              ? 100
+                              : -5,
+                          marginLeft: !sidebarShown ? -100 : '',
+                          color: message.author.id !== user.id && user.dark_theme === 'false' ? '' : '#fff',
+                          borderRadius: !next
                             ? message.author.id === user.id
                               ? '50px 0px 50px 50px'
                               : '0px 50px 50px 50px'
-                            : (!message.alert && !prev.alert && !next.alert && message.author.id !== prev.author.id) ||
-                              (!prev && // STARTS SEQUENACE
-                                message.author.id === next.author.id) ||
-                              (next && prev.alert && next.author.id === message.author.id) ||
-                              !prev
+                            : !prev
                             ? message.author.id === user.id
                               ? '50px 50px 0px 50px'
                               : '50px 50px 50px 0px'
-                            : ''
-                          : '',
-                      }}
-                    >
-                      {message.alert ? (
-                        <div
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            flexDirection: 'column',
-                            marginLeft: 250,
-                            marginBottom: 30,
-                            marginTop: 70,
-                            fontWeight: 500,
-                            color: darkMode ? '#fff' : '#000',
-                          }}
-                          className={feedStyles.groupNameChangeText}
-                        >
-                          {message.body.includes('left the group') && message.alert
-                            ? message.body
-                            : !message.body.includes('kicked') && !message.body.includes('added')
-                            ? message.author.id !== user.id
-                              ? `${message.author.username} has changed the group name to ${message.body}`
-                              : `You have changed the group name to ${message.body}`
-                            : message.body.includes('kicked')
-                            ? message.author.id !== user.id
-                              ? `${message.author.username} has ${message.body}`
-                              : `You have ${message.body}`
-                            : message.author.id === user.id
-                            ? `You have ${message.body}`
-                            : `${message.author.username} has ${message.body}`}
-                        </div>
-                      ) : message.image ? (
-                        <img
-                          style={{
-                            marginLeft: 5,
-                            marginTop: 10,
-                            fontSize: 20,
-                            width: 900,
-                            borderRadius: 50,
-                            height: '100%',
-                          }}
-                          src={message.body}
-                          className={feedStyles.text}
-                        />
-                      ) : isUrl(message.body) ? (
-                        <p
-                          style={{
-                            marginLeft: 5,
-                            marginTop: 10,
-                            fontSize: 20,
-                            cursor: 'pointer',
-                            textDecoration: 'underline',
-                          }}
-                          onClick={() => window.open(message.body)}
-                          className={feedStyles.text}
-                        >
-                          {message.body}
-                        </p>
-                      ) : (
-                        <p
-                          style={{
-                            marginLeft: 5,
-                            marginTop: 10,
-                            fontSize: 20,
-                          }}
-                          className={feedStyles.text}
-                        >
-                          {message.body}
-                        </p>
-                      )}
-                    </div>
+                            : prev && next
+                            ? (!message.alert &&
+                                !prev.alert &&
+                                !next.alert &&
+                                message.author.id !== prev.author.id && // MIDDLE OF SEQUENCE
+                                message.author.id !== next.author.id) ||
+                              (next.alert && prev.alert)
+                              ? message.author.id === user.id
+                                ? '4em 4em 4em 4em'
+                                : '4em 4em 4em 4em'
+                              : !prev.alert &&
+                                !next.alert &&
+                                message.author.id === prev.author.id && // MIDDLE OF SEQUENCE
+                                message.author.id === next.author.id
+                              ? message.author.id === user.id
+                                ? '2em 0em 0em 2em'
+                                : '0em 2em 2em 0em'
+                              : (!message.alert &&
+                                  !prev.alert &&
+                                  message.author.id === prev.author.id && // ENDS SEQUENCE
+                                  message.author.id !== next.author.id) ||
+                                next.alert ||
+                                !next
+                              ? message.author.id === user.id
+                                ? '50px 0px 50px 50px'
+                                : '0px 50px 50px 50px'
+                              : (!message.alert &&
+                                  !prev.alert &&
+                                  !next.alert &&
+                                  message.author.id !== prev.author.id) ||
+                                (!prev && // STARTS SEQUENACE
+                                  message.author.id === next.author.id) ||
+                                (next && prev.alert && next.author.id === message.author.id) ||
+                                !prev
+                              ? message.author.id === user.id
+                                ? '50px 50px 0px 50px'
+                                : '50px 50px 50px 0px'
+                              : ''
+                            : '',
+                        }}
+                      >
+                        {message.alert ? (
+                          <div
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              flexDirection: 'column',
+                              marginLeft: 250,
+                              marginBottom: 30,
+                              marginTop: 70,
+                              fontWeight: 500,
+                              color: darkMode ? '#fff' : '#000',
+                            }}
+                            className={feedStyles.groupNameChangeText}
+                          >
+                            {message.body.includes('left the group') && message.alert
+                              ? message.body
+                              : !message.body.includes('kicked') && !message.body.includes('added')
+                              ? message.author.id !== user.id
+                                ? `${message.author.username} has changed the group name to ${message.body}`
+                                : `You have changed the group name to ${message.body}`
+                              : message.body.includes('kicked')
+                              ? message.author.id !== user.id
+                                ? `${message.author.username} has ${message.body}`
+                                : `You have ${message.body}`
+                              : message.author.id === user.id
+                              ? `You have ${message.body}`
+                              : `${message.author.username} has ${message.body}`}
+                          </div>
+                        ) : message.image ? (
+                          <div style={{ width: '100%' }}>
+                            <img
+                              onClick={() => {
+                                (document.body.style as any) =
+                                  (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
+                                  (typeof window !== 'undefined' && window.screen.availWidth) < 1800
+                                    ? 'zoom: 1'
+                                    : 'zoom: 1';
+                                setImgPreview(message.body);
+                                imageModalOnOpen();
+                              }}
+                              style={{
+                                marginLeft: 5,
+                                cursor: 'pointer',
+                                marginTop: 10,
+                                fontSize: 20,
+                                borderRadius: 90,
+                                width: '100vh',
+                              }}
+                              src={message.body}
+                              className={feedStyles.text}
+                            />
+                          </div>
+                        ) : isUrl(message.body) ? (
+                          <p
+                            style={{
+                              marginLeft: 5,
+                              marginTop: 10,
+                              fontSize: 20,
+                              cursor: 'pointer',
+                              textDecoration: 'underline',
+                            }}
+                            onClick={() => window.open(message.body)}
+                            className={feedStyles.text}
+                          >
+                            {message.body}
+                          </p>
+                        ) : (
+                          <p
+                            style={{
+                              marginLeft: 5,
+                              marginTop: 10,
+                              fontSize: 20,
+                            }}
+                            className={feedStyles.text}
+                          >
+                            {message.body}
+                          </p>
+                        )}
+                      </div>
+                    </Tooltip>
                   </div>
                 </React.Fragment>
               );
@@ -1388,6 +1420,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                 </ModalFooter>
               </ModalContent>
             </Modal>
+
             <Modal
               onClose={() => {
                 (document.body.style as any) =
@@ -2312,7 +2345,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                       <>
                         <InsertPhotoIcon
                           onClick={() => {
-                            document.getElementById('filepicker')?.click();
+                            document.getElementById('imagepicker')?.click();
                           }}
                           fontSize="large"
                           style={{
@@ -2332,42 +2365,49 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
 
                     <input
                       type="file"
-                      id="filepicker"
+                      id="imagepicker"
                       accept="image/x-png,image/gif,image/jpeg"
                       onChange={(e: any) => {
                         const file = e.target.files[0];
-
-                        const reader = new FileReader();
-                        reader.onloadend = async () => {
-                          try {
-                            await SendMessage({
-                              variables: {
-                                groupid: groupSelected,
-                                body: messageVal,
-                                author: {
-                                  username: user.username,
-                                  email: user.email,
-                                  id: user.id,
-                                  profile_picture: user.profile_picture,
-                                },
-                                image: true,
-                                messageid: generateId(24),
-                                time: formatAMPM(new Date()),
-                                date: today,
-                                day,
-                                alert: false,
+                        reader(file).then(async (res) => {
+                          setMessages([
+                            ...messages,
+                            {
+                              groupid: groupSelected,
+                              body: res,
+                              author: {
+                                username: user?.username,
+                                email: user?.email,
+                                id: user?.id,
+                                profile_picture: user?.profile_picture,
                               },
-                            });
-                          } catch (err) {
-                            toast({
-                              status: 'error',
-                              title: 'This image is too big! Please choose a smaller image.',
-                              position: 'top-right',
-                              isClosable: true,
-                            });
-                          }
-                        };
-                        reader.readAsDataURL(file);
+                              image: true,
+                              messageid: generateId(24),
+                              date: today,
+                              time: formatAMPM(new Date()),
+                              day,
+                              alert: false,
+                            },
+                          ]);
+                          await SendMessage({
+                            variables: {
+                              groupid: groupSelected,
+                              body: res,
+                              author: {
+                                username: user?.username,
+                                email: user?.email,
+                                id: user?.id,
+                                profile_picture: user?.profile_picture,
+                              },
+                              image: true,
+                              messageid: generateId(24),
+                              date: today,
+                              time: formatAMPM(new Date()),
+                              day,
+                              alert: false,
+                            },
+                          });
+                        });
                       }}
                       style={{ display: 'none' }}
                     />

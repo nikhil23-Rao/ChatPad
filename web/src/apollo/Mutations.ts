@@ -123,3 +123,9 @@ export const DELETE_CONVERSATION = gql`
     DeleteConversation(groupid: $groupid)
   }
 `;
+
+export const CHANGE_MESSAGE_COLOR = gql`
+  mutation ChangeMessageColor($authorid: String, $value: String) {
+    ChangeMessageColor(authorid: $authorid, value: $value)
+  }
+`;

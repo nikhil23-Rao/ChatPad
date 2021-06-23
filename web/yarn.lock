@@ -7290,6 +7290,11 @@ react-animate-height@2.0.21:
     classnames "^2.2.5"
     prop-types "^15.6.1"
 
+react-awesome-lightbox@1.8.0:
+  version "1.8.0"
+  resolved "https://registry.yarnpkg.com/react-awesome-lightbox/-/react-awesome-lightbox-1.8.0.tgz#ce7ef9d4484d5f695b26588b48be94e5fe733639"
+  integrity sha512-V0a2wrAa4xuMLMLmQIuXfLbHjd08cgB130aqZhlhQRq9vhsBdVskhbUv9YY0J7nK42MrURJlhsmWlZ3fI6MHZA==
+
 react-bootstrap@1.5.2:
   version "1.5.2"
   resolved "https://registry.yarnpkg.com/react-bootstrap/-/react-bootstrap-1.5.2.tgz#07dabec53d10491a520c49f102170b440fa89008"

@@ -3,12 +3,13 @@ import { Theme } from '@/../context/theme';
 import { GET_USER_ID } from '@/apollo/Queries';
 import { signOut, useSession } from 'next-auth/client';
 import React, { useContext, useEffect, useState } from 'react';
-import { useMutation } from '@apollo/client';
-import { SWITCH_ONLINE, TOGGLE_THEME, UPDATE_TIME } from '@/apollo/Mutations';
+import { useMutation, useQuery } from '@apollo/client';
+import { CHANGE_GROUP_NAME, CHANGE_MESSAGE_COLOR, TOGGLE_THEME, UPDATE_TIME } from '@/apollo/Mutations';
 import { Spinner } from '@chakra-ui/react';
 import feedStyles from '../styles/feed.module.css';
 import meStyles from '../styles/me.module.css';
-import Link from 'next/link';
+import { Tooltip } from '@material-ui/core';
+import { BURNING_SUN, DARK_NIGHT, LIGHT_RAINBOW, LINEAR_MAGIC, OCEAN_BLUE } from '@/constants/vars/messageColors';
 
 interface MeProps {}
 
@@ -17,33 +18,37 @@ const Me: React.FC<MeProps> = ({}) => {
   const [darkModeSelected, setDarkModeSelected] = useState(false);
   const [closed, setClosed] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
-  const [tab, setTab] = useState<'appearence' | 'logout' | 'profile' | ''>('');
+  const [tab, setTab] = useState<'appearence' | 'logout' | 'profile' | 'messagecolor' | ''>('');
   const [lightModeSelected, setLightModeSelected] = useState(false);
-  const [left, setLeft] = useState<string | number>('28.75rem');
+  const [messageColor, setMessageColor] = useState<
+    'Dark Night' | 'Linear Magic' | 'Light Rainbow' | 'Burning Sun' | 'Ocean Blue' | ''
+  >('');
   const [user, setUser] = useState<{
     username: string | null | undefined;
     email: string | null | undefined;
     id: string | null | undefined;
     dark_theme: string | null | undefined;
     profile_picture: string | null | undefined;
+    message_color: string | null;
     iat?: string | null | undefined;
   } | null>(null);
-  const theme = useContext(Theme);
+  const { data, refetch } = useQuery(GET_USER_ID, { variables: { email: session?.user.email } });
   const GetUser = async () => {
-    if (session) {
-      const result = await client.query({ query: GET_USER_ID, variables: { email: session.user.email } });
+    if (session && data) {
       const currentUser: {
         username: string;
         email: string;
         id: string;
         profile_picture: string;
         dark_theme: string;
+        message_color: string;
       } = {
         username: session.user.name!,
         email: session.user.email!,
-        id: result.data.GetUserId[0],
-        dark_theme: result.data.GetUserId[1],
+        id: data.GetUserId[0],
+        dark_theme: data.GetUserId[1],
         profile_picture: session.user.image!,
+        message_color: data.GetUserId[4],
       };
       if (currentUser.dark_theme === 'true') {
         setDarkMode(true);
@@ -53,6 +58,7 @@ const Me: React.FC<MeProps> = ({}) => {
   };
   const [ToggleTheme] = useMutation(TOGGLE_THEME);
   const [UpdateTime] = useMutation(UPDATE_TIME);
+  const [ChangeMessageColor] = useMutation(CHANGE_MESSAGE_COLOR);
   useEffect(() => {
     GetUser();
     if (user && user.dark_theme == 'true') {
@@ -60,7 +66,12 @@ const Me: React.FC<MeProps> = ({}) => {
     } else {
       setLightModeSelected(!lightModeSelected);
     }
-  }, [session]);
+  }, [session, data]);
+  useEffect(() => {
+    if (user) {
+      setMessageColor(user.message_color as any);
+    }
+  }, [user]);
   useEffect(() => {
     setInterval(() => {
       UpdateTime();
@@ -130,6 +141,16 @@ const Me: React.FC<MeProps> = ({}) => {
                 >
                   <i className="fa fa-eye fa-2x"></i>
                 </li>
+
+                <li
+                  onClick={() => setTab('messagecolor')}
+                  style={{
+                    textDecoration: tab === 'appearence' ? 'underline' : '',
+                    color: user.dark_theme === 'true' ? '#fff' : '',
+                  }}
+                >
+                  <i className="fa fa-pencil fa-2x"></i>
+                </li>
                 <li
                   style={{ color: '#F56565', textDecoration: 'none' }}
                   onClick={async () => {
@@ -198,6 +219,140 @@ const Me: React.FC<MeProps> = ({}) => {
                     Default Dark
                   </p>
                 </div>
+              )}
+              {tab === 'messagecolor' && (
+                <>
+                  <div style={{ display: 'flex', flexDirection: 'row', cursor: 'pointer' }}>
+                    <Tooltip title="Ocean Blue" arrow>
+                      <div
+                        onClick={() => {
+                          setMessageColor('Ocean Blue');
+                          ChangeMessageColor({ variables: { authorid: user.id, value: 'Ocean Blue' } });
+                        }}
+                        style={{
+                          border: messageColor === 'Ocean Blue' ? '5px solid #047EFE' : '',
+                          width: 100,
+                          height: 100,
+                          borderRadius: 100,
+                          backgroundColor: OCEAN_BLUE,
+                          marginTop: 20,
+                          marginRight: 30,
+                        }}
+                      >
+                        {messageColor === 'Ocean Blue' ? (
+                          <i
+                            className="fa fa-check-circle"
+                            style={{ color: 'lightgreen', top: 70, right: -69, position: 'relative' }}
+                          ></i>
+                        ) : null}
+                      </div>
+                    </Tooltip>
+                    <Tooltip title="Linear Magic" arrow>
+                      <div
+                        onClick={() => {
+                          setMessageColor('Linear Magic');
+                          ChangeMessageColor({ variables: { authorid: user.id, value: 'Linear Magic' } });
+                        }}
+                        style={{
+                          border: messageColor === 'Linear Magic' ? '5px solid #047EFE' : '',
+                          width: 100,
+                          height: 100,
+                          borderRadius: 100,
+                          backgroundColor: '#047EFE',
+                          marginTop: 20,
+                          marginRight: 30,
+                          backgroundAttachment: 'fixed',
+                          backgroundImage: LINEAR_MAGIC,
+                        }}
+                      >
+                        {messageColor === 'Linear Magic' ? (
+                          <i
+                            className="fa fa-check-circle"
+                            style={{ color: 'lightgreen', top: 70, right: -69, position: 'relative' }}
+                          ></i>
+                        ) : null}
+                      </div>
+                    </Tooltip>
+                    <Tooltip title="Light Rainbow" arrow>
+                      <div
+                        onClick={() => {
+                          setMessageColor('Light Rainbow');
+                          ChangeMessageColor({ variables: { authorid: user.id, value: 'Light Rainbow' } });
+                        }}
+                        style={{
+                          border: messageColor === 'Light Rainbow' ? '5px solid #047EFE' : '',
+                          width: 100,
+                          height: 100,
+                          borderRadius: 100,
+                          backgroundColor: '#047EFE',
+                          marginTop: 20,
+                          marginRight: 30,
+                          backgroundAttachment: 'fixed',
+                          backgroundImage: LIGHT_RAINBOW,
+                        }}
+                      >
+                        {messageColor === 'Light Rainbow' ? (
+                          <i
+                            className="fa fa-check-circle"
+                            style={{ color: 'lightgreen', top: 70, right: -69, position: 'relative' }}
+                          ></i>
+                        ) : null}
+                      </div>
+                    </Tooltip>
+                    <Tooltip title="Burning Sun" arrow>
+                      <div
+                        onClick={() => {
+                          setMessageColor('Burning Sun');
+                          ChangeMessageColor({ variables: { authorid: user.id, value: 'Burning Sun' } });
+                        }}
+                        style={{
+                          border: messageColor === 'Burning Sun' ? '5px solid #047EFE' : '',
+                          width: 100,
+                          height: 100,
+                          borderRadius: 100,
+                          backgroundColor: '#047EFE',
+                          marginTop: 20,
+                          marginRight: 30,
+                          backgroundAttachment: 'fixed',
+                          backgroundImage: BURNING_SUN,
+                        }}
+                      >
+                        {messageColor === 'Burning Sun' ? (
+                          <i
+                            className="fa fa-check-circle"
+                            style={{ color: 'lightgreen', top: 70, right: -69, position: 'relative' }}
+                          ></i>
+                        ) : null}
+                      </div>
+                    </Tooltip>
+                    <Tooltip title="Dark Night" arrow>
+                      <div
+                        onClick={() => {
+                          setMessageColor('Dark Night');
+                          ChangeMessageColor({ variables: { authorid: user.id, value: 'Dark Night' } });
+                        }}
+                        style={{
+                          border: messageColor === 'Dark Night' ? '5px solid #047EFE' : '',
+                          width: 100,
+                          height: 100,
+                          borderRadius: 100,
+                          backgroundColor: '#047EFE',
+                          marginTop: 20,
+                          marginRight: 30,
+                          backgroundAttachment: 'fixed',
+                          backgroundImage: DARK_NIGHT,
+                        }}
+                      >
+                        {messageColor === 'Dark Night' ? (
+                          <i
+                            className="fa fa-check-circle"
+                            style={{ color: 'lightgreen', top: 70, right: -69, position: 'relative' }}
+                          ></i>
+                        ) : null}
+                      </div>
+                    </Tooltip>
+                  </div>
+                </>
               )}
             </div>
           </div>
