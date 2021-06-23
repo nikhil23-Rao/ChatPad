@@ -72,7 +72,7 @@ import { formatAMPM } from '@/../utils/formatTime';
 import { tw } from 'twind';
 import { isUrl } from '@/../utils/isUrl';
 import { AddMembers } from '@/components/AddMembers';
-import { BURNING_SUN, DARK_NIGHT, LIGHT_RAINBOW, LINEAR_MAGIC } from '@/constants/vars/messageColors';
+import { BURNING_SUN, DARK_NIGHT, LIGHT_RAINBOW, LINEAR_MAGIC } from '../../constants/vars/messageColors';
 import { Tooltip } from '@material-ui/core';
 import Lightbox from 'react-awesome-lightbox';
 

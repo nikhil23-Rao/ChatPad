@@ -9,7 +9,7 @@ import { Spinner } from '@chakra-ui/react';
 import feedStyles from '../styles/feed.module.css';
 import meStyles from '../styles/me.module.css';
 import { Tooltip } from '@material-ui/core';
-import { BURNING_SUN, DARK_NIGHT, LIGHT_RAINBOW, LINEAR_MAGIC, OCEAN_BLUE } from '@/constants/vars/messageColors';
+import { BURNING_SUN, DARK_NIGHT, LIGHT_RAINBOW, LINEAR_MAGIC, OCEAN_BLUE } from '../constants/vars/messageColors';
 
 interface MeProps {}
 
