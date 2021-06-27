@@ -68,13 +68,17 @@ import { useRouter } from 'next/dist/client/router';
 import { InputGroup, InputRightElement, Skeleton, SkeletonCircle, useToast, Spinner, Textarea } from '@chakra-ui/react';
 import EmojiEmotionsIcon from '@material-ui/icons/EmojiEmotions';
 import InsertPhotoIcon from '@material-ui/icons/InsertPhoto';
+import NoteSharpIcon from '@material-ui/icons/NoteSharp';
+import ReactGiphySearchbox from 'react-giphy-searchbox';
 import { formatAMPM } from '@/../utils/formatTime';
 import { tw } from 'twind';
 import { isUrl } from '@/../utils/isUrl';
 import { AddMembers } from '@/components/AddMembers';
-import { BURNING_SUN, DARK_NIGHT, LIGHT_RAINBOW, LINEAR_MAGIC } from '../../constants/vars/messageColors';
+import { BURNING_SUN, DARK_NIGHT, LIGHT_RAINBOW, LINEAR_MAGIC, OCEAN_BLUE } from '../../constants/vars/messageColors';
 import { Tooltip } from '@material-ui/core';
 import Lightbox from 'react-awesome-lightbox';
+import { decrypt } from '@/../utils/security/security';
+import ReactTextareaAutocomplete from '@webscopeio/react-textarea-autocomplete';
 
 interface ChatProps {
   currId: string;
@@ -117,6 +121,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   const [offset, setOffset] = useState(10);
   const router = useRouter();
   const [visible, setVisible] = useState(true);
+  const [stickerGalleryShown, setStickerGalleryShown] = useState(false);
   const [groupNameValue, setGroupNameValue] = useState('');
   const [messageVal, setMessageVal] = useState('');
   const [session] = useSession();
@@ -171,7 +176,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
       window.addEventListener('beforeunload', function (e) {
         SwitchOnline({ variables: { authorid: currentUser.id, value: false, groupid: groupSelected } });
         SwitchOnline({ variables: { authorid: currentUser.id, value: false, groupid: groupSelected } });
-        for (var i = 0; i < 100000; i++) {}
+        for (var i = 0; i < 100000000; i++) {}
         return undefined;
       });
     }
@@ -257,6 +262,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
     window.scrollTo(0, 0);
     setTimeout(() => {
       window.scrollTo(0, 0);
+
       setPageLoading(false);
     }, 2000);
   }, []);
@@ -276,7 +282,6 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
               currentGroupid: groupSelected,
             },
           });
-          SwitchOnline({ variables: { authorid: user?.id, value: false, groupid: groupSelected } });
         }
         if (document.hidden === false) {
           SetChatOn({
@@ -286,7 +291,6 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
               currentGroupid: groupSelected,
             },
           });
-          SwitchOnline({ variables: { authorid: user?.id, value: true, groupid: groupSelected } });
         }
       }
     });
@@ -361,7 +365,8 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
 
   useEffect(() => {
     if (typeof messageData !== 'undefined') {
-      const messages = [...messageData.GetInitialMessages];
+      const init = decrypt(messageData.GetInitialMessages);
+      const messages = [...JSON.parse(init)];
       setMessages(messages.reverse());
     }
   }, [typeof messageData, groupSelected]);
@@ -382,10 +387,10 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
       const topPos = breakpoint?.offsetTop - 310; // Height That Reaches Breakpoint
       el.scrollTop = topPos;
     }
-    if (el && !breakpoint) {
-      el.scrollTop = el.scrollHeight - el.clientHeight;
+    if (el && !breakpoint && !pageLoading) {
+      el.scrollTop = el.scrollHeight + 1000;
     }
-  }, [typeof document, typeof window, typeof messageData, pageLoading, messages, realtimeData]);
+  }, [typeof document, typeof window, messageData, messages, realtimeData, pageLoading]);
 
   const updateReadBy = async () => {
     if (document.visibilityState === 'visible' && user && messages.length > 0) {
@@ -408,6 +413,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
     const el = document.getElementById('chatDiv');
     setInterval(() => {
       if (el && !pageLoading && el.scrollTop <= 5) {
+        if (loadMoreData && loadMoreData.LoadMore.length === 0) return;
         setLoader(true);
         document.getElementById('loadmore')?.click();
         el.scrollTop = 500;
@@ -865,7 +871,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                               width: 50,
                               height: 50,
                               borderRadius: 100,
-                              left: 129,
+                              left: 149,
                               top:
                                 prev && prev.alert
                                   ? -74
@@ -912,14 +918,49 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                         style={{
                           color: darkMode ? '#ebeef0' : '#000',
                           position: 'relative',
-                          left: 579,
-                          top: 10,
+                          left: 600,
+                          top: 2,
                           fontSize: 14,
                           fontFamily: 'Lato',
                         }}
                       >
                         {message.author.username}
                       </p>
+                    ) : null}
+
+                    {message.author.id === user.id ? (
+                      (message.author.id === user.id && next && next.alert && next.author.id !== user.id) ||
+                      (!next && !message.alert) ||
+                      (prev &&
+                        next &&
+                        message.author.id === prev.author.id && // ENDS SEQUENCE
+                        message.author.id !== next.author.id) ||
+                      (prev &&
+                        next &&
+                        message.author.id !== prev.author.id && // MIDDLE OF SEQUENCE
+                        message.author.id !== next.author.id &&
+                        !message.alert) ||
+                      (!prev && next && message.author.id !== next.author.id && !message.alert) ? (
+                        <Tooltip arrow title="Message Sent." placement="right">
+                          <div
+                            style={{
+                              width: 20,
+                              animation: 'checkmarkfade 3s',
+                              height: 20,
+                              left: 1710,
+                              top: 30,
+                              borderRadius: 100,
+                              position: 'absolute',
+                              backgroundColor: '#0C65EB',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                            }}
+                          >
+                            <i className="fa fa-check" style={{ color: '#fff' }}></i>
+                          </div>
+                        </Tooltip>
+                      ) : null
                     ) : null}
 
                     <Tooltip
@@ -959,10 +1000,13 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                             : ''
                         }
                         style={{
+                          backgroundColor:
+                            message.author.id !== user.id && message.image ? (darkMode ? '#000' : '#fff') : '',
+                          left: message.author.id !== user.id && !message.image ? 583 : '',
                           backgroundImage:
-                            user.id === message.author.id
+                            user.id === message.author.id && !message.image && !message.alert
                               ? user.message_color === 'Ocean Blue'
-                                ? ''
+                                ? OCEAN_BLUE
                                 : user.message_color === 'Linear Magic'
                                 ? LINEAR_MAGIC
                                 : user.message_color === 'Light Rainbow'
@@ -972,15 +1016,8 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                                 : DARK_NIGHT
                               : '',
                           marginBottom:
-                            next &&
-                            prev &&
-                            !message.alert &&
-                            !prev.alert &&
-                            !next.alert &&
-                            message.author.id === prev.author.id && // ENDS SEQUENCE
-                            message.author.id !== next.author.id &&
-                            next.author.id !== user.id
-                              ? 100
+                            next && next.author.id !== message.author.id // ENDS SEQUENCE
+                              ? 80
                               : -5,
                           marginLeft: !sidebarShown ? -100 : '',
                           color: message.author.id !== user.id && user.dark_theme === 'false' ? '' : '#fff',
@@ -1063,7 +1100,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                               : `${message.author.username} has ${message.body}`}
                           </div>
                         ) : message.image ? (
-                          <div style={{ width: '100%' }}>
+                          <div style={{ width: 506, backgroundImage: 'none' }}>
                             <img
                               onClick={() => {
                                 (document.body.style as any) =
@@ -1077,10 +1114,60 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                               style={{
                                 marginLeft: 5,
                                 cursor: 'pointer',
-                                marginTop: 10,
+                                width: 506,
+
+                                marginBottom:
+                                  (next && next.image && message.image) || (prev && !prev.image && message.image)
+                                    ? -13
+                                    : -13,
                                 fontSize: 20,
-                                borderRadius: 90,
-                                width: '100vh',
+                                borderRadius: !next
+                                  ? message.author.id === user.id
+                                    ? '50px 0px 50px 50px'
+                                    : '0px 50px 50px 50px'
+                                  : !prev
+                                  ? message.author.id === user.id
+                                    ? '50px 50px 0px 50px'
+                                    : '50px 50px 50px 0px'
+                                  : prev && next
+                                  ? (!message.alert &&
+                                      !prev.alert &&
+                                      !next.alert &&
+                                      message.author.id !== prev.author.id && // MIDDLE OF SEQUENCE
+                                      message.author.id !== next.author.id) ||
+                                    (next.alert && prev.alert)
+                                    ? message.author.id === user.id
+                                      ? '4em 4em 4em 4em'
+                                      : '4em 4em 4em 4em'
+                                    : !prev.alert &&
+                                      !next.alert &&
+                                      message.author.id === prev.author.id && // MIDDLE OF SEQUENCE
+                                      message.author.id === next.author.id
+                                    ? message.author.id === user.id
+                                      ? '2em 0em 0em 2em'
+                                      : '0em 2em 2em 0em'
+                                    : (!message.alert &&
+                                        !prev.alert &&
+                                        message.author.id === prev.author.id && // ENDS SEQUENCE
+                                        message.author.id !== next.author.id) ||
+                                      next.alert ||
+                                      !next
+                                    ? message.author.id === user.id
+                                      ? '50px 0px 50px 50px'
+                                      : '0px 50px 50px 50px'
+                                    : (!message.alert &&
+                                        !prev.alert &&
+                                        !next.alert &&
+                                        message.author.id !== prev.author.id) ||
+                                      (!prev && // STARTS SEQUENACE
+                                        message.author.id === next.author.id) ||
+                                      (next && prev.alert && next.author.id === message.author.id) ||
+                                      !prev
+                                    ? message.author.id === user.id
+                                      ? '50px 50px 0px 50px'
+                                      : '50px 50px 50px 0px'
+                                    : ''
+                                  : '',
                               }}
                               src={message.body}
                               className={feedStyles.text}
@@ -1877,7 +1964,9 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                               className={feedStyles.groupName}
                             >
                               {group.last_message.author.id !== user?.id ? group.last_message.author.username : 'You'}:{' '}
-                              {group.last_message.body.includes('has left') && group.last_message.alert
+                              {group.last_message.image
+                                ? '(Sent An Image/Sticker)'
+                                : group.last_message.body.includes('has left') && group.last_message.alert
                                 ? '(Left The Group)'
                                 : group.last_message.alert && group.last_message.body.includes('kicked')
                                 ? '(Kicked Member From Group)'
@@ -2043,7 +2132,9 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                           className={feedStyles.groupName}
                         >
                           {group.last_message.author.id !== user?.id ? group.last_message.author.username : 'You'}:{' '}
-                          {group.last_message.body.includes('has left') && group.last_message.alert
+                          {group.last_message.image
+                            ? '(Sent An Image/Sticker)'
+                            : group.last_message.body.includes('has left') && group.last_message.alert
                             ? '(Left The Group)'
                             : group.last_message.alert && group.last_message.body.includes('kicked')
                             ? '(Kicked Member From Group)'
@@ -2337,7 +2428,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                     style={{
                       top: screenHeight === '70vh' ? -27 : 2,
                       backgroundColor: 'transparent',
-                      right: !sidebarShown ? 115 : 24,
+                      right: !sidebarShown ? 115 : 40,
                       cursor: 'pointer',
                     }}
                   >
@@ -2346,6 +2437,16 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                         <InsertPhotoIcon
                           onClick={() => {
                             document.getElementById('imagepicker')?.click();
+                          }}
+                          fontSize="large"
+                          style={{
+                            color: darkMode ? '#4097FF' : 'gray',
+                          }}
+                        />
+
+                        <NoteSharpIcon
+                          onClick={() => {
+                            setStickerGalleryShown(!stickerGalleryShown);
                           }}
                           fontSize="large"
                           style={{
@@ -2415,6 +2516,64 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                 )}
               </InputGroup>
             </div>
+            {stickerGalleryShown && (
+              <div
+                style={{
+                  position: 'absolute',
+                  bottom: 200,
+                  left: 580,
+                }}
+              >
+                <ReactGiphySearchbox
+                  searchPlaceholder="Search For Stickers To Send..."
+                  masonryConfig={[
+                    { columns: 4, imageWidth: 110, gutter: 5 },
+                    { mq: '300px', columns: 3, imageWidth: 320, gutter: 5 },
+                  ]}
+                  apiKey="iEss7rTPuL6rYx8FICb1Ow8laxgzUd7Z"
+                  onSelect={async (item) => {
+                    setMessages([
+                      ...messages,
+                      {
+                        groupid: groupSelected,
+                        body: item.images.preview_gif.url,
+                        author: {
+                          username: user?.username,
+                          email: user?.email,
+                          id: user?.id,
+                          profile_picture: user?.profile_picture,
+                        },
+                        image: true,
+                        messageid: generateId(24),
+                        date: today,
+                        time: formatAMPM(new Date()),
+                        day,
+                        alert: false,
+                      },
+                    ]);
+                    await SendMessage({
+                      variables: {
+                        groupid: groupSelected,
+                        body: item.images.preview_gif.url,
+                        author: {
+                          username: user?.username,
+                          email: user?.email,
+                          id: user?.id,
+                          profile_picture: user?.profile_picture,
+                        },
+                        image: true,
+                        messageid: generateId(24),
+                        date: today,
+                        time: formatAMPM(new Date()),
+                        day,
+                        alert: false,
+                      },
+                    });
+                    setStickerGalleryShown(false);
+                  }}
+                />
+              </div>
+            )}
             {showEmoji && (
               <span>
                 <Picker

@@ -14,6 +14,7 @@ import { Spinner } from '@chakra-ui/react';
 import { tw } from 'twind';
 import { LinearProgress } from '@material-ui/core';
 import Feed from './feed';
+import { LINEAR_MAGIC } from '@/constants/vars/messageColors';
 
 export default function LandingPage() {
   const [splash, setSplash] = useState(false);
@@ -30,7 +31,14 @@ export default function LandingPage() {
       }, 3650);
     }
     (document.body.style as any) = 'overflow: hidden';
-    if (splash && document.visibilityState === 'visible') document.body.style.zoom = '80%';
+    if (
+      (splash &&
+        document.visibilityState === 'visible' &&
+        typeof window !== 'undefined' &&
+        window.screen.availHeight < 863) ||
+      (typeof window !== 'undefined' && window.screen.availWidth) < 1800
+    )
+      document.body.style.zoom = '80%';
   }, [session]);
 
   if (splash) {
@@ -41,12 +49,45 @@ export default function LandingPage() {
     return (
       <>
         <div className="cover" id="splash">
-          <svg id="icon" viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg">
-            <path
-              d="M1792 896q0 174-120 321.5t-326 233-450 85.5q-70 0-145-8-198 175-460 242-49 14-114 22-17 2-30.5-9t-17.5-29v-1q-3-4-.5-12t2-10 4.5-9.5l6-9 7-8.5 8-9q7-8 31-34.5t34.5-38 31-39.5 32.5-51 27-59 26-76q-157-89-247.5-220t-90.5-281q0-130 71-248.5t191-204.5 286-136.5 348-50.5q244 0 450 85.5t326 233 120 321.5z"
-              fill="#fff"
-            />
-          </svg>
+          <div
+            style={{
+              position: 'fixed',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              backgroundColor: 'whitesmoke',
+              // backgroundAttachment: 'fixed',
+              // backgroundImage: 'linear-gradient(#009afe 0%, rgb(146, 0, 255) 50%)',
+              width: 190,
+              height: 190,
+              borderRadius: '200px 200px 200px 20px',
+            }}
+          >
+            <div
+              style={{
+                backgroundColor: '#fff',
+                width: 170,
+                height: 170,
+                top: 10,
+                left: 10,
+                position: 'relative',
+                borderRadius: '200px 200px 200px 20px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <div
+                style={{ backgroundColor: '#1c1c1c', width: 30, height: 30, borderRadius: 100, marginRight: 10 }}
+              ></div>
+              <div
+                style={{ backgroundColor: '#1c1c1c', width: 30, height: 30, borderRadius: 100, marginRight: 10 }}
+              ></div>
+              <div
+                style={{ backgroundColor: '#1c1c1c', width: 30, height: 30, borderRadius: 100, marginRight: 10 }}
+              ></div>
+            </div>
+          </div>
         </div>
       </>
     );

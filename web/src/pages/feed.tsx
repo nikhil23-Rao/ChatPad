@@ -13,6 +13,9 @@ import { useRouter } from 'next/dist/client/router';
 import LoadingBar from 'react-top-loading-bar';
 import { Skeleton, Spinner, Input } from '@chakra-ui/react';
 import { tw } from 'twind';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCommentDots } from '@fortawesome/free-solid-svg-icons';
+import { LINEAR_MAGIC } from '@/constants/vars/messageColors';
 
 interface FeedProps {}
 
@@ -54,34 +57,8 @@ const Feed: React.FC<FeedProps> = ({}) => {
       setDarkMode(currentUser.dark_theme === 'true' ? true : false);
       setUser(currentUser);
     }
-    if (token) {
-      const currentUser: {
-        username: string;
-        email: string;
-        id: string;
-        profile_picture: string;
-        iat: string;
-        oauth: boolean;
-        dark_theme: string;
-      } = jwtDecode(token!);
-      setDarkMode(currentUser.dark_theme === 'true' ? true : false);
-      setUser(currentUser);
-    }
-    if (token) {
-      const currentUser: {
-        username: string;
-        email: string;
-        id: string;
-        profile_picture: string;
-        iat: string;
-        oauth: boolean;
-        dark_theme: string;
-      } = jwtDecode(token!);
-      setUser(currentUser);
-    }
   };
 
-  const { data, loading } = useQuery(GET_GROUPS, { variables: { authorid: user?.id } });
   const { data: searchData, loading: searchLoading } = useQuery(SEARCH_GROUPS, {
     variables: { query, authorid: user?.id },
   });
@@ -133,30 +110,46 @@ const Feed: React.FC<FeedProps> = ({}) => {
             <div
               style={{
                 position: 'fixed',
-                top: '46%',
+                top: '35%',
                 left: '55%',
+                backgroundAttachment: 'fixed',
+                backgroundImage: LINEAR_MAGIC,
+
+                width: 190,
+                height: 190,
+                borderRadius: '200px 200px 200px 20px',
               }}
             >
-              <i className="fa fa-comment fa-5x icon-3d" style={{ color: darkMode ? '#fff' : 'gray' }}></i>
+              <div
+                style={{
+                  backgroundColor: '#fff',
+                  width: 170,
+                  height: 170,
+                  top: 10,
+                  left: 10,
+                  position: 'relative',
+                  borderRadius: '200px 200px 200px 20px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <div
+                  style={{ backgroundColor: '#1c1c1c', width: 30, height: 30, borderRadius: 100, marginRight: 10 }}
+                ></div>
+                <div
+                  style={{ backgroundColor: '#1c1c1c', width: 30, height: 30, borderRadius: 100, marginRight: 10 }}
+                ></div>
+                <div
+                  style={{ backgroundColor: '#1c1c1c', width: 30, height: 30, borderRadius: 100, marginRight: 10 }}
+                ></div>
+              </div>
             </div>
-            <p
-              style={{
-                top:
-                  (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
-                  (typeof window !== 'undefined' && window.screen.availWidth) < 1800
-                    ? '60%'
-                    : '58%',
-                position: 'fixed',
-                left:
-                  (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
-                  (typeof window !== 'undefined' && window.screen.availWidth) < 1800
-                    ? '44.7%'
-                    : '46.2%',
-                color: darkMode ? '#fff' : '#000',
-              }}
-            >
-              To start, select a group on the left hand side or create a new group.
-            </p>
+            <div style={{ position: 'fixed', top: '61%', left: '40%' }}>
+              <p className="welcometext" style={{ color: darkMode ? '#fff' : '#000' }}>
+                To get started select an existing group on the left hand side or start fresh with a new group.
+              </p>
+            </div>
           </>
         )}
         <div

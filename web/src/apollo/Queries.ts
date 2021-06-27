@@ -8,14 +8,7 @@ export const GET_USER_ID = gql`
 
 export const GET_ALL_USERS = gql`
   query GetAllUsers {
-    GetAllUsers {
-      username
-      email
-      profile_picture
-      id
-      online
-      chaton
-    }
+    GetAllUsers
   }
 `;
 
@@ -40,21 +33,7 @@ export const GET_GROUPS = gql`
 
 export const GET_INITIAL_MESSAGES = gql`
   query GetInitialMessages($groupid: String, $limit: Int, $offset: Int) {
-    GetInitialMessages(groupid: $groupid, limit: $limit, offset: $offset) {
-      body
-      messageid
-      author {
-        username
-        email
-        profile_picture
-        id
-      }
-      image
-      time
-      date
-      read_by
-      alert
-    }
+    GetInitialMessages(groupid: $groupid, limit: $limit, offset: $offset)
   }
 `;
 
@@ -100,6 +79,7 @@ export const SEARCH_GROUPS = gql`
       dm
       id
       last_message {
+        image
         alert
         read_by
         body

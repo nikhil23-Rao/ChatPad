@@ -11,6 +11,7 @@ import client from '@/../apollo-client';
 import { useRouter } from 'next/dist/client/router';
 import { useSession } from 'next-auth/client';
 import { GET_GROUPS, GET_USER_ID } from '@/apollo/Queries';
+import { decrypt } from '@/../utils/security/security';
 
 export const Search = () => {
   const [session] = useSession();
@@ -40,13 +41,17 @@ export const Search = () => {
     removeSelectedItem,
     selectedItems,
   } = useMultipleSelection({ initialSelectedItems: [] });
-  const getFilteredItems = (items) =>
-    items.filter(
-      (item) =>
-        selectedItems.indexOf(item as never) < 0 &&
-        item.email.toLowerCase().startsWith(inputValue.toLowerCase()) &&
-        item.id !== user?.id,
-    );
+  const getFilteredItems = (items) => {
+    const res = decrypt(items);
+    if (res !== '') {
+      return JSON.parse(res).filter(
+        (item) =>
+          selectedItems.indexOf(item as never) < 0 &&
+          item.email.toLowerCase().startsWith(inputValue.toLowerCase()) &&
+          item.id !== user?.id,
+      );
+    }
+  };
   const {
     isOpen,
     getMenuProps,

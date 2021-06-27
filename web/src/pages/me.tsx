@@ -234,7 +234,7 @@ const Me: React.FC<MeProps> = ({}) => {
                           width: 100,
                           height: 100,
                           borderRadius: 100,
-                          backgroundColor: OCEAN_BLUE,
+                          backgroundImage: OCEAN_BLUE,
                           marginTop: 20,
                           marginRight: 30,
                         }}

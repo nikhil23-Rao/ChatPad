@@ -121,23 +121,21 @@
 
 .message {
   position: relative;
-  width: 506px;
+  width: 497px;
   left: 566px;
   margin-bottom: 10px;
   display: block;
   background-attachment: fixed;
   background: #323232;
   color: #000;
-  border-radius: 19px;
 }
 
 .yourmessage {
   position: relative;
-  max-width: 506px;
+  max-width: 497px;
   left: 1200px;
   margin-bottom: 10px;
   background-attachment: fixed;
-  background-color: #009afe;
   color: #fff;
   border-radius: 19px;
 }

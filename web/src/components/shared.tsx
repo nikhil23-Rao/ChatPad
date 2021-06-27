@@ -3,6 +3,7 @@ import { css as emoCSS } from '@emotion/css';
 import styled from '@emotion/styled';
 import client from '@/../apollo-client';
 import { GET_ALL_USERS } from '@/apollo/Queries';
+import CryptoJS from 'crypto-js';
 
 let items = [];
 

@@ -7,6 +7,9 @@ import 'font-awesome/css/font-awesome.min.css';
 import 'emoji-mart/css/emoji-mart.css';
 import 'react-toastify/dist/ReactToastify.css';
 import 'react-awesome-lightbox/build/style.css';
+import '@fortawesome/fontawesome-svg-core/styles.css'; // import Font Awesome CSS
+import { config } from '@fortawesome/fontawesome-svg-core';
+config.autoAddCss = false;
 
 import { ChakraProvider } from '@chakra-ui/react';
 import { ToastContainer } from 'react-toastify';
