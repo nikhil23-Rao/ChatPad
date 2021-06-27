@@ -77,7 +77,7 @@ import { AddMembers } from '@/components/AddMembers';
 import { BURNING_SUN, DARK_NIGHT, LIGHT_RAINBOW, LINEAR_MAGIC, OCEAN_BLUE } from '../../constants/vars/messageColors';
 import { Tooltip } from '@material-ui/core';
 import Lightbox from 'react-awesome-lightbox';
-import { decrypt } from '@/../utils/security/security';
+import { decrypt } from '../../../utils/security/security';
 import ReactTextareaAutocomplete from '@webscopeio/react-textarea-autocomplete';
 
 interface ChatProps {

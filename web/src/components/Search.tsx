@@ -11,7 +11,7 @@ import client from '@/../apollo-client';
 import { useRouter } from 'next/dist/client/router';
 import { useSession } from 'next-auth/client';
 import { GET_GROUPS, GET_USER_ID } from '@/apollo/Queries';
-import { decrypt } from '@/../utils/security/security';
+import { decrypt } from '../../utils/security/security';
 
 export const Search = () => {
   const [session] = useSession();
