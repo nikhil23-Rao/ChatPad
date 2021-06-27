@@ -1,6 +1,5 @@
 .vscode
 web/node_modules/
-web/utils/security/
 desktop/web/node_modules/
 backend/node_modules/
 # Local Netlify folder
