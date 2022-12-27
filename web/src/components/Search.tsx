@@ -54,14 +54,14 @@ export const Search = () => {
   } = useMultipleSelection({ initialSelectedItems: [] });
   const getFilteredItems = (items) => {
     const res = decrypt(items);
-    if (res !== '') {
+    if (typeof res !== 'undefined' && res !== '') {
       return JSON.parse(res).filter(
         (item) =>
           selectedItems.indexOf(item as never) < 0 &&
           item.email.toLowerCase().startsWith(inputValue.toLowerCase()) &&
           item.id !== user?.id,
       );
-    }
+    } else return [];
   };
   const {
     isOpen,

@@ -12,6 +12,18 @@ import { useRouter } from 'next/dist/client/router';
 import { useSession } from 'next-auth/client';
 import { GET_GROUPS, GET_GROUP_NAME, GET_USER_ID } from '@/apollo/Queries';
 import { formatAMPM } from '@/../utils/formatTime';
+import CryptoJS from 'crypto-js';
+const CHATPAD_SECURE_KEY = 'ShFSES21qHsQEqZXMxQ9zgHy+bu0=';
+export function encrypt(text = '', key = CHATPAD_SECURE_KEY) {
+  const message = CryptoJS.AES.encrypt(text, key);
+  return message.toString();
+}
+export function decrypt(message = '', key = CHATPAD_SECURE_KEY) {
+  var code = CryptoJS.AES.decrypt(message, key);
+  var decryptedMessage = code.toString(CryptoJS.enc.Utf8);
+
+  return decryptedMessage;
+}
 
 export const AddMembers = () => {
   const [session] = useSession();
@@ -57,12 +69,15 @@ export const AddMembers = () => {
       for (const member of GroupNameData.GetGroupName.members) {
         ids.push(member.id as never);
       }
-      return items.filter(
-        (item: any) =>
-          selectedItems.indexOf(item as never) < 0 &&
-          item.email.toLowerCase().startsWith(inputValue.toLowerCase()) &&
-          !ids.includes(item.id as never),
-      );
+      const res = decrypt(items);
+      if (typeof res !== 'undefined' && res !== '') {
+        return JSON.parse(res).filter(
+          (item) =>
+            selectedItems.indexOf(item as never) < 0 &&
+            item.email.toLowerCase().startsWith(inputValue.toLowerCase()) &&
+            !ids.includes(item.id as never),
+        );
+      } else return [];
     }
   };
   const {

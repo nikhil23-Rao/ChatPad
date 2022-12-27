@@ -34,6 +34,7 @@ import {
   ModalBody,
   ModalCloseButton,
 } from '@chakra-ui/react';
+import Image from 'next/image';
 import BackspaceIcon from '@material-ui/icons/Backspace';
 import {
   GET_CHAT_PATHS,
@@ -78,6 +79,9 @@ import { BURNING_SUN, DARK_NIGHT, LIGHT_RAINBOW, LINEAR_MAGIC, OCEAN_BLUE } from
 import { Tooltip } from '@material-ui/core';
 import Lightbox from 'react-awesome-lightbox';
 import CryptoJS from 'crypto-js';
+import { urlify } from '@/../utils/urlify';
+import { LazyLoadImage } from 'react-lazy-load-image-component';
+import { Loader } from '@/components/loader';
 const CHATPAD_SECURE_KEY = 'ShFSES21qHsQEqZXMxQ9zgHy+bu0=';
 export function encrypt(text = '', key = CHATPAD_SECURE_KEY) {
   const message = CryptoJS.AES.encrypt(text, key);
@@ -132,6 +136,8 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
   const router = useRouter();
   const [visible, setVisible] = useState(true);
   const [stickerGalleryShown, setStickerGalleryShown] = useState(false);
+  const [previewShown, setPreviewShown] = useState(false);
+  const [preview, setPreview] = useState('');
   const [groupNameValue, setGroupNameValue] = useState('');
   const [messageVal, setMessageVal] = useState('');
   const [session] = useSession();
@@ -274,7 +280,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
       window.scrollTo(0, 0);
 
       setPageLoading(false);
-    }, 2000);
+    }, 3000);
   }, []);
 
   useEffect(() => {
@@ -292,6 +298,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
               currentGroupid: groupSelected,
             },
           });
+          SwitchOnline({ variables: { authorid: user?.id, value: false, groupid: groupSelected } });
         }
         if (document.hidden === false) {
           SetChatOn({
@@ -301,6 +308,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
               currentGroupid: groupSelected,
             },
           });
+          SwitchOnline({ variables: { authorid: user?.id, value: true, groupid: groupSelected } });
         }
       }
     });
@@ -397,6 +405,20 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
       const topPos = breakpoint?.offsetTop - 310; // Height That Reaches Breakpoint
       el.scrollTop = topPos;
     }
+    setTimeout(() => {
+      if (el && !breakpoint && !pageLoading) {
+        el.scrollTop = el.scrollHeight + 1000;
+      }
+    }, 100);
+  }, []);
+
+  useEffect(() => {
+    const el = document.getElementById('chatDiv');
+    const breakpoint = document.getElementById('breakpoint');
+    if (breakpoint && el) {
+      const topPos = breakpoint?.offsetTop - 310; // Height That Reaches Breakpoint
+      el.scrollTop = topPos;
+    }
     if (el && !breakpoint && !pageLoading) {
       el.scrollTop = el.scrollHeight + 1000;
     }
@@ -431,7 +453,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
         el.scrollTop = 500;
         setLoader(false);
       }
-    }, 1000);
+    }, 100);
   }, [pageLoading, typeof window]);
 
   useEffect(() => {
@@ -444,6 +466,8 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
 
   useEffect(() => {
     GetUser();
+  }, [session]);
+  useEffect(() => {
     (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
     (typeof window !== 'undefined' && window.screen.availWidth) < 1800
       ? ((document.body.style as any) = 'overflow: hidden; zoom: 0.8;')
@@ -473,6 +497,17 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
         variables: { authorid: user?.id, groupid: '', currentGroupid: groupSelected },
       });
       playSound();
+    }
+
+    if (realtimeData && messages[messages.length - 1].body === realtimeData.GetAllMessages[0].body) {
+      console.log('SENT IS TRUE');
+      const newMessages = messages.slice();
+      for (const message in newMessages) {
+        if (typeof newMessages[message].sent != 'undefined') newMessages[message].sent = true;
+      }
+      console.log(newMessages);
+      setMessages(newMessages);
+      console.log('SET');
     }
 
     if (
@@ -938,39 +973,50 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                       </p>
                     ) : null}
 
-                    {message.author.id === user.id ? (
-                      (message.author.id === user.id && next && next.alert && next.author.id !== user.id) ||
-                      (!next && !message.alert) ||
-                      (prev &&
-                        next &&
-                        message.author.id === prev.author.id && // ENDS SEQUENCE
-                        message.author.id !== next.author.id) ||
-                      (prev &&
-                        next &&
-                        message.author.id !== prev.author.id && // MIDDLE OF SEQUENCE
-                        message.author.id !== next.author.id &&
-                        !message.alert) ||
-                      (!prev && next && message.author.id !== next.author.id && !message.alert) ? (
-                        <Tooltip arrow title="Message Sent." placement="right">
-                          <div
-                            style={{
-                              width: 20,
-                              animation: 'checkmarkfade 3s',
-                              height: 20,
-                              left: 1710,
-                              top: 30,
-                              borderRadius: 100,
-                              position: 'absolute',
-                              backgroundColor: '#0C65EB',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                            }}
-                          >
-                            <i className="fa fa-check" style={{ color: '#fff' }}></i>
-                          </div>
-                        </Tooltip>
-                      ) : null
+                    {message.author.id === user.id &&
+                    !message.alert &&
+                    typeof message.sent !== 'undefined' &&
+                    message.sent === true ? (
+                      <Tooltip arrow title="Message Sent." placement="right">
+                        <div
+                          style={{
+                            width: 20,
+                            height: 20,
+                            left: 1710,
+                            top: 30,
+                            borderRadius: 100,
+                            position: 'absolute',
+                            backgroundColor: '#0C65EB',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}
+                        >
+                          <i className="fa fa-check" style={{ color: '#fff', animation: 'checkmarkfade 1s' }}></i>
+                        </div>
+                      </Tooltip>
+                    ) : message.author.id === user.id &&
+                      !message.alert &&
+                      typeof message.sent !== 'undefined' &&
+                      message.sent === false ? (
+                      <Tooltip arrow title="Message Sending..." placement="right">
+                        <div
+                          style={{
+                            width: 20,
+                            height: 20,
+                            left: 1710,
+                            top: 30,
+                            borderRadius: 100,
+                            position: 'absolute',
+                            backgroundColor: '#0C65EB',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}
+                        >
+                          <Spinner size="xs" style={{ color: '#fff' }} />
+                        </div>
+                      </Tooltip>
                     ) : null}
 
                     <Tooltip
@@ -1111,7 +1157,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                           </div>
                         ) : message.image ? (
                           <div style={{ width: 506, backgroundImage: 'none' }}>
-                            <img
+                            <LazyLoadImage
                               onClick={() => {
                                 (document.body.style as any) =
                                   (typeof window !== 'undefined' && window.screen.availHeight < 863) ||
@@ -1181,6 +1227,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                               }}
                               src={message.body}
                               className={feedStyles.text}
+                              effect="blur"
                             />
                           </div>
                         ) : isUrl(message.body) ? (
@@ -2278,7 +2325,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                       chaton: string;
                       typing: boolean;
                     }) => {
-                      if (member.id !== user.id) {
+                      if (member.id !== user.id && !previewShown) {
                         return (
                           <div style={{ bottom: messageVal.length <= 75 ? '' : 94, position: 'relative' }}>
                             <div>
@@ -2318,31 +2365,126 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                       }
                     },
                   )}
-
-                {!pageLoading && (
-                  <Textarea
-                    placeholder="Send a message..."
+                {previewShown && (
+                  <div
                     style={{
+                      backgroundColor: darkMode ? '#1c1c1c' : '#fafafa',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      display: 'flex',
+                      width: '98%',
+                      height: 300,
+                      position: 'relative',
+                      borderRadius: 10,
+                      top: screenHeight === '70vh' ? -330 : -300,
+                    }}
+                  >
+                    <i className="fa fa-close fa-2x close-icon" onClick={() => setPreviewShown(false)}></i>
+                    <img
+                      src={preview}
+                      style={{ maxWidth: '100%', maxHeight: '100%' }}
+                      draggable={false}
+                      loading="eager"
+                      onLoad={() => console.log('loading')}
+                    />
+                    <button
+                      className="imgsendbtn"
+                      onClick={async () => {
+                        setMessages([
+                          ...messages,
+                          {
+                            groupid: groupSelected,
+                            body: preview,
+                            author: {
+                              username: user.username,
+                              email: user.email,
+                              id: user.id,
+                              profile_picture: user.profile_picture,
+                            },
+                            image: true,
+                            messageid: generateId(24),
+                            date: today,
+                            time: formatAMPM(new Date()),
+                            day,
+                            alert: false,
+                          },
+                        ]);
+                        setPreviewShown(false);
+                        setPreview('');
+                        await SendMessage({
+                          variables: {
+                            groupid: groupSelected,
+                            body: preview,
+                            author: {
+                              username: user.username,
+                              email: user.email,
+                              id: user.id,
+                              profile_picture: user.profile_picture,
+                            },
+                            image: true,
+                            messageid: generateId(24),
+                            date: today,
+                            time: formatAMPM(new Date()),
+                            day,
+                            alert: false,
+                          },
+                        });
+                      }}
+                    ></button>
+                  </div>
+                )}
+                {!pageLoading && (
+                  <div
+                    contentEditable={true}
+                    onInput={(e) => {
+                      const el = document.getElementById('contenteditabletextarea');
+
+                      if (el && el.innerHTML && el.innerHTML.match(/img/) && urlify(el.innerHTML) !== null) {
+                        setPreviewShown(true);
+                        setPreview(
+                          urlify(el.innerHTML)[0] !== null
+                            ? urlify(el.innerHTML)[0]![0]!
+                            : urlify(el.innerHTML)[1]![1]!,
+                        );
+                        while (el.firstChild) {
+                          el.removeChild(el.firstChild);
+                        }
+                      }
+                      setMessageVal(e.currentTarget.textContent as string);
+                    }}
+                    id="contenteditabletextarea"
+                    placeholder={previewShown ? 'Add Attachment...' : 'Send a message...'}
+                    style={{
+                      cursor: 'text',
                       color: darkMode ? '#fff' : '#000',
                       right: !sidebarShown ? 90 : '',
-                      paddingRight: 100,
-                      borderRadius: 10,
+                      borderRadius: 12,
                       backgroundColor: darkMode ? '#202327' : '#F4F4F4',
-                      minHeight: messageVal.length <= 75 ? 10 : 140,
-                      bottom: screenHeight === '70vh' ? 40 : screenHeight === '60vh' ? -20 : 10,
-                      lineHeight: 1.8,
+                      height: messageVal.length <= 75 ? 50 : 140,
+                      top: screenHeight === '70vh' ? -28 : '',
+                      width: screenHeight === '70vh' ? 955 : '',
                       position: 'absolute',
                     }}
-                    resize="none"
-                    value={messageVal}
-                    _placeholder={{ color: darkMode ? '#fff' : '#7c7c82' }}
                     onKeyPress={async (e) => {
-                      const el = document.getElementById('chatDiv');
+                      const el = document.getElementById('contenteditabletextarea');
+
                       if (e.shiftKey) {
                         return;
                       }
                       if (e.key === 'Enter') {
                         e.preventDefault();
+                        if (previewShown)
+                          return toast({
+                            title: 'Please send the image first.',
+                            status: 'warning',
+                            position: 'bottom-left',
+                            isClosable: true,
+                          });
+                        if (el) {
+                          while (el.firstChild) {
+                            el.removeChild(el.firstChild);
+                          }
+                        }
                         if (!messageVal.replace(/\s/g, '').length) {
                           return e.preventDefault();
                         }
@@ -2386,6 +2528,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                             time: Date.now(),
                             day,
                             alert: false,
+                            sent: false,
                           },
                         ]);
                         await SendMessage({
@@ -2427,18 +2570,15 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                         });
                       }
                     }}
-                    onChange={(e) => {
-                      setMessageVal(e.currentTarget.value);
-                    }}
                     onClick={() => showEmoji && setShowEmoji(false)}
                   />
                 )}
                 {!pageLoading && (
                   <InputRightElement
                     style={{
-                      top: screenHeight === '70vh' ? -27 : 2,
+                      top: screenHeight === '70vh' ? -27 : 6,
                       backgroundColor: 'transparent',
-                      right: !sidebarShown ? 115 : 40,
+                      right: !sidebarShown ? 115 : 45,
                       cursor: 'pointer',
                     }}
                   >
@@ -2480,44 +2620,10 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                       accept="image/x-png,image/gif,image/jpeg"
                       onChange={(e: any) => {
                         const file = e.target.files[0];
-                        reader(file).then(async (res) => {
-                          setMessages([
-                            ...messages,
-                            {
-                              groupid: groupSelected,
-                              body: res,
-                              author: {
-                                username: user?.username,
-                                email: user?.email,
-                                id: user?.id,
-                                profile_picture: user?.profile_picture,
-                              },
-                              image: true,
-                              messageid: generateId(24),
-                              date: today,
-                              time: formatAMPM(new Date()),
-                              day,
-                              alert: false,
-                            },
-                          ]);
-                          await SendMessage({
-                            variables: {
-                              groupid: groupSelected,
-                              body: res,
-                              author: {
-                                username: user?.username,
-                                email: user?.email,
-                                id: user?.id,
-                                profile_picture: user?.profile_picture,
-                              },
-                              image: true,
-                              messageid: generateId(24),
-                              date: today,
-                              time: formatAMPM(new Date()),
-                              day,
-                              alert: false,
-                            },
-                          });
+                        console.log(file);
+                        reader(file).then((res) => {
+                          setPreviewShown(true);
+                          setPreview(res as string);
                         });
                       }}
                       style={{ display: 'none' }}
@@ -2540,7 +2646,7 @@ const Chat: React.FC<ChatProps> = ({ currId }) => {
                     { columns: 4, imageWidth: 110, gutter: 5 },
                     { mq: '300px', columns: 3, imageWidth: 320, gutter: 5 },
                   ]}
-                  apiKey="iEss7rTPuL6rYx8FICb1Ow8laxgzUd7Z"
+                  apiKey="dmQDJFagLAfpapf0BdtxYOTV6myzNbkT"
                   onSelect={async (item) => {
                     setMessages([
                       ...messages,

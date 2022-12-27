@@ -8,6 +8,7 @@ import 'emoji-mart/css/emoji-mart.css';
 import 'react-toastify/dist/ReactToastify.css';
 import 'react-awesome-lightbox/build/style.css';
 import '@fortawesome/fontawesome-svg-core/styles.css'; // import Font Awesome CSS
+import 'react-lazy-load-image-component/src/effects/blur.css';
 import { config } from '@fortawesome/fontawesome-svg-core';
 config.autoAddCss = false;
 

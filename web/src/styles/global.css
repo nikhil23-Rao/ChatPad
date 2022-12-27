@@ -1412,3 +1412,54 @@ body {
     opacity: 1;
   }
 }
+
+#contenteditabletextarea {
+  background-color: white;
+  background-color: -moz-field;
+  border: 1px solid darkgray;
+  right: 10px;
+  top: 5px;
+  height: 50px;
+  font-size: 20px;
+  padding-left: 15px;
+  padding-right: 130px;
+  padding-top: 8px;
+  width: 898px;
+  text-overflow: clip;
+  overflow-y: scroll;
+  text-align: left;
+  outline: none;
+}
+
+[contenteditable][placeholder]:empty:before {
+  content: attr(placeholder);
+  position: absolute;
+  color: lightgray;
+  font-size: 20px;
+  top: 8px;
+  background-color: transparent;
+}
+
+.imgsendbtn {
+  filter: alpha(opacity=alpha(opacity=60));
+  opacity: 0.6;
+  cursor: pointer;
+  background: no-repeat url(https://ssl.gstatic.com/chat/babble/sprites/common-517bca7f07a37c64c3263a1411e266a5.png) -1070px -121px;
+  height: 60px;
+  width: 60px;
+  background: no-repeat url(https://ssl.gstatic.com/chat/babble/sprites/highdpi-1cb87125492385c4ff0cd94fb144aa0f.png) -557px -390px;
+  -webkit-background-size: 617px, 557px;
+  background-size: 617px, 557px;
+  position: absolute;
+  bottom: 45%;
+  right: 50%;
+  margin: 0px -47px -12px 0px;
+}
+
+.close-icon {
+  top: 30px;
+  left: 798px;
+  color: #fc8181;
+  position: absolute;
+  cursor: pointer;
+}
